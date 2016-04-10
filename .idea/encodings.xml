@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding" useUTFGuessing="true" native2AsciiForPropertiesFiles="false">
+    <file url="file://$PROJECT_DIR$/app/libs/aws-android-sdk-cognito-2.2.5.jar" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/libs/aws-android-sdk-core-2.2.5.jar" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/libs/aws-android-sdk-s3-2.2.5.jar" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/libs/json-simple-1.1.1.jar" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/src/main/java/Adapters" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/src/main/java/CommonUtilPackage" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/src/main/java/DataModel/FCPublication.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/src/main/java/DataModel/FCTypeOfCollecting.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/src/main/java/DataModel/Group.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/src/main/java/DataModel/GroupMember.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/src/main/java/DataModel/ICanWriteSelfToJSONWriter.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/src/main/java/DataModel/PublicationReport.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/src/main/java/DataModel/RegisteredUserForPublication.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/src/main/java/DataModel/UserRegisterData.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/src/main/java/FooDoNetSQLClasses" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/src/main/java/FooDoNetServerClasses" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/src/main/java/FooDoNetServiceUtil" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/src/main/java/UIUtil" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/src/main/java/upp/foodonet/material/AddEditPublicationService.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/src/main/java/upp/foodonet/material/FooDoNetSQLProvider.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/src/main/java/upp/foodonet/material/FullSizeImgActivity.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/src/main/java/upp/foodonet/material/PublicationDetailsActivity.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/src/main/java/upp/foodonet/material/RegisterUnregisterReportService.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/src/main/res/drawable/btn_call_inactive_pub_det.png" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/src/main/res/drawable/btn_sms_inactive_pub_det.png" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/src/main/res/drawable/call_green_xxh.png" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/src/main/res/drawable/camera_xxh.png" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/src/main/res/drawable/cancel_rishum_pub_det_btn.png" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/src/main/res/drawable/done_xxh.png" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/src/main/res/drawable/facebook_green_xxh.png" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/src/main/res/drawable/foodonet_logo_200_200.png" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/src/main/res/drawable/navigate_green_xxh.png" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/src/main/res/drawable/navigate_pub_det_btn.png" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/src/main/res/drawable/no_photo_xxh.png" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/src/main/res/drawable/pub_det_call.png" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/src/main/res/drawable/pub_det_facebook.png" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/src/main/res/drawable/pub_det_sms.png" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/src/main/res/drawable/pub_det_twitter.png" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/src/main/res/drawable/rishum_pub_det_btn.png" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/src/main/res/drawable/sms_green_xxh.png" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/src/main/res/drawable/twitter_green_xxh.png" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/src/main/res/drawable/user_icon_blue.png" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/src/main/res/drawable/user_icon_green.png" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/src/main/res/drawable/validation_ok.png" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/src/main/res/drawable/validation_wrong.png" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/src/main/res/menu/menu_my_publication_details.xml" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/src/main/res/menu/pub_details_popup_menu.xml" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/src/main/res/values-en" charset="UTF-8" />
+  </component>
+</project>
+
