@@ -5,7 +5,6 @@
     <file url="file://$PROJECT_DIR$/app/libs/aws-android-sdk-core-2.2.5.jar" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/app/libs/aws-android-sdk-s3-2.2.5.jar" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/app/libs/json-simple-1.1.1.jar" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/app/src/main/java/Adapters" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/app/src/main/java/CommonUtilPackage" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/app/src/main/java/DataModel/FCPublication.java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/app/src/main/java/DataModel/FCTypeOfCollecting.java" charset="UTF-8" />
@@ -22,8 +21,6 @@
     <file url="file://$PROJECT_DIR$/app/src/main/java/upp/foodonet/material/AddEditPublicationService.java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/app/src/main/java/upp/foodonet/material/FooDoNetSQLProvider.java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/app/src/main/java/upp/foodonet/material/FullSizeImgActivity.java" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/app/src/main/java/upp/foodonet/material/PublicationDetailsActivity.java" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/app/src/main/java/upp/foodonet/material/RegisterUnregisterReportService.java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/app/src/main/res/drawable/btn_call_inactive_pub_det.png" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/app/src/main/res/drawable/btn_sms_inactive_pub_det.png" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/app/src/main/res/drawable/call_green_xxh.png" charset="UTF-8" />
@@ -48,7 +45,6 @@
     <file url="file://$PROJECT_DIR$/app/src/main/res/drawable/validation_wrong.png" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/app/src/main/res/menu/menu_my_publication_details.xml" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/app/src/main/res/menu/pub_details_popup_menu.xml" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/app/src/main/res/values-en" charset="UTF-8" />
+    <file url="PROJECT" charset="UTF-8" />
   </component>
 </project>
-
