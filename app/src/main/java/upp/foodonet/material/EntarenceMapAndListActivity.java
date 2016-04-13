@@ -14,8 +14,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.AttributeSet;
+import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -40,6 +43,7 @@ public class EntarenceMapAndListActivity
     SupportMapFragment mapFragment;
     GoogleMap mMap;
     LinearLayout ll_map_and_gallery;
+    CoordinatorLayout.LayoutParams fabLayoutParams;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +56,10 @@ public class EntarenceMapAndListActivity
 
         fab = (FloatingActionButton)findViewById(R.id.fab_btn);
         if(fab != null) fab.setOnClickListener(this);
+        fabLayoutParams = (CoordinatorLayout.LayoutParams)fab.getLayoutParams();
+//        CoordinatorLayout.LayoutParams lp = (CoordinatorLayout.LayoutParams)fab.getLayoutParams();
+//        lp.setBehavior(new FrameSwitchFABBehavior(this, null));
+//        fab.setLayoutParams(lp);
 
         ll_map_and_gallery = (LinearLayout)findViewById(R.id.ll_map_and_gallery);
 
@@ -136,6 +144,29 @@ public class EntarenceMapAndListActivity
 //                startActivity(addPub);
                 break;
         }
+        //CoordinatorLayout.LayoutParams layoutParams = (CoordinatorLayout.LayoutParams)fab.getLayoutParams();
+        //new CoordinatorLayout.LayoutParams(fab.getWidth(), fab.getHeight());//
+        switch (ll_map_and_gallery.getVisibility()){
+            case View.GONE:
+//                int width = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, fab.getWidth(), getResources().getDisplayMetrics());
+//                int height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, fab.getHeight(), getResources().getDisplayMetrics());
+                CoordinatorLayout.LayoutParams layoutParams = new CoordinatorLayout.LayoutParams(fabLayoutParams);
+                layoutParams.setAnchorId(View.NO_ID);
+                layoutParams.gravity = Gravity.RIGHT | Gravity.BOTTOM;
+                layoutParams.bottomMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 50, getResources().getDisplayMetrics());
+                layoutParams.rightMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 50, getResources().getDisplayMetrics());
+                fab.setLayoutParams(layoutParams);
+                break;
+            case View.VISIBLE:
+                fab.setLayoutParams(fabLayoutParams);
+//                layoutParams.setAnchorId(R.id.map);
+//                layoutParams.anchorGravity = Gravity.BOTTOM | Gravity.RIGHT | Gravity.END;
+//                layoutParams.rightMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 50, getResources().getDisplayMetrics());
+//                layoutParams.bottomMargin = 0;
+//                fab.setLayoutParams(layoutParams);
+                break;
+        }
+
     }
 
     @Override
@@ -149,8 +180,11 @@ public class EntarenceMapAndListActivity
     }
 
     class FrameSwitchFABBehavior extends CoordinatorLayout.Behavior<FloatingActionButton>{
+        Context context;
+
         public FrameSwitchFABBehavior(Context context, AttributeSet attrs){
             super();
+            this.context = context;
         }
 
         @Override
@@ -162,7 +196,6 @@ public class EntarenceMapAndListActivity
 
         @Override
         public boolean onDependentViewChanged(CoordinatorLayout parent, FloatingActionButton child, View dependency){
-
             return true;
         }
     }
