@@ -100,6 +100,8 @@ public class EntarenceMapAndListActivity
 
                     switch (item.getItemId()) {
                         case R.id.nav_item_sharings:
+                            Intent intent = new Intent(getApplicationContext(), SplashScreenActivity.class);
+                            startActivity(intent);
                             break;
                         case R.id.nav_item_subscriptions:
 
