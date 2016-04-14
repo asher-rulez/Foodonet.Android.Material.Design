@@ -2,7 +2,10 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"/>
+
+<!--
+
 
     <ScrollView
         android:layout_width="match_parent"
@@ -32,7 +35,7 @@
                 android:scaleType="fitCenter"
                 android:src="@drawable/done_xxh" />
 
-            <!--
+            &lt;!&ndash;
                 <ImageButton
                     android:id="@+id/btn_menu_add_pub"
                     android:layout_width="30dp"
@@ -46,7 +49,7 @@
                     android:layout_marginTop="@dimen/edit_text_side_margin_add_edit_pub"
                     android:layout_alignParentTop="true"
                     android:layout_alignParentLeft="true"/>
-            -->
+            &ndash;&gt;
 
             <ImageView
                 android:id="@+id/imgAddPicture"
@@ -70,7 +73,7 @@
                 android:inputType="textShortMessage"
                 android:textColorHighlight="@color/basic_blue"
                 android:textSize="@dimen/add_pub_et_date_text_size">
-                <!--<requestFocus />-->
+                &lt;!&ndash;<requestFocus />&ndash;&gt;
             </EditText>
 
             <EditText
@@ -86,18 +89,18 @@
                 android:textSize="@dimen/add_pub_et_date_text_size" />
 
 
-            <!--<AutoCompleteTextView-->
-            <!--android:id="@+id/actv_address_new_publication"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="56dp"-->
-            <!--android:ems="10"-->
-            <!--android:hint="@string/address_string"-->
-            <!--android:layout_below="@+id/et_title_new_publication"-->
-            <!--android:layout_marginRight="13dp"-->
-            <!--android:layout_marginLeft="13dp"/>-->
+            &lt;!&ndash;<AutoCompleteTextView&ndash;&gt;
+            &lt;!&ndash;android:id="@+id/actv_address_new_publication"&ndash;&gt;
+            &lt;!&ndash;android:layout_width="match_parent"&ndash;&gt;
+            &lt;!&ndash;android:layout_height="56dp"&ndash;&gt;
+            &lt;!&ndash;android:ems="10"&ndash;&gt;
+            &lt;!&ndash;android:hint="@string/address_string"&ndash;&gt;
+            &lt;!&ndash;android:layout_below="@+id/et_title_new_publication"&ndash;&gt;
+            &lt;!&ndash;android:layout_marginRight="13dp"&ndash;&gt;
+            &lt;!&ndash;android:layout_marginLeft="13dp"/>&ndash;&gt;
 
 
-            <!--
+            &lt;!&ndash;
                 <TextView
                     android:id="@+id/address"
                     android:layout_width="wrap_content"
@@ -105,33 +108,33 @@
                     android:layout_alignParentLeft="true"
                     android:layout_alignParentStart="true"
                     android:visibility="gone"/>
-            -->
+            &ndash;&gt;
 
-            <!--<Button-->
-                <!--android:id="@+id/btn_start_date_time_add_pub"-->
-                <!--android:layout_width="wrap_content"-->
-                <!--android:layout_height="@dimen/top_panel_height"-->
-                <!--android:layout_alignParentLeft="true"-->
-                <!--android:layout_below="@+id/et_address_edit_add_pub"-->
-                <!--android:layout_marginLeft="13dp"-->
-                <!--android:background="@android:color/transparent"-->
-                <!--android:text="@string/no_time_set_string"-->
-                <!--android:textSize="@dimen/add_pub_et_date_text_size" />-->
-            <!--&lt;!&ndash;android:layout_marginTop="10dp"&ndash;&gt;-->
+            &lt;!&ndash;<Button&ndash;&gt;
+                &lt;!&ndash;android:id="@+id/btn_start_date_time_add_pub"&ndash;&gt;
+                &lt;!&ndash;android:layout_width="wrap_content"&ndash;&gt;
+                &lt;!&ndash;android:layout_height="@dimen/top_panel_height"&ndash;&gt;
+                &lt;!&ndash;android:layout_alignParentLeft="true"&ndash;&gt;
+                &lt;!&ndash;android:layout_below="@+id/et_address_edit_add_pub"&ndash;&gt;
+                &lt;!&ndash;android:layout_marginLeft="13dp"&ndash;&gt;
+                &lt;!&ndash;android:background="@android:color/transparent"&ndash;&gt;
+                &lt;!&ndash;android:text="@string/no_time_set_string"&ndash;&gt;
+                &lt;!&ndash;android:textSize="@dimen/add_pub_et_date_text_size" />&ndash;&gt;
+            &lt;!&ndash;&lt;!&ndash;android:layout_marginTop="10dp"&ndash;&gt;&ndash;&gt;
 
 
-            <!--<Button-->
-                <!--android:id="@+id/btn_end_date_time_add_pub"-->
-                <!--android:layout_width="wrap_content"-->
-                <!--android:layout_height="@dimen/top_panel_height"-->
-                <!--android:layout_alignParentLeft="true"-->
-                <!--android:layout_below="@+id/btn_start_date_time_add_pub"-->
-                <!--android:layout_marginLeft="13dp"-->
-                <!--android:background="@android:color/transparent"-->
-                <!--android:text="@string/no_time_set_string"-->
-                <!--android:textSize="@dimen/add_pub_et_date_text_size" />-->
+            &lt;!&ndash;<Button&ndash;&gt;
+                &lt;!&ndash;android:id="@+id/btn_end_date_time_add_pub"&ndash;&gt;
+                &lt;!&ndash;android:layout_width="wrap_content"&ndash;&gt;
+                &lt;!&ndash;android:layout_height="@dimen/top_panel_height"&ndash;&gt;
+                &lt;!&ndash;android:layout_alignParentLeft="true"&ndash;&gt;
+                &lt;!&ndash;android:layout_below="@+id/btn_start_date_time_add_pub"&ndash;&gt;
+                &lt;!&ndash;android:layout_marginLeft="13dp"&ndash;&gt;
+                &lt;!&ndash;android:background="@android:color/transparent"&ndash;&gt;
+                &lt;!&ndash;android:text="@string/no_time_set_string"&ndash;&gt;
+                &lt;!&ndash;android:textSize="@dimen/add_pub_et_date_text_size" />&ndash;&gt;
 
-            <!--
+            &lt;!&ndash;
                 <Button
                     android:id="@+id/end_date_picker_button"
                     android:layout_width="wrap_content"
@@ -150,43 +153,43 @@
                     android:layout_alignLeft="@+id/end_date_picker_button"
                     android:layout_alignStart="@+id/end_date_picker_button" />
 
-            -->
-            <!--<TextView-->
-                <!--android:id="@+id/tv_set_date_start_add_pub"-->
-                <!--android:layout_width="165dp"-->
-                <!--android:layout_height="@dimen/top_panel_height"-->
-                <!--android:layout_alignParentEnd="true"-->
-                <!--android:layout_alignParentRight="true"-->
-                <!--android:layout_below="@+id/et_address_edit_add_pub"-->
-                <!--android:layout_marginRight="@dimen/edit_text_side_margin_add_edit_pub"-->
-                <!--android:gravity="center_vertical|right"-->
-                <!--android:text="@string/start_string"-->
-                <!--android:textSize="@dimen/add_pub_et_date_text_size" />-->
+            &ndash;&gt;
+            &lt;!&ndash;<TextView&ndash;&gt;
+                &lt;!&ndash;android:id="@+id/tv_set_date_start_add_pub"&ndash;&gt;
+                &lt;!&ndash;android:layout_width="165dp"&ndash;&gt;
+                &lt;!&ndash;android:layout_height="@dimen/top_panel_height"&ndash;&gt;
+                &lt;!&ndash;android:layout_alignParentEnd="true"&ndash;&gt;
+                &lt;!&ndash;android:layout_alignParentRight="true"&ndash;&gt;
+                &lt;!&ndash;android:layout_below="@+id/et_address_edit_add_pub"&ndash;&gt;
+                &lt;!&ndash;android:layout_marginRight="@dimen/edit_text_side_margin_add_edit_pub"&ndash;&gt;
+                &lt;!&ndash;android:gravity="center_vertical|right"&ndash;&gt;
+                &lt;!&ndash;android:text="@string/start_string"&ndash;&gt;
+                &lt;!&ndash;android:textSize="@dimen/add_pub_et_date_text_size" />&ndash;&gt;
 
-            <!--<TextView-->
-                <!--android:id="@+id/tv_set_date_end_add_pub"-->
-                <!--android:layout_width="165dp"-->
-                <!--android:layout_height="@dimen/top_panel_height"-->
-                <!--android:layout_alignParentEnd="true"-->
-                <!--android:layout_alignParentRight="true"-->
-                <!--android:layout_below="@+id/tv_set_date_start_add_pub"-->
-                <!--android:layout_marginRight="@dimen/edit_text_side_margin_add_edit_pub"-->
-                <!--android:gravity="center_vertical|right"-->
-                <!--android:text="@string/end_string"-->
-                <!--android:textSize="@dimen/add_pub_et_date_text_size" />-->
+            &lt;!&ndash;<TextView&ndash;&gt;
+                &lt;!&ndash;android:id="@+id/tv_set_date_end_add_pub"&ndash;&gt;
+                &lt;!&ndash;android:layout_width="165dp"&ndash;&gt;
+                &lt;!&ndash;android:layout_height="@dimen/top_panel_height"&ndash;&gt;
+                &lt;!&ndash;android:layout_alignParentEnd="true"&ndash;&gt;
+                &lt;!&ndash;android:layout_alignParentRight="true"&ndash;&gt;
+                &lt;!&ndash;android:layout_below="@+id/tv_set_date_start_add_pub"&ndash;&gt;
+                &lt;!&ndash;android:layout_marginRight="@dimen/edit_text_side_margin_add_edit_pub"&ndash;&gt;
+                &lt;!&ndash;android:gravity="center_vertical|right"&ndash;&gt;
+                &lt;!&ndash;android:text="@string/end_string"&ndash;&gt;
+                &lt;!&ndash;android:textSize="@dimen/add_pub_et_date_text_size" />&ndash;&gt;
 
-            <!--<EditText-->
-                <!--android:id="@+id/et_additional_info_add_edit_pub"-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="48dp"-->
-                <!--android:layout_below="@+id/et_address_edit_add_pub"-->
-                <!--android:layout_marginLeft="@dimen/edit_text_side_margin_add_edit_pub"-->
-                <!--android:layout_marginRight="@dimen/edit_text_side_margin_add_edit_pub"-->
-                <!--android:ems="10"-->
-                <!--android:hint="@string/add_phone_number_string"-->
-                <!--android:inputType="phone"-->
-                <!--android:textColorHighlight="@color/basic_blue"-->
-                <!--android:textSize="@dimen/add_pub_et_date_text_size" />-->
+            &lt;!&ndash;<EditText&ndash;&gt;
+                &lt;!&ndash;android:id="@+id/et_additional_info_add_edit_pub"&ndash;&gt;
+                &lt;!&ndash;android:layout_width="match_parent"&ndash;&gt;
+                &lt;!&ndash;android:layout_height="48dp"&ndash;&gt;
+                &lt;!&ndash;android:layout_below="@+id/et_address_edit_add_pub"&ndash;&gt;
+                &lt;!&ndash;android:layout_marginLeft="@dimen/edit_text_side_margin_add_edit_pub"&ndash;&gt;
+                &lt;!&ndash;android:layout_marginRight="@dimen/edit_text_side_margin_add_edit_pub"&ndash;&gt;
+                &lt;!&ndash;android:ems="10"&ndash;&gt;
+                &lt;!&ndash;android:hint="@string/add_phone_number_string"&ndash;&gt;
+                &lt;!&ndash;android:inputType="phone"&ndash;&gt;
+                &lt;!&ndash;android:textColorHighlight="@color/basic_blue"&ndash;&gt;
+                &lt;!&ndash;android:textSize="@dimen/add_pub_et_date_text_size" />&ndash;&gt;
 
             <EditText
                 android:id="@+id/et_subtitle_add_edit_pub"
@@ -214,4 +217,4 @@
                 android:src="@drawable/camera_xxh" />
         </RelativeLayout>
     </ScrollView>
-</LinearLayout>
+</LinearLayout>-->
