@@ -28,10 +28,11 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import FooDoNetServiceUtil.FooDoNetCustomActivityConnectedToService;
 import upp.foodonet.material.R;
 
 public class EntarenceMapAndListActivity
-        extends AppCompatActivity
+        extends FooDoNetCustomActivityConnectedToService
         implements View.OnClickListener,
         OnMapReadyCallback {
 
@@ -54,23 +55,23 @@ public class EntarenceMapAndListActivity
         initToolBar();
         initNavVew();
 
-        fab = (FloatingActionButton)findViewById(R.id.fab_btn);
-        if(fab != null) fab.setOnClickListener(this);
-        fabLayoutParams = (CoordinatorLayout.LayoutParams)fab.getLayoutParams();
+        fab = (FloatingActionButton) findViewById(R.id.fab_btn);
+        if (fab != null) fab.setOnClickListener(this);
+        fabLayoutParams = (CoordinatorLayout.LayoutParams) fab.getLayoutParams();
 //        CoordinatorLayout.LayoutParams lp = (CoordinatorLayout.LayoutParams)fab.getLayoutParams();
 //        lp.setBehavior(new FrameSwitchFABBehavior(this, null));
 //        fab.setLayoutParams(lp);
 
-        ll_map_and_gallery = (LinearLayout)findViewById(R.id.ll_map_and_gallery);
+        ll_map_and_gallery = (LinearLayout) findViewById(R.id.ll_map_and_gallery);
 
-        mapFragment = (SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map);
-        if(mapFragment != null) mapFragment.getMapAsync(this);
+        mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+        if (mapFragment != null) mapFragment.getMapAsync(this);
         //   initTabs();
     }
 
     private void initToolBar() {
-        toolbar = (Toolbar)findViewById(R.id.toolBar);
-        if(toolbar != null) toolbar.setTitle(R.string.app_name);
+        toolbar = (Toolbar) findViewById(R.id.toolBar);
+        if (toolbar != null) toolbar.setTitle(R.string.app_name);
         toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
@@ -86,45 +87,46 @@ public class EntarenceMapAndListActivity
 
         ActionBarDrawerToggle actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.open, R.string.close);
 
-        if(drawerLayout != null) drawerLayout.setDrawerListener(actionBarDrawerToggle);
+        if (drawerLayout != null) drawerLayout.setDrawerListener(actionBarDrawerToggle);
 
         actionBarDrawerToggle.syncState();
 
         NavigationView v = (NavigationView) findViewById(R.id.nv_main);
-        if(v != null) v.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(MenuItem item) {
-                drawerLayout.closeDrawers();
+        if (v != null)
+            v.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+                @Override
+                public boolean onNavigationItemSelected(MenuItem item) {
+                    drawerLayout.closeDrawers();
 
-                switch (item.getItemId()) {
-                    case R.id.nav_item_sharings:
+                    switch (item.getItemId()) {
+                        case R.id.nav_item_sharings:
+                            break;
+                        case R.id.nav_item_subscriptions:
 
-                        break;
-                    case R.id.nav_item_subscriptions:
+                            break;
+                        case R.id.nav_item_groups:
 
-                        break;
-                    case R.id.nav_item_groups:
+                            break;
+                        case R.id.nav_item_settings:
 
-                        break;
-                    case R.id.nav_item_settings:
+                            break;
 
-                        break;
+                        case R.id.nav_item_contact_us:
 
-                    case R.id.nav_item_contact_us:
+                            break;
 
-                        break;
+                        case R.id.nav_item_terms:
 
-                    case R.id.nav_item_terms:
+                            break;
 
-                        break;
+                    }
 
+                    return true;
                 }
-
-                return true;
-            }
-        });
+            });
     }
-    private void showNotifyTab(int TAB){
+
+    private void showNotifyTab(int TAB) {
         viewPager.setCurrentItem(TAB);
     }
 
@@ -132,7 +134,7 @@ public class EntarenceMapAndListActivity
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.fab_btn:
-                switch (ll_map_and_gallery.getVisibility()){
+                switch (ll_map_and_gallery.getVisibility()) {
                     case View.VISIBLE:
                         ll_map_and_gallery.setVisibility(View.GONE);
                         break;
@@ -146,7 +148,7 @@ public class EntarenceMapAndListActivity
         }
         //CoordinatorLayout.LayoutParams layoutParams = (CoordinatorLayout.LayoutParams)fab.getLayoutParams();
         //new CoordinatorLayout.LayoutParams(fab.getWidth(), fab.getHeight());//
-        switch (ll_map_and_gallery.getVisibility()){
+        switch (ll_map_and_gallery.getVisibility()) {
             case View.GONE:
 //                int width = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, fab.getWidth(), getResources().getDisplayMetrics());
 //                int height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, fab.getHeight(), getResources().getDisplayMetrics());
@@ -179,6 +181,17 @@ public class EntarenceMapAndListActivity
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
     }
 
+    @Override
+    public void OnGooglePlayServicesCheckError() {
+
+    }
+
+    @Override
+    public void OnInternetNotConnected() {
+
+    }
+
+/*
     class FrameSwitchFABBehavior extends CoordinatorLayout.Behavior<FloatingActionButton>{
         Context context;
 
@@ -199,4 +212,5 @@ public class EntarenceMapAndListActivity
             return true;
         }
     }
+*/
 }

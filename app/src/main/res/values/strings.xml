@@ -32,12 +32,6 @@
 
     <!-- Common - check if needed -->
 
-    <string name="title_activity_splash_screen">SplashScreenActivity</string>
-    <string name="hello_world">Hello world!</string>
-    <string name="title_activity_map_and_list">MapAndListActivity</string>
-    <string name="title_activity_all_publications">AllPublicationsActivity</string>
-    <string name="title_activity_my_publications_list">MyPublicationsListActivity</string>
-
     <!-- my publication details -->
     <string name="pub_det_on_the_way_to_take">On the way</string>
     <string name="pub_det_metr_from_you">meters from you</string>
@@ -314,6 +308,8 @@
     <string name="welcome_reg_number_string">WELCOME TO FOODONET</string>
     <string name="btn_start_sharing_string">Start Sharing</string>
     <string name="last_step_string">LAST STEP TO START</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
 
 
 </resources>

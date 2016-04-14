@@ -11,6 +11,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -27,7 +28,7 @@ import upp.foodonet.material.R;
  * Created by Asher on 31-Jul-15.
  */
 public abstract class FooDoNetCustomActivityConnectedToService
-        extends FragmentActivity
+        extends AppCompatActivity
         implements IBroadcastReceiverCallback {
     //implements IFooDoNetServiceCallback, IGotMyLocationCallback {
 
