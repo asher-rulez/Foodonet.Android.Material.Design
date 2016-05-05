@@ -107,7 +107,8 @@ public class EntarenceMapAndListActivity
 
                             break;
                         case R.id.nav_item_groups:
-
+                            Intent intentGroups = new Intent(getApplicationContext(), GroupsListActivity.class);
+                            startActivity(intentGroups);
                             break;
                         case R.id.nav_item_settings:
 

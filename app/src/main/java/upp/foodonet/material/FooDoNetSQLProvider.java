@@ -72,6 +72,7 @@ public class FooDoNetSQLProvider extends ContentProvider {
     private static final int GROUP_MEMBERS_BY_GROUP_ID = 105;
     private static final int GROUP_MEMBER_BY_MEMBER_ID = 110;
     private static final int GROUP_MEMBER = 111;
+    private static final int GROUPS_LIST = 102;
 
     private static final String AUTHORITY = "foodonet.foodcollector.sqlprovider";
 
@@ -117,6 +118,8 @@ public class FooDoNetSQLProvider extends ContentProvider {
     private static final String EXT_PUBLICATION_REMOVE_COMPLETELY = "/RemovePublicationCompletely";
 
     private static final String EXT_GROUP = "/Group";
+
+    private static final String EXT_GROUPS_LIST = "/GroupsList";
 
     private static final String EXT_GROUP_MEMBER = "/GroupMembers";
 
@@ -177,6 +180,8 @@ public class FooDoNetSQLProvider extends ContentProvider {
             = Uri.parse(BASE_STRING_FOR_URI + EXT_PUBLICATION_REMOVE_COMPLETELY);
     public static final Uri URI_GROUP
             = Uri.parse(BASE_STRING_FOR_URI + EXT_GROUP);
+    public static final Uri URI_GROUPS_LIST
+            = Uri.parse(BASE_STRING_FOR_URI + EXT_GROUPS_LIST);
     public static final Uri URI_GROUP_MEMBERS
             = Uri.parse(BASE_STRING_FOR_URI + EXT_GROUP_MEMBER);
     public static final Uri URI_GROUP_MEMBERS_BY_GROUP = Uri.parse(BASE_STRING_FOR_URI + EXT_GROUP_MEMBERS_BY_GROUP);
@@ -219,6 +224,7 @@ public class FooDoNetSQLProvider extends ContentProvider {
         sURIMatcher.addURI(AUTHORITY, BASE_PATH + EXT_GROUP_MEMBER, GROUP_MEMBER);
         sURIMatcher.addURI(AUTHORITY, BASE_PATH + EXT_GROUP_MEMBER + "/#", GROUP_MEMBER_BY_MEMBER_ID);
         sURIMatcher.addURI(AUTHORITY, BASE_PATH + EXT_GROUP_MEMBERS_BY_GROUP + "/#", GROUP_MEMBERS_BY_GROUP_ID);
+        sURIMatcher.addURI(AUTHORITY, BASE_PATH + EXT_GROUPS_LIST, GROUPS_LIST);
     }
 
     @Override
@@ -336,6 +342,10 @@ public class FooDoNetSQLProvider extends ContentProvider {
                 queryBuilder.setTables(GroupMemberTable.GROUP_MEMBER_TABLE_NAME);
                 queryBuilder.appendWhere(GroupMember.GROUP_MEMBER_ID_KEY + " = " + uri.getLastPathSegment());
                 break;
+            case GROUPS_LIST:
+                Cursor cGroupsList = database.getReadableDatabase().rawQuery(GroupTable.GetRawSelectGroupsForList(), null);
+                cGroupsList.setNotificationUri(getContext().getContentResolver(), uri);
+                return cGroupsList;
 //            case REPORTS_LIST_FOR_PUBLICATION:
 //                return database.getReadableDatabase()
 //                        .rawQuery(FooDoNetSQLHelper.RAW_SELECT_REPORTS_FOR_PUB_DETAILS.replace("{0}", String.valueOf(uri.getLastPathSegment())), null);
@@ -578,6 +588,9 @@ public class FooDoNetSQLProvider extends ContentProvider {
             case GROUP_MEMBER:
             case GROUP_MEMBER_BY_MEMBER_ID:
                 available = GroupMember.GetColumnNamesArray();
+                break;
+            case GROUPS_LIST:
+                available = Group.GetColumnNamesForListArray();
                 break;
 //            case REPORTS_LIST_FOR_PUBLICATION:
 //                available = new String[]

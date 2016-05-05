@@ -23,45 +23,79 @@ public class Group implements ICanWriteSelfToJSONWriter {
     public static final String GROUP_NAME_KEY = "name";
     public static final String GROUP_ADMIN_ID_KEY = "user_id";
 
+    public static final String GROUP_MEMBERS_COUNT_KEY = "members_count";
+
     public static final String GROUP_ITEM_JSON_KEY = "group";
 
-    public Group(){}
+    public Group() {
+    }
 
     public Group(String name, int adminId) {
         Set_name(name);
         Set_admin_id(adminId);
     }
 
-    public Group(int id, String name, int admin_id){
-        this(name,admin_id);
+    public Group(int id, String name, int admin_id) {
+        this(name, admin_id);
         Set_id(id);
     }
 
     private int _id;
-    public int Get_id() {return _id;}
-    public void Set_id(int id) {this._id = id;}
+
+    public int Get_id() {
+        return _id;
+    }
+
+    public void Set_id(int id) {
+        this._id = id;
+    }
 
     private String _name;
-    public String Get_name() { return _name;}
-    public void Set_name(String name) { this._name = name;}
+
+    public String Get_name() {
+        return _name;
+    }
+
+    public void Set_name(String name) {
+        this._name = name;
+    }
 
     private int _admin_id;
-    public int Get_admin_id() {return _admin_id;}
-    public void Set_admin_id(int admin_id) {this._admin_id = admin_id;}
+
+    public int Get_admin_id() {
+        return _admin_id;
+    }
+
+    public void Set_admin_id(int admin_id) {
+        this._admin_id = admin_id;
+    }
+
+    private int _members_count;
+
+    public int get_members_count() {
+        return _members_count;
+    }
+
+    public void set_members_count(int count) {
+        _members_count = count;
+    }
 
     private ArrayList<GroupMember> _group_members;
-    public ArrayList<GroupMember> get_group_members(){
-        if(_group_members == null)
+
+    public ArrayList<GroupMember> get_group_members() {
+        if (_group_members == null)
             _group_members = new ArrayList<>();
         return _group_members;
     }
+
     public void set_group_members(ArrayList<GroupMember> group_members) {
-        if(_group_members == null)
+        if (_group_members == null)
             _group_members = new ArrayList<>();
         _group_members.addAll(group_members);
     }
-    public void add_group_member(GroupMember groupMember){
-        if(_group_members == null)
+
+    public void add_group_member(GroupMember groupMember) {
+        if (_group_members == null)
             _group_members = new ArrayList<>();
         _group_members.add(groupMember);
     }
@@ -75,6 +109,10 @@ public class Group implements ICanWriteSelfToJSONWriter {
                 };
     }
 
+    public static String[] GetColumnNamesForListArray(){
+        return new String[]{ GROUP_ID_KEY, GROUP_NAME_KEY, GROUP_MEMBERS_COUNT_KEY };
+    }
+
     public ContentValues GetContentValuesRow() {
         ContentValues cv = new ContentValues();
         cv.put(GROUP_ID_KEY, Get_id());
@@ -85,13 +123,27 @@ public class Group implements ICanWriteSelfToJSONWriter {
 
     public static ArrayList<Group> GetGroupsFromCursor(Cursor cursor) {
         ArrayList<Group> result = new ArrayList<Group>();
-        if(cursor != null && cursor.moveToFirst()) {
+        if (cursor != null && cursor.moveToFirst()) {
             do {
                 int id = cursor.getInt(cursor.getColumnIndex(GROUP_ID_KEY));
                 String name = cursor.getString(cursor.getColumnIndex(GROUP_NAME_KEY));
                 int admin_id = cursor.getInt(cursor.getColumnIndex(GROUP_ADMIN_ID_KEY));
                 Group group = new Group(id, name, admin_id);
                 result.add(group);
+            } while (cursor.moveToNext());
+        }
+        return result;
+    }
+
+    public static ArrayList<Group> GetGroupsFromCursorForList(Cursor cursor) {
+        ArrayList<Group> result = new ArrayList<>();
+        if (cursor != null && cursor.moveToFirst()) {
+            do {
+                Group g = new Group();
+                g.Set_id(cursor.getInt(cursor.getColumnIndex(GROUP_ID_KEY)));
+                g.Set_name(cursor.getString(cursor.getColumnIndex(GROUP_NAME_KEY)));
+                g.set_members_count(cursor.getInt(cursor.getColumnIndex(GROUP_MEMBERS_COUNT_KEY)));
+                result.add(g);
             } while (cursor.moveToNext());
         }
         return result;

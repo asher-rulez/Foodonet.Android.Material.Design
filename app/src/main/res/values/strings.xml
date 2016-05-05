@@ -15,7 +15,7 @@
     <string name="title_activity_add_new_fcpublication">AddNewFCPublicationActivity</string>
     <string name="no_date_set_string">0000–00–00</string>
     <string name="no_time_set_string">00:00:00</string>
-<!--
+    <!--
     <string name="another_details_string">פרטים נוספים</string>
     <string name="side_menu_feedback_title">כתוב לנו</string>
     <string name="feedback_validation_text_null">תכתוב לנו משהו</string>
@@ -23,7 +23,7 @@
     <string name="feedback_uimessage_thanks">תודה על תגובה!</string>
 -->
     <string name="test_btn_text">TEST</string>
-<!--
+    <!--
     <string name="leave_report_pub_details">דווח</string>
     <string name="start_date_time_picker_dialog_title">מתאריך‫:‬</string>
     <string name="end_date_time_picker_dialog_title">ועד תאריך‫:‬</string>
@@ -44,21 +44,21 @@
     <string name="cancel_publication">cancel publication</string>
     <string name="cancel_publication_question">Really cancel this publication?</string>
     <string name="pub_det_uimessage_successfully_registered_to_pub">Successfully registered to publication</string>
-<!--
+    <!--
     <string name="pub_det_uimessage_failed_register_to_pub">Register to publication failed</string>
     <string name="pub_det_uimessage_failed_unregister_from_pub">ביטול הרשמה נכשל</string>
     <string name="pub_det_must_register_before_waze">חובה להרשם לשיתוף לפני ניווט אליו</string>
 -->
 
     <!-- Report dialog -->
-<!--
+    <!--
     <string name="report_dialog_whole_btn_text">נשאר עוד</string>
     <string name="report_dialog_half_btn_text">לקחתי הכול</string>
     <string name="report_dialog_few_btn_text">לא מצאתי כלום</string>
 -->
 
     <!-- TODO: Remove or change this placeholder text -->
-<!--
+    <!--
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_activity_add_edit_publication">AddEditPublicationActivity</string>
 -->
@@ -73,7 +73,7 @@
     <!-- Add/Edit publication -->
 
     <string name="file_name_part_just_shot">justShot</string>
-<!--
+    <!--
     <string name="validation_title_empty">שם השיתוף לא יכול להיות ריק</string>
     <string name="validation_title_too_long">שם השיתוף ארוך מדיי, אורך מקסימאלי: {0} תווים</string>
     <string name="validation_address_empty">חובה למלא כתובת</string>
@@ -88,7 +88,7 @@
 -->
     <!-- Address dialog -->
 
-<!--
+    <!--
     <string name="get_current_location_checkbox_text">מיקום נוכחי</string>
     <string name="address_dialog_btn_ok">שמירה</string>
     <string name="address_dialog_btn_cancel">חזרה</string>
@@ -100,7 +100,7 @@
 
     <!-- Collector dialog details -->
 
-<!--
+    <!--
     <string name="collector_dialog_sign_title">רישום לאיסוף</string>
     <string name="collector_dialog_register_text">יש למלא פרטי התקשרות כדי להצטרף לאיסוף</string>
     <string name="collector_dialog_name_et">שם</string>
@@ -110,7 +110,7 @@
 -->
 
     <!-- Collector details -->
-<!--
+    <!--
     <string name="collector_details_name_too_short">השם אמור להכיל לפחות שני אותיות</string>
     <string name="collector_details_phone_too_short">מספר הטל׳ אמור להכיל לפחות שני מספרים</string>
     <string name="collector_details_phone_incorrect">מספר הטלפון לא תקין</string>
@@ -118,7 +118,7 @@
 
     <!-- Report dialog details -->
 
-<!--
+    <!--
     <string name="report_dialog_report_title">דווח על איסוף</string>
     <string name="report_dialog_collected_part_btn">אספתי חלק</string>
     <string name="report_dialog_collected_all_btn">אספתי הכל</string>
@@ -132,14 +132,14 @@
 
     <!-- Dialog publication reports -->
 
-<!--
+    <!--
     <string name="dialog_pub_reports_title">דיווחי משתמשים</string>
     <string name="dialog_pub_reports_back_btn">חזרה</string>
 -->
 
     <!-- Publication details -->
     <string name="error_cant_perform_this_action_without_internet">לא ניתן לבצע {0} ללא חיבור לאינטרנט</string>
-<!--
+    <!--
     <string name="progress_taking_pub_off_air">מעדכן שיתוף</string>
     <string name="progress_registration_to_pub">הרשמה</string>
     <string name="progress_unregistering_from_pub">ביטול הרשמה</string>
@@ -166,7 +166,7 @@
 
     <!-- My publications list -->
 
-<!--
+    <!--
     <string name="progress_saving">שמירה</string>
     <string name="new_pub_waiting_for_save_on_server">שיתוף תרם נשמר בשרת, נה להמתין</string>
     <string name="progress_saving_on_server">בתהליך שמירה בשרת</string>
@@ -175,21 +175,22 @@
 
     <!-- Entrance activity -->
 
-<!--
+    <!--
     <string name="progress_loading">טוען..</string>
     <string name="no_internet_connection_available_error_message">לא נמצא חיבור לאינטרנט‫.‬ חלק מתכונות האפליקציה לא יהיו זמינות</string>
 -->
 
     <!-- SplashScreen -->
 
-<!--
+    <!--
     <string name="progress_foodonet_loading">טוען..</string>
-    <string name="progress_first_load">טעינה ראשונה.</string>
 -->
+    <string name="progress_load">Loading...</string>
+    <string name="progress_first_load">First load...</string>
 
     <!-- Common hebrew -->
 
-<!--
+    <!--
     <string name="confirmAction">בטוח?</string>
     <string name="confirmExit">ברצונך לצאת מאפליקציה?</string>
     <string name="yes">כן</string>
@@ -201,7 +202,7 @@
 
     <!-- Notification messages -->
 
-<!--
+    <!--
     <string name="notif_new_pub">שיתוף חדש בקרבתך</string>
     <string name="notif_was_deleted">שיתוף נמחק</string>
     <string name="notif_report">התקבל דיווח חדש על השיתוף</string>
@@ -213,7 +214,7 @@
 
     <!-- Feedback Dialog -->
 
-<!--
+    <!--
     <string name="feedback_dialog_title">שתפו אותנו במחשבות, הצעות או כל מה שתירצו</string>
     <string name="feedback_name_hint">שם שלך</string>
     <string name="feedback_report_hint">טקסט תגובה</string>
@@ -224,7 +225,7 @@
 
     <!-- Sign in activity -->
 
-<!--
+    <!--
     <string name="sign_in_title">Sharing food changing society</string>
     <string name="sign_in_subtitle">Ready to get started?</string>
     <string name="sign_in_footer">Continue without Registration</string>
@@ -236,7 +237,7 @@
 
     <!-- Register Phone Activity -->
 
-<!--
+    <!--
     <string name="title_activity_register_phone">RegisterPhoneActivity</string>
     <string name="welcome_reg_number_string">ברוכים הבאים ל FOODONET</string>
     <string name="btn_start_sharing_string">התחל לשתף</string>
@@ -259,7 +260,6 @@
     <string name="no_internet_connection_available_error_message">Communication Issue</string>
     <string name="get_current_location_checkbox_text">Current location</string>
     <string name="pub_det_menu_item_delete">Delete</string>
-    <string name="confirmAction">Delete Event?</string>
     <string name="pub_det_menu_item_edit">Edit</string>
     <string name="side_menu_going_to_take_part">en route</string>
     <string name="filter_ending_btn_text">Ends</string>
@@ -273,7 +273,6 @@
     <!--<string name="side_menu_going_to_take_part">My Pickups</string>-->
     <string name="side_menu_my_active_pubs_part">My Shares</string>
     <string name="collector_dialog_name_et">Name</string>
-    <string name="no">No</string>
     <string name="pub_det_no_reports_for_pub">No reports</string>
     <string name="report_dialog_found_nothing_btn">Nothing Left</string>
     <string name="filter_not_active_btn_text">Off Air</string>
@@ -304,14 +303,33 @@
     <string name="welcome_string">Welcome</string>
     <string name="enter_title_string">What are you sharing?</string>
     <string name="add_phone_number_string">What\'s your phone number?</string>
-    <string name="yes">Yes</string>
     <string name="welcome_reg_number_string">WELCOME TO FOODONET</string>
     <string name="btn_start_sharing_string">Start Sharing</string>
     <string name="last_step_string">LAST STEP TO START</string>
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
 
-    <string name="hello_world">Hello world!</string>
+    <!-- Sign in activity -->
 
+    <string name="sign_in_title">Sharing food changing society</string>
+    <string name="sign_in_subtitle">Ready to get started?</string>
+    <string name="sign_in_footer">Continue without Registration</string>
+    <string name="sign_in_with_title">Sign in with</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="title_activity_register_phone">RegisterPhoneActivity</string>
+
+    <!-- Register phone number -->
+
+    <string name="validation_phone_number_empty">Phone number cannot be empty</string>
+    <string name="validation_phone_number_invalid">You entered invalid number</string>
+    <string name="action_sign_in_short">Sign in</string>
+
+    <!-- Common -->
+
+    <string name="confirmAction">Sure?</string>
+    <string name="confirmExit">You\'re sure you want to quit?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="title_activity_groups_list">GroupsListActivity</string>
 
 </resources>
