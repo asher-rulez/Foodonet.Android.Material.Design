@@ -1,5 +1,6 @@
 package CommonUtilPackage;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -7,6 +8,7 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -22,6 +24,7 @@ import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -40,6 +43,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import android.provider.Settings.Secure;
+import android.view.Display;
 import android.widget.EditText;
 
 //import org.apache.http.HttpEntity;
@@ -608,6 +612,24 @@ public class CommonUtil {
         SharedPreferences.Editor editor = sp.edit();
         editor.putString(context.getString(R.string.shared_preferences_user_data_phone_num_key), phoneNum);
         return editor.commit();
+    }
+
+    public static LatLngBounds GetBoundsByCenterLatLng(LatLng center, double maxDistance) {
+        double distance = maxDistance * 1.5;
+        return new LatLngBounds
+                (new LatLng(center.latitude - distance, center.longitude - distance),
+                        new LatLng(center.latitude + distance, center.longitude + distance));
+    }
+
+    public static double GetDistance(LatLng pos1, LatLng pos2) {
+        return Math.sqrt(Math.pow(pos1.latitude - pos2.latitude, 2) + Math.pow(pos1.longitude - pos2.longitude, 2));
+    }
+
+    public static Point GetScreenSize(Activity activity) {
+        Display display = activity.getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        return size;
     }
 
 }
