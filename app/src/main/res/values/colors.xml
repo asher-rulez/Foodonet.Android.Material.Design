@@ -2,7 +2,7 @@
 <resources>
     <color name="colorPrimary">#3197d3</color>
     <color name="colorPrimaryDark">#3197d3</color>
-    <color name="colorAccent">#FF4081</color>
+    <!--<color name="colorAccent">#FF4081</color>-->
     <color name="white">#FFFFFF</color>
     <color name="side_menu_score_circle_red">#B80000</color>
     <color name="side_menu_item_background">#555555</color>
@@ -34,6 +34,7 @@
     <color name="validation_red_text_color">#FF0000</color>
     <color name="validation_green_text_color">#30AC59</color>
     <color name="edit_text_input_default_color">#000000</color>
+    <color name="plus_button_red">#FF3939</color>
 
     <color name="black_overlay">#66000000</color>
 </resources>

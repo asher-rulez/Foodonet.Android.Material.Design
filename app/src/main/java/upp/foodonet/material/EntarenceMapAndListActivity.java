@@ -47,6 +47,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -85,6 +86,7 @@ public class EntarenceMapAndListActivity
     float kilometer_for_map;
     int myLocationRefreshRate;
     ImageButton btn_focus_on_my_location;
+    Date lastLocationUpdateDate;
 
     HorizontalScrollView hsv_gallery;
     LinearLayout gallery_pubs;
@@ -104,7 +106,7 @@ public class EntarenceMapAndListActivity
         initToolBar();
         initNavVew();
 
-        fab = (FloatingActionButton) findViewById(R.id.fab_btn);
+        fab = (FloatingActionButton) findViewById(R.id.fab_map_and_list);
         if (fab != null) fab.setOnClickListener(this);
         fabLayoutParams = (CoordinatorLayout.LayoutParams) fab.getLayoutParams();
 //        CoordinatorLayout.LayoutParams lp = (CoordinatorLayout.LayoutParams)fab.getLayoutParams();
@@ -115,8 +117,8 @@ public class EntarenceMapAndListActivity
 
         btn_focus_on_my_location = (ImageButton) findViewById(R.id.btn_center_on_my_location_map);
         btn_focus_on_my_location.setOnClickListener(this);
-        gallery_pubs = (LinearLayout)findViewById(R.id.ll_image_btns_gallery);
-        hsv_gallery = (HorizontalScrollView)findViewById(R.id.hsv_image_gallery);
+        gallery_pubs = (LinearLayout) findViewById(R.id.ll_image_btns_gallery);
+        hsv_gallery = (HorizontalScrollView) findViewById(R.id.hsv_image_gallery);
 
         TypedValue typedValue = new TypedValue();
         getResources().getValue(R.dimen.map_one_kilometer_for_calculation, typedValue, true);
@@ -132,14 +134,44 @@ public class EntarenceMapAndListActivity
     }
 
     private void initToolBar() {
-        toolbar = (Toolbar) findViewById(R.id.toolBar);
-        if (toolbar != null) toolbar.setTitle(R.string.app_name);
-        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                return false;
-            }
-        });
+        toolbar = (Toolbar) findViewById(R.id.tb_map_and_list);
+        if (toolbar != null) //toolbar.setTitle(R.string.app_name);
+            toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem item) {
+                    if(item.getTitle().toString().compareToIgnoreCase("list") == 0){
+                        switch (ll_map_and_gallery.getVisibility()) {
+                            case View.VISIBLE:
+                                ll_map_and_gallery.setVisibility(View.GONE);
+                                break;
+                            case View.GONE:
+                                ll_map_and_gallery.setVisibility(View.VISIBLE);
+                                break;
+                        }
+                    }
+                    switch (ll_map_and_gallery.getVisibility()) {
+                        case View.GONE:
+//                int width = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, fab.getWidth(), getResources().getDisplayMetrics());
+//                int height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, fab.getHeight(), getResources().getDisplayMetrics());
+                            CoordinatorLayout.LayoutParams layoutParams = new CoordinatorLayout.LayoutParams(fabLayoutParams);
+                            layoutParams.setAnchorId(View.NO_ID);
+                            layoutParams.gravity = Gravity.RIGHT | Gravity.BOTTOM;
+                            layoutParams.bottomMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 50, getResources().getDisplayMetrics());
+                            layoutParams.rightMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 50, getResources().getDisplayMetrics());
+                            fab.setLayoutParams(layoutParams);
+                            break;
+                        case View.VISIBLE:
+                            fab.setLayoutParams(fabLayoutParams);
+//                layoutParams.setAnchorId(R.id.map);
+//                layoutParams.anchorGravity = Gravity.BOTTOM | Gravity.RIGHT | Gravity.END;
+//                layoutParams.rightMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 50, getResources().getDisplayMetrics());
+//                layoutParams.bottomMargin = 0;
+//                fab.setLayoutParams(layoutParams);
+                            break;
+                    }
+                    return true;
+                }
+            });
 
         toolbar.inflateMenu(R.menu.menu);
     }
@@ -198,47 +230,21 @@ public class EntarenceMapAndListActivity
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.fab_btn:
-                switch (ll_map_and_gallery.getVisibility()) {
-                    case View.VISIBLE:
-                        ll_map_and_gallery.setVisibility(View.GONE);
-                        break;
-                    case View.GONE:
-                        ll_map_and_gallery.setVisibility(View.VISIBLE);
-                        break;
-                    case R.id.btn_center_on_my_location_map:
-                        if (myLocation == null)
-                            return;
-                        CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(CommonUtil.GetBoundsByCenterLatLng(myLocation, maxDistance), width, height, 0);
-                        googleMap.animateCamera(cu);
-                        break;
-                }
+            case R.id.fab_map_and_list:
+
 //                Intent addPub = new Intent(this, AddEditPublicationActivity.class);
 //                startActivity(addPub);
                 break;
+            case R.id.btn_center_on_my_location_map:
+                if (myLocation == null)
+                    return;
+                CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(CommonUtil.GetBoundsByCenterLatLng(myLocation, maxDistance), width, height, 0);
+                googleMap.animateCamera(cu);
+                break;
+
         }
         //CoordinatorLayout.LayoutParams layoutParams = (CoordinatorLayout.LayoutParams)fab.getLayoutParams();
         //new CoordinatorLayout.LayoutParams(fab.getWidth(), fab.getHeight());//
-        switch (ll_map_and_gallery.getVisibility()) {
-            case View.GONE:
-//                int width = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, fab.getWidth(), getResources().getDisplayMetrics());
-//                int height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, fab.getHeight(), getResources().getDisplayMetrics());
-                CoordinatorLayout.LayoutParams layoutParams = new CoordinatorLayout.LayoutParams(fabLayoutParams);
-                layoutParams.setAnchorId(View.NO_ID);
-                layoutParams.gravity = Gravity.RIGHT | Gravity.BOTTOM;
-                layoutParams.bottomMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 50, getResources().getDisplayMetrics());
-                layoutParams.rightMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 50, getResources().getDisplayMetrics());
-                fab.setLayoutParams(layoutParams);
-                break;
-            case View.VISIBLE:
-                fab.setLayoutParams(fabLayoutParams);
-//                layoutParams.setAnchorId(R.id.map);
-//                layoutParams.anchorGravity = Gravity.BOTTOM | Gravity.RIGHT | Gravity.END;
-//                layoutParams.rightMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 50, getResources().getDisplayMetrics());
-//                layoutParams.bottomMargin = 0;
-//                fab.setLayoutParams(layoutParams);
-                break;
-        }
 
     }
 
@@ -263,10 +269,10 @@ public class EntarenceMapAndListActivity
 
         if (btn_focus_on_my_location != null && googleMap != null)
             btn_focus_on_my_location.setVisibility(View.VISIBLE);
-        if(hsv_gallery != null)
+        if (hsv_gallery != null)
             hsv_gallery.setVisibility(View.VISIBLE);
 
-        if(progressDialog != null)
+        if (progressDialog != null)
             progressDialog.dismiss();
 
         SetCamera();
@@ -292,8 +298,9 @@ public class EntarenceMapAndListActivity
         return googleMap.addMarker(newMarker);
     }
 
-    private void AnimateCameraFocusOnLatLng(LatLng latLng){
-        CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(CommonUtil.GetBoundsByCenterLatLng(latLng, maxDistance), width, height, 0);
+    private void AnimateCameraFocusOnLatLng(LatLng latLng) {
+        CameraUpdate cu = CameraUpdateFactory.newLatLngZoom(latLng, 15);
+        //CameraUpdateFactory.newLatLngBounds(CommonUtil.GetBoundsByCenterLatLng(latLng, maxDistance), width, height, 0);
         googleMap.animateCamera(cu);
     }
 
@@ -350,12 +357,60 @@ public class EntarenceMapAndListActivity
         AnimateCameraFocusOnLatLng(average);
     }
 
+    @Override
+    public void onMyLocationChange(Location location) {
+        Log.i(MY_TAG, "got location update from map");
+        if (location == null)
+            return;
+        if (lastLocationUpdateDate == null)
+            lastLocationUpdateDate = new Date();
+        else {
+            long millisPassed = new Date().getTime() - lastLocationUpdateDate.getTime();
+            if (millisPassed < myLocationRefreshRate) {
+                Log.i(MY_TAG, millisPassed + " after last update, not updating");
+                return;
+            } else {
+                Log.i(MY_TAG, "updating location! lat: " + location.getLatitude()
+                        + "; long: " + location.getLongitude());
+                lastLocationUpdateDate = new Date();
+            }
+        }
+/*
+        if(myLocation == null) {
+            BitmapDescriptor icon = BitmapDescriptorFactory.fromResource(R.drawable.blue_dot_circle);
+            myLocation = AddMarker(((float)location.getLatitude()), (float)location.getLongitude(), getString(R.string.my_location), icon);
+        }
+*/
+        if (myLocation != null && myLocation.latitude == location.getLatitude() && myLocation.longitude == location.getLongitude())
+            return;
+        myLocation = new LatLng(location.getLatitude(), location.getLongitude());
+/*
+        if (mainPagerAdapter != null){
+            mainPagerAdapter.NotifyListOnLocationChange(location);
+        }
+*/
+        SetCamera();
+/*
+        if (GetDistance(myLocation, new LatLng(location.getLatitude(), location.getLongitude())) <= maxDistance)
+            return;
+*/
+        //UpdateMyLocationPreferences(new LatLng(location.getLatitude(), location.getLongitude()));
+    }
+
+    @Override
+    public void OnGotMyLocationCallback(Location location) {
+        Log.i(MY_TAG, "got location callback from task");
+        if (location != null)
+            myLocation = new LatLng(location.getLatitude(), location.getLongitude());
+        if (isMapLoaded)
+            OnReadyToUpdateCamera();
+    }
 
     //endregion MAP METHODS
 
     //region PUBS GALLERY
 
-    public void AddImageToGallery(final FCPublication publication){
+    public void AddImageToGallery(final FCPublication publication) {
 
         int screenLayout = this.getResources().getConfiguration().screenLayout;
         screenLayout &= Configuration.SCREENLAYOUT_SIZE_MASK;
@@ -365,7 +420,7 @@ public class EntarenceMapAndListActivity
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(size, size);
         lp.setMargins(15, 30, 15, 30);
 
-        if(screenLayout == Configuration.SCREENLAYOUT_SIZE_SMALL) lp.setMargins(5, 10, 5, 10);
+        if (screenLayout == Configuration.SCREENLAYOUT_SIZE_SMALL) lp.setMargins(5, 10, 5, 10);
 
         imageButton.setLayoutParams(lp);
         imageButton.setBackgroundResource(R.drawable.map_gallery_border);
@@ -373,7 +428,7 @@ public class EntarenceMapAndListActivity
         Drawable drawable
                 = CommonUtil.GetBitmapDrawableFromFile(
                 publication.GetImageFileName(), getString(R.string.image_folder_path), size, size);
-        if(drawable == null)
+        if (drawable == null)
             drawable = getResources().getDrawable(R.drawable.foodonet_logo_200_200);
         imageButton.setImageDrawable(drawable);
         imageButton.setScaleType(ImageView.ScaleType.FIT_XY);
@@ -387,15 +442,15 @@ public class EntarenceMapAndListActivity
             }
         });
         StateListDrawable states = new StateListDrawable();
-        states.addState(new int[] { android.R.attr.state_pressed }, getResources().getDrawable(R.drawable.map_my_location_button_pressed));
+        states.addState(new int[]{android.R.attr.state_pressed}, getResources().getDrawable(R.drawable.map_my_location_button_pressed));
         states.addState(new int[]{}, getResources().getDrawable(R.drawable.map_my_location_button_normal));
         imageButton.setBackground(states);
         gallery_pubs.addView(imageButton);
     }
 
-    public void ImageBtnFromGallerySelected(int id){
-        for(Map.Entry<Marker, Integer> e : myMarkers.entrySet()){
-            if(e.getValue().intValue() == id){
+    public void ImageBtnFromGallerySelected(int id) {
+        for (Map.Entry<Marker, Integer> e : myMarkers.entrySet()) {
+            if (e.getValue().intValue() == id) {
                 AnimateCameraFocusOnLatLng(e.getKey().getPosition());
                 e.getKey().showInfoWindow();
             }
@@ -423,11 +478,6 @@ public class EntarenceMapAndListActivity
 
     @Override
     public void onInfoWindowClick(Marker marker) {
-
-    }
-
-    @Override
-    public void onMyLocationChange(Location location) {
 
     }
 
@@ -471,9 +521,9 @@ public class EntarenceMapAndListActivity
                         Bitmap markerIcon;
                         BitmapDescriptor icon = null;
 
-                            markerIcon = CommonUtil.decodeScaledBitmapFromDrawableResource(
-                                    getResources(), R.drawable.map_marker, 13, 13);
-                            icon = BitmapDescriptorFactory.fromBitmap(markerIcon);
+                        markerIcon = CommonUtil.decodeScaledBitmapFromDrawableResource(
+                                getResources(), R.drawable.map_marker, 13, 13);
+                        icon = BitmapDescriptorFactory.fromBitmap(markerIcon);
 
                         myMarkers.put(AddMarker(publication.getLatitude().floatValue(),
                                 publication.getLongitude().floatValue(),
@@ -488,7 +538,7 @@ public class EntarenceMapAndListActivity
                 }
                 break;
         }
-        }
+    }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {

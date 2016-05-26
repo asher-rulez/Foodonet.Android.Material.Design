@@ -9,16 +9,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-
-        <!--
-                <android.support.v4.view.ViewPager
-                    android:id="@+id/vp_main"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    app:layout_behavior="@string/appbar_scrolling_view_behavior"
-                    />
-        -->
-
         <FrameLayout
             android:layout_width="fill_parent"
             android:layout_height="fill_parent">
@@ -114,28 +104,22 @@ tools:context="com.example.asher.mapappexample.MapsActivity"-->
             android:fitsSystemWindows="true">
 
             <android.support.v7.widget.Toolbar
-                android:id="@+id/toolBar"
+                android:id="@+id/tb_map_and_list"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                android:background="?attr/colorPrimary"
-                android:theme="@style/ThemeOverlay.AppCompat.Dark" />
+                android:background="?attr/colorPrimary"/>
 
         </android.support.design.widget.AppBarLayout>
 
         <android.support.design.widget.FloatingActionButton
-            android:id="@+id/fab_btn"
+            android:id="@+id/fab_map_and_list"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="30dp"
-            android:src="@mipmap/ic_note_add_black_24dp"
-            app:backgroundTint="@color/colorPrimary"
+            android:layout_marginRight="10dp"
+            android:src="@drawable/white_plus"
+            app:backgroundTint="@color/plus_button_red"
             app:layout_anchor="@id/map"
             app:layout_anchorGravity="bottom|right|end" />
-        <!--
-                android:layout_gravity="end|bottom"
-                android:layout_marginBottom="30dp"
-        -->
-
 
     </android.support.design.widget.CoordinatorLayout>
 

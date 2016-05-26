@@ -31,7 +31,7 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppDefault">
         <activity
             android:name=".SplashScreenActivity"
             android:screenOrientation="portrait">
@@ -92,11 +92,10 @@
 
         <activity
             android:name=".SignInActivity"
-            android:theme="@style/AppTheme" />
+            android:screenOrientation="portrait" />
         <activity
             android:name=".RegisterPhoneActivity"
-            android:label="@string/title_activity_register_phone"
-            android:theme="@style/AppTheme" />
+            android:screenOrientation="portrait" />
         <activity
             android:name="com.facebook.FacebookActivity"
             android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
@@ -110,8 +109,7 @@
 
         <activity
             android:name=".GroupsListActivity"
-            android:label="@string/title_activity_groups_list"
-            android:theme="@style/AppTheme"></activity>
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>

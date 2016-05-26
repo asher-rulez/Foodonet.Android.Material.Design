@@ -15,8 +15,9 @@ import java.util.ArrayList;
 import Adapters.GroupsListRecyclerViewAdapter;
 import Adapters.IOnGroupSelecterFromListListener;
 import DataModel.Group;
+import FooDoNetServiceUtil.FooDoNetCustomActivityConnectedToService;
 
-public class GroupsListActivity extends AppCompatActivity implements View.OnClickListener, IOnGroupSelecterFromListListener {
+public class GroupsListActivity extends FooDoNetCustomActivityConnectedToService implements View.OnClickListener, IOnGroupSelecterFromListListener {
 
     private FloatingActionButton fab_add_group;
     private RecyclerView rv_groups_list;
@@ -25,13 +26,20 @@ public class GroupsListActivity extends AppCompatActivity implements View.OnClic
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_groups_list);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.tb_groups_list);
+        //setSupportActionBar(toolbar);
 
-        fab_add_group = (FloatingActionButton) findViewById(R.id.fab);
+/*
+        fab_add_group = (FloatingActionButton) findViewById(R.id.fab_groups);
         fab_add_group.setOnClickListener(this);
+*/
 
         rv_groups_list = (RecyclerView)findViewById(R.id.rv_groups_list);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
         setupRecyclerView(rv_groups_list);
     }
 
@@ -49,6 +57,16 @@ public class GroupsListActivity extends AppCompatActivity implements View.OnClic
 
     @Override
     public void OnGroupSelected(int groupID) {
+
+    }
+
+    @Override
+    public void OnGooglePlayServicesCheckError() {
+
+    }
+
+    @Override
+    public void OnInternetNotConnected() {
 
     }
 
