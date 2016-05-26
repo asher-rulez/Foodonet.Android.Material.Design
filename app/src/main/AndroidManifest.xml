@@ -26,6 +26,12 @@
         android:protectionLevel="signature" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
+    <!-- Reading contacts -->
+
+    <uses-permission android:name="android.permission.READ_CONTACTS"/>
+
+    <!-- Application -->
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -110,6 +116,14 @@
         <activity
             android:name=".GroupsListActivity"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".NewAndExistingGroupActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppDefault" />
+        <activity
+            android:name=".SelectContactsForGroupActivity"
+            android:label="@string/title_activity_select_contacts_for_group"
+            android:theme="@style/AppDefault"></activity>
     </application>
 
 </manifest>

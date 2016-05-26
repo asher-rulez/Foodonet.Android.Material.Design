@@ -324,6 +324,14 @@
     <string name="validation_phone_number_invalid">You entered invalid number</string>
     <string name="action_sign_in_short">Sign in</string>
 
+    <!-- Group add/edit -->
+
+    <string name="group_title">Group</string>
+    <string name="group_name_hint">Group name</string>
+    <string name="group_add_members">Add members</string>
+    <string name="contacts_title">Contacts</string>
+    <string name="loading_contacts">Loading contacts</string>
+
     <!-- Common -->
 
     <string name="confirmAction">Sure?</string>
@@ -331,5 +339,7 @@
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="title_activity_groups_list">GroupsListActivity</string>
+    <string name="title_activity_new_and_existing_group">NewAndExistingGroupActivity</string>
+    <string name="title_activity_select_contacts_for_group">SelectContactsForGroupActivity</string>
 
 </resources>

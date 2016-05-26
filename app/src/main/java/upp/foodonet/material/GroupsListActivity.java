@@ -1,5 +1,6 @@
 package upp.foodonet.material;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -17,7 +18,14 @@ import Adapters.IOnGroupSelecterFromListListener;
 import DataModel.Group;
 import FooDoNetServiceUtil.FooDoNetCustomActivityConnectedToService;
 
-public class GroupsListActivity extends FooDoNetCustomActivityConnectedToService implements View.OnClickListener, IOnGroupSelecterFromListListener {
+public class GroupsListActivity
+        extends FooDoNetCustomActivityConnectedToService
+        implements  View.OnClickListener,
+                    IOnGroupSelecterFromListListener {
+
+    private static final String MY_TAG = "food_groupsList";
+    public static final int requestCodeNewGroup = 0;
+    public static final int requestCodeExistingGroup = 1;
 
     private FloatingActionButton fab_add_group;
     private RecyclerView rv_groups_list;
@@ -29,10 +37,8 @@ public class GroupsListActivity extends FooDoNetCustomActivityConnectedToService
         Toolbar toolbar = (Toolbar) findViewById(R.id.tb_groups_list);
         //setSupportActionBar(toolbar);
 
-/*
         fab_add_group = (FloatingActionButton) findViewById(R.id.fab_groups);
         fab_add_group.setOnClickListener(this);
-*/
 
         rv_groups_list = (RecyclerView)findViewById(R.id.rv_groups_list);
     }
@@ -52,7 +58,17 @@ public class GroupsListActivity extends FooDoNetCustomActivityConnectedToService
 
     @Override
     public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.fab_groups:
+                Intent newGroupIntent = new Intent(this, NewAndExistingGroupActivity.class);
+                startActivityForResult(newGroupIntent, requestCodeNewGroup);
+                break;
+        }
+    }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
