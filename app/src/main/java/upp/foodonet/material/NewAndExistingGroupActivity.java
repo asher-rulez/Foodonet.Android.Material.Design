@@ -2,6 +2,7 @@ package upp.foodonet.material;
 
 import android.app.ProgressDialog;
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.database.Cursor;
@@ -17,6 +18,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Adapter;
@@ -33,17 +35,31 @@ import AsyncTasks.FetchContactsAsyncTask;
 import AsyncTasks.IFetchContactsParent;
 import CommonUtilPackage.CommonUtil;
 import CommonUtilPackage.ContactItem;
+import CommonUtilPackage.InternalRequest;
+import DataModel.Group;
+import DataModel.GroupMember;
+import FooDoNetServerClasses.HttpServerConnectorAsync;
+import FooDoNetServerClasses.IFooDoNetServerCallback;
 
-public class NewAndExistingGroupActivity extends AppCompatActivity implements View.OnClickListener, IFetchContactsParent, TextWatcher {
+public class NewAndExistingGroupActivity
+        extends AppCompatActivity
+        implements View.OnClickListener,
+        IFetchContactsParent,
+        TextWatcher,
+        IFooDoNetServerCallback {
 
     private static final String MY_TAG = "food_editGroup";
     public static final String extra_key_contacts = "contacts";
+    public static final String extra_key_is_new_group = "isNew";
+
+    int groupID;
 
     EditText et_groupTitle;
     Button btn_addMembers;
     ProgressDialog pd_loadingContacts;
     RecyclerView rv_contacts_in_group;
     FloatingActionButton fab_saveGroup;
+    ProgressDialog pb_savingGroup;
 
     ContactsInGroupRecyclerViewAdapter adapter;
 
@@ -65,6 +81,16 @@ public class NewAndExistingGroupActivity extends AppCompatActivity implements Vi
         fab_saveGroup.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.fab_inactive_gray)));
         et_groupTitle = (EditText) findViewById(R.id.et_groupName);
         et_groupTitle.addTextChangedListener(this);
+
+        Intent intent = getIntent();
+        IsNewGroup = intent.getBooleanExtra(extra_key_is_new_group, true);
+
+        if (IsNewGroup) {
+            groupID = 0;
+        } else {
+
+        }
+
         groupContacts = new ArrayList<>();
         rv_contacts_in_group = (RecyclerView) findViewById(R.id.rv_group_member_list);
         SetRecyclerView();
@@ -84,6 +110,19 @@ public class NewAndExistingGroupActivity extends AppCompatActivity implements Vi
                 FetchContactsAsyncTask contactsAsyncTask = new FetchContactsAsyncTask(getContentResolver(), this);
                 contactsAsyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, groupContacts);
                 break;
+            case R.id.fab_save_group:
+                pb_savingGroup = CommonUtil.ShowProgressDialog(this, getString(R.string.saving_group));
+                HttpServerConnectorAsync connector = new HttpServerConnectorAsync(getString(R.string.server_base_url), (IFooDoNetServerCallback) this);
+                Group g = new Group(et_groupTitle.getText().toString(), CommonUtil.GetMyUserID(this));
+                GroupMember owner = new GroupMember(0, CommonUtil.GetMyUserID(this), 0, true,
+                        CommonUtil.GetMyPhoneNumberFromPreferences(this),
+                        CommonUtil.GetSocialAccountNameFromPreferences(this));
+                InternalRequest ir = new InternalRequest(InternalRequest.ACTION_POST_NEW_GROUP, getString(R.string.server_post_new_group), g);
+                ir.groupOwner = owner;
+                ir.groupMembersToAdd = GetGroupMembers();
+                ir.MembersServerSubPath = getString(R.string.server_post_add_members_to_group);
+                connector.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, ir);
+                break;
         }
     }
 
@@ -91,7 +130,7 @@ public class NewAndExistingGroupActivity extends AppCompatActivity implements Vi
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (pd_loadingContacts != null) pd_loadingContacts.dismiss();
-        if(resultCode == 0) return;
+        if (resultCode == 0) return;
         HashMap<Integer, ContactItem> selectedContacts = (HashMap<Integer, ContactItem>) data.getSerializableExtra(extra_key_contacts);
         groupContacts.clear();
         groupContacts.addAll(selectedContacts.values());
@@ -103,6 +142,13 @@ public class NewAndExistingGroupActivity extends AppCompatActivity implements Vi
         Intent addMembersIntent = new Intent(this, SelectContactsForGroupActivity.class);
         addMembersIntent.putExtra(extra_key_contacts, contacts);
         startActivityForResult(addMembersIntent, 0);
+    }
+
+    private ArrayList<GroupMember> GetGroupMembers() {
+        ArrayList<GroupMember> result = new ArrayList<>();
+        for (ContactItem item : groupContacts)
+            result.add(new GroupMember(0, 0, groupID, false, item.getPhoneNumber(), item.getName()));
+        return result;
     }
 
     @Override
@@ -121,6 +167,26 @@ public class NewAndExistingGroupActivity extends AppCompatActivity implements Vi
     @Override
     public void afterTextChanged(Editable s) {
 
+    }
+
+    @Override
+    public void OnServerRespondedCallback(InternalRequest response) {
+        switch (response.ActionCommand) {
+            case InternalRequest.ACTION_POST_NEW_GROUP:
+                switch (response.Status) {
+                    case InternalRequest.STATUS_OK:
+                        getContentResolver().insert(FooDoNetSQLProvider.URI_GROUP, response.group.GetContentValuesRow());
+                        for(GroupMember member : response.group.get_group_members())
+                            getContentResolver().insert(FooDoNetSQLProvider.URI_GROUP_MEMBERS, member.GetContentValuesRow());
+                        Log.e(MY_TAG, "succeeded to save group");
+                        break;
+                    case InternalRequest.STATUS_FAIL:
+                        Log.e(MY_TAG, "failed to save group");
+                        break;
+                }
+                if (pb_savingGroup != null) pb_savingGroup.dismiss();
+                break;
+        }
     }
 
     /*

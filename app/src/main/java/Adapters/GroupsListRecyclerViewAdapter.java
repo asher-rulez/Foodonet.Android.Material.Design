@@ -67,7 +67,7 @@ public class GroupsListRecyclerViewAdapter extends RecyclerView.Adapter<GroupsLi
             groupTitle.setText(title);
         }
         public void setGroupMembersCount(int count){
-            groupMembersCount.setText(count);
+            groupMembersCount.setText(String.valueOf(count));
         }
         public void setGroupID(int id){
             groupID = id;

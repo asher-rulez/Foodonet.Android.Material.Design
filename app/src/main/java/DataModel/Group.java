@@ -100,6 +100,12 @@ public class Group implements ICanWriteSelfToJSONWriter {
         _group_members.add(groupMember);
     }
 
+    public void add_group_members(ArrayList<GroupMember> members){
+        if (_group_members == null)
+            _group_members = new ArrayList<>();
+        _group_members.addAll(members);
+    }
+
     public static String[] GetColumnNamesArray() {
         return
                 new String[]{

@@ -436,7 +436,7 @@ public class HttpServerConnectorAsync extends AsyncTask<InternalRequest, Void, S
             //endregion
             //region POST GROUP
             case InternalRequest.ACTION_POST_NEW_GROUP:
-                group = (Group)params[0].canWriteSelfToJSONWriterObject;
+                group = (Group) params[0].canWriteSelfToJSONWriterObject;
                 MakeServerRequest(REQUEST_METHOD_POST, server_sub_path, params[0].canWriteSelfToJSONWriterObject, true);
                 if (!isSuccess || TextUtils.isEmpty(responseString)) {
                     Log.e(MY_TAG, "failed to create group");
@@ -448,13 +448,16 @@ public class HttpServerConnectorAsync extends AsyncTask<InternalRequest, Void, S
                         e.printStackTrace();
                     }
                 }
-                if(group.Get_id() > 0){
+                if (group.Get_id() > 0) {
                     params[0].groupOwner.set_group_id(group.Get_id());
                     GroupMembersForPost memberOwner = new GroupMembersForPost();
                     memberOwner.AddGroupMembers(params[0].groupOwner);
+                    memberOwner.AddGroupMembers(params[0].groupMembersToAdd);
                     MakeServerRequest(REQUEST_METHOD_POST, params[0].MembersServerSubPath, memberOwner, true);
-                    if(!isSuccess || TextUtils.isEmpty(responseString))
+                    if (!isSuccess || TextUtils.isEmpty(responseString))
                         Log.e(MY_TAG, "failed to add admin groupMember");
+                    group.add_group_member(params[0].groupOwner);
+                    group.add_group_members(params[0].groupMembersToAdd);
                 } else
                     isSuccess = false;
                 return "";
@@ -777,38 +780,45 @@ public class HttpServerConnectorAsync extends AsyncTask<InternalRequest, Void, S
         }
     }
 
-    class GroupMembersForPost implements ICanWriteSelfToJSONWriter{
+    class GroupMembersForPost implements ICanWriteSelfToJSONWriter {
 
         private ArrayList<GroupMember> groupMembers;
-        public ArrayList<GroupMember> Get_GroupMembers(){
+
+        public ArrayList<GroupMember> Get_GroupMembers() {
             return groupMembers;
         }
 
-        public void Set_GroupMembers(ArrayList<GroupMember> members){
+        public void Set_GroupMembers(ArrayList<GroupMember> members) {
             groupMembers = members;
         }
 
-        public void AddGroupMembers(GroupMember... members){
-            if(groupMembers == null)
+        public void AddGroupMembers(GroupMember... members) {
+            if (groupMembers == null)
                 groupMembers = new ArrayList<>();
-            for(GroupMember gm : members)
+            for (GroupMember gm : members)
                 groupMembers.add(gm);
         }
 
-        GroupMembersForPost(){
+        public void AddGroupMembers(ArrayList<GroupMember> members){
+            if (groupMembers == null)
+                groupMembers = new ArrayList<>();
+            groupMembers.addAll(members);
+        }
+
+        GroupMembersForPost() {
             Set_GroupMembers(new ArrayList<GroupMember>());
         }
 
-        GroupMembersForPost(ArrayList<GroupMember> members){
+        GroupMembersForPost(ArrayList<GroupMember> members) {
             Set_GroupMembers(members);
         }
 
         @Override
         public org.json.simple.JSONObject GetJsonObjectForPost() {
-            if(groupMembers == null || groupMembers.size() == 0)
+            if (groupMembers == null || groupMembers.size() == 0)
                 return null;
             org.json.simple.JSONArray array = new org.json.simple.JSONArray();
-            for (GroupMember gm : groupMembers){
+            for (GroupMember gm : groupMembers) {
                 array.add(gm.GetJsonObjectForPost());
             }
             Map<String, Object> outerMap = new HashMap<>();
