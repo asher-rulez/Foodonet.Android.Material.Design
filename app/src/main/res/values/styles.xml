@@ -36,5 +36,4 @@
 
     <style name="AppDefault.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
-
 </resources>

@@ -13,17 +13,25 @@ import java.util.Map;
 
 import CommonUtilPackage.ContactItem;
 import upp.foodonet.material.R;
+import upp.foodonet.material.SelectContactsForGroupActivity;
 
 /**
  * Created by Asher on 26.05.2016.
  */
 public class ContactPhoneNumbersRecyclerViewAdapter extends RecyclerView.Adapter<ContactPhoneNumbersRecyclerViewAdapter.ContactViewHolder> {
 
-    private Map<Integer,ContactItem> contacts;
-    private Map<Integer,ContactItem> selectedContacts;
+    private HashMap<Integer,ContactItem> contacts;
+    private HashMap<Integer,ContactItem> selectedContacts;
+    SelectContactsForGroupActivity parent;
 
-    public ContactPhoneNumbersRecyclerViewAdapter(Map<Integer,ContactItem> contacts){
+    public ContactPhoneNumbersRecyclerViewAdapter(HashMap<Integer,ContactItem> contacts, SelectContactsForGroupActivity parent){
         this.contacts = contacts;
+        selectedContacts = new HashMap<>();
+        for(Map.Entry<Integer, ContactItem> entry : this.contacts.entrySet()){
+            if(entry.getValue().getIsSelected())
+                selectedContacts.put(entry.getKey(), entry.getValue());
+        }
+        this.parent = parent;
     }
 
     @Override
@@ -34,7 +42,7 @@ public class ContactPhoneNumbersRecyclerViewAdapter extends RecyclerView.Adapter
 
     @Override
     public void onBindViewHolder(ContactViewHolder holder, int position) {
-        holder.setContactItem(position, contacts.get(position));
+        holder.setContactItem(position, contacts.get(position), selectedContacts.containsKey(position));
     }
 
     @Override
@@ -46,13 +54,26 @@ public class ContactPhoneNumbersRecyclerViewAdapter extends RecyclerView.Adapter
         if(selectedContacts == null)
             selectedContacts = new HashMap<>();
         selectedContacts.put(id, contacts.get(id));
+        CheckIfAllSelected();
     }
 
     public void RemoveFromSelected(int id){
         selectedContacts.remove(id);
+        CheckIfAllSelected();
     }
 
-    public Map<Integer, ContactItem> getSelectedContacts(){
+    private void CheckIfAllSelected(){
+        parent.setAllSelected(contacts.size() == selectedContacts.size());
+    }
+
+    public void SetSelectAll(boolean isSelectAll){
+        selectedContacts.clear();
+        if(isSelectAll)
+            selectedContacts.putAll(contacts);
+        this.notifyDataSetChanged();
+    }
+
+    public HashMap<Integer, ContactItem> getSelectedContacts(){
         return selectedContacts;
     }
 
@@ -69,10 +90,15 @@ public class ContactPhoneNumbersRecyclerViewAdapter extends RecyclerView.Adapter
             contactTitle.setText(name);
         }
 
-        public void setContactItem(int id, ContactItem item){
+        public void setIsChecked(boolean isChecked){
+            cb_isSelected.setChecked(isChecked);
+        }
+
+        public void setContactItem(int id, ContactItem item, boolean isChecked){
             setId(id);
             setContactTitle(item.getName());
             setContactPhoneNumber(item.getPhoneNumber());
+            setIsChecked(isChecked);
         }
 
         private int id;
@@ -100,6 +126,7 @@ public class ContactPhoneNumbersRecyclerViewAdapter extends RecyclerView.Adapter
             contactPhoneNumber = (TextView)itemView.findViewById(R.id.tv_contact_phone_number);
             cb_isSelected = (CheckBox)itemView.findViewById(R.id.cb_contact_selected);
             cb_isSelected.setOnCheckedChangeListener(this);
+            cb_isSelected.setChecked(false);
         }
 
 

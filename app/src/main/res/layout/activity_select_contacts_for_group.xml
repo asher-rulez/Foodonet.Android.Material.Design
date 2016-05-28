@@ -27,12 +27,14 @@
                     android:layout_centerVertical="true"
                     android:layout_centerHorizontal="true"
                     android:text="@string/contacts_title"/>
-                <CheckBox
+                <android.support.v7.widget.AppCompatCheckBox
+                    android:id="@+id/cb_select_contacts_select_all"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
                     android:layout_alignParentRight="true"
-                    android:layout_marginRight="16dp"/>
+                    android:layout_marginRight="16dp"
+                    app:buttonTint="@color/white"/>
             </RelativeLayout>
         </android.support.v7.widget.Toolbar>
 
@@ -45,7 +47,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
-        android:layout_margin="@dimen/fab_margin"
-        android:src="@android:drawable/ic_dialog_email" />
+        android:layout_marginBottom="50dp"
+        android:layout_marginRight="50dp"
+        android:src="@drawable/save_icon_white"
+        app:backgroundTint="@color/plus_button_red"/>
 
 </android.support.design.widget.CoordinatorLayout>
