@@ -51,6 +51,7 @@ public class NewAndExistingGroupActivity
     private static final String MY_TAG = "food_editGroup";
     public static final String extra_key_contacts = "contacts";
     public static final String extra_key_is_new_group = "isNew";
+    public static final String extra_key_existing_group = "group";
 
     int groupID;
 
@@ -65,6 +66,7 @@ public class NewAndExistingGroupActivity
 
     boolean IsNewGroup;
     ArrayList<ContactItem> groupContacts;
+    Group existingGroup;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,6 +90,9 @@ public class NewAndExistingGroupActivity
         if (IsNewGroup) {
             groupID = 0;
         } else {
+            existingGroup = (Group)intent.getSerializableExtra(extra_key_existing_group);
+            et_groupTitle.setText(existingGroup.Get_name());
+            et_groupTitle.setEnabled(false);
 
         }
 
@@ -99,6 +104,12 @@ public class NewAndExistingGroupActivity
     private void SetRecyclerView() {
         rv_contacts_in_group.setLayoutManager(new LinearLayoutManager(rv_contacts_in_group.getContext()));
         adapter = new ContactsInGroupRecyclerViewAdapter();
+        if(!IsNewGroup){
+            ArrayList<ContactItem> contactItems = new ArrayList<>();
+            for(GroupMember member : existingGroup.get_group_members())
+                contactItems.add(new ContactItem(member.get_name(), member.get_phone_number()));
+            adapter.setContacts(contactItems);
+        }
         rv_contacts_in_group.setAdapter(adapter);
     }
 
@@ -179,6 +190,7 @@ public class NewAndExistingGroupActivity
                         for(GroupMember member : response.group.get_group_members())
                             getContentResolver().insert(FooDoNetSQLProvider.URI_GROUP_MEMBERS, member.GetContentValuesRow());
                         Log.e(MY_TAG, "succeeded to save group");
+                        finish();
                         break;
                     case InternalRequest.STATUS_FAIL:
                         Log.e(MY_TAG, "failed to save group");

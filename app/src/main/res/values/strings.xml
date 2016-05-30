@@ -332,6 +332,7 @@
     <string name="contacts_title">Contacts</string>
     <string name="loading_contacts">Loading contacts</string>
     <string name="saving_group">Saving group</string>
+    <string name="loading_group">Loading group</string>
 
     <!-- Common -->
 

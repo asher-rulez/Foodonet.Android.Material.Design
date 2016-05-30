@@ -8,6 +8,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.simple.JSONObject;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,7 +16,7 @@ import java.util.Map;
 /**
  * Created by Asher on 05.03.2016.
  */
-public class GroupMember implements ICanWriteSelfToJSONWriter {
+public class GroupMember implements ICanWriteSelfToJSONWriter, Serializable {
 
     private static final String MY_TAG = "food_groupMember";
 

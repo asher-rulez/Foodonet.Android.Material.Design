@@ -18,7 +18,7 @@ public class GroupsListRecyclerViewAdapter extends RecyclerView.Adapter<GroupsLi
     private ArrayList<Group> groupsList;
     private IOnGroupSelecterFromListListener groupSelectedListener;
 
-    public GroupsListRecyclerViewAdapter(ArrayList<Group> groups, IOnGroupSelecterFromListListener listener){
+    public GroupsListRecyclerViewAdapter(ArrayList<Group> groups, IOnGroupSelecterFromListListener listener) {
         groupsList = new ArrayList<>();
         groupsList.addAll(groups);
         groupSelectedListener = listener;
@@ -49,30 +49,32 @@ public class GroupsListRecyclerViewAdapter extends RecyclerView.Adapter<GroupsLi
         return groupsList.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder{
+    public class ViewHolder extends RecyclerView.ViewHolder {
         private TextView groupTitle;
         private TextView groupMembersCount;
         private int groupID;
         public View view;
 
-
         public ViewHolder(View itemView) {
             super(itemView);
             view = itemView;
-            groupTitle = (TextView)view.findViewById(R.id.tv_groups_list_item_title);
-            groupMembersCount = (TextView)view.findViewById(R.id.tv_groups_list_item_members_count);
+            groupTitle = (TextView) view.findViewById(R.id.tv_groups_list_item_title);
+            groupMembersCount = (TextView) view.findViewById(R.id.tv_groups_list_item_members_count);
         }
 
-        public void setGroupTitle(String title){
+        public void setGroupTitle(String title) {
             groupTitle.setText(title);
         }
-        public void setGroupMembersCount(int count){
+
+        public void setGroupMembersCount(int count) {
             groupMembersCount.setText(String.valueOf(count));
         }
-        public void setGroupID(int id){
+
+        public void setGroupID(int id) {
             groupID = id;
         }
-        public int getGroupID(){
+
+        public int getGroupID() {
             return groupID;
         }
     }

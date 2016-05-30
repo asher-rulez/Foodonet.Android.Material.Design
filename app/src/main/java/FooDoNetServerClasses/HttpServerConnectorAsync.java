@@ -448,16 +448,32 @@ public class HttpServerConnectorAsync extends AsyncTask<InternalRequest, Void, S
                         e.printStackTrace();
                     }
                 }
+                isSuccess = false;
+                responseString = "";
                 if (group.Get_id() > 0) {
                     params[0].groupOwner.set_group_id(group.Get_id());
-                    GroupMembersForPost memberOwner = new GroupMembersForPost();
-                    memberOwner.AddGroupMembers(params[0].groupOwner);
-                    memberOwner.AddGroupMembers(params[0].groupMembersToAdd);
-                    MakeServerRequest(REQUEST_METHOD_POST, params[0].MembersServerSubPath, memberOwner, true);
-                    if (!isSuccess || TextUtils.isEmpty(responseString))
-                        Log.e(MY_TAG, "failed to add admin groupMember");
-                    group.add_group_member(params[0].groupOwner);
-                    group.add_group_members(params[0].groupMembersToAdd);
+                    ArrayList<GroupMember> members = new ArrayList<>();
+                    members.add(params[0].groupOwner);
+                    members.addAll(params[0].groupMembersToAdd);
+                    for(GroupMember member : members){
+                        isSuccess = false;
+                        responseString = "";
+                        GroupMembersForPost memberOwner = new GroupMembersForPost();
+                        member.set_group_id(group.Get_id());
+                        memberOwner.AddGroupMembers(member);
+                        MakeServerRequest(REQUEST_METHOD_POST, params[0].MembersServerSubPath, memberOwner, true);
+                        if(!isSuccess || TextUtils.isEmpty(responseString)){
+                            Log.e(MY_TAG, "failed to save user: " + member.get_name() + " " + member.get_phone_number() + (member.get_is_admin() ? "(admin)":""));
+                        }else{
+                            try {
+                                JSONArray memberObjArray = new JSONArray(responseString);
+                                member.set_id(memberObjArray.getJSONObject(0).getInt("id"));
+                                group.add_group_member(member);
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
                 } else
                     isSuccess = false;
                 return "";
