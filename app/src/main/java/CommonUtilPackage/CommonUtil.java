@@ -178,6 +178,11 @@ public class CommonUtil {
         }
     }
 
+    public static String GetDistanceStringFromCurrentLocation(LatLng point1, Context context){
+        LatLng currentLocation = GetMyLocationFromPreferences(context);
+        return GetDistanceString(currentLocation, point1, context);
+    }
+
     public static double GetDistanceInKM(LatLng point1, LatLng point2) {
         if (point1 == null || point2 == null)
             return -1;
@@ -233,7 +238,7 @@ public class CommonUtil {
         return result;
     }
 
-    public static LatLng GetFilterLocationFromPreferences(Context context) {
+    public static LatLng GetMyLocationFromPreferences(Context context) {
         SharedPreferences sp
                 = context.getSharedPreferences(
                 context.getString(R.string.shared_preferences_my_location_key), Context.MODE_PRIVATE);

@@ -272,7 +272,7 @@ public class FooDoNetSQLProvider extends ContentProvider {
                         || filterID == FooDoNetSQLHelper.FILTER_ID_LIST_MY_BY_TEXT_FILTER)
                     stringFilter = CommonUtil.GetFilterStringFromPreferences(this.getContext());
                 if (filterID == FooDoNetSQLHelper.FILTER_ID_LIST_ALL_BY_CLOSEST) {
-                    LatLng myLocation = CommonUtil.GetFilterLocationFromPreferences(this.getContext());
+                    LatLng myLocation = CommonUtil.GetMyLocationFromPreferences(this.getContext());
                     String rawSelect = FooDoNetSQLHelper.GetRawSelectPublicationsForListByFilterID(
                             filterID, imei, String.valueOf(myLocation.latitude),
                             String.valueOf(myLocation.longitude));

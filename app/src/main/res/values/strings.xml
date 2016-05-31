@@ -366,4 +366,9 @@
     <string name="title_activity_add_edit_publication">AddEditPublicationActivity</string>
     <string name="hello_world">Hello world!</string>
 
+    <!-- Publications list -->
+
+    <string name="address_format_for_list">{0} ({1})</string>
+    <string name="users_joined_format_for_list">{0} users joined</string>
+
 </resources>
