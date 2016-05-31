@@ -232,8 +232,8 @@ public class EntarenceMapAndListActivity
         switch (v.getId()) {
             case R.id.fab_map_and_list:
 
-//                Intent addPub = new Intent(this, AddEditPublicationActivity.class);
-//                startActivity(addPub);
+                Intent addPub = new Intent(this, AddEditPublicationActivity.class);
+                startActivity(addPub);
                 break;
             case R.id.btn_center_on_my_location_map:
                 if (myLocation == null)
