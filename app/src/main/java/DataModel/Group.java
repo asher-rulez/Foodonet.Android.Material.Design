@@ -23,6 +23,7 @@ public class Group implements ICanWriteSelfToJSONWriter, Serializable {
     public static final String GROUP_ID_KEY = "_id";
     public static final String GROUP_NAME_KEY = "name";
     public static final String GROUP_ADMIN_ID_KEY = "user_id";
+    public static final String GROUP_MEMBERS_KEY = "members";
 
     public static final String GROUP_MEMBERS_COUNT_KEY = "members_count";
 
@@ -175,6 +176,12 @@ public class Group implements ICanWriteSelfToJSONWriter, Serializable {
             group.Set_id(jo.getInt(GROUP_ID_KEY));
             group.Set_name(jo.getString(GROUP_NAME_KEY));
             group.Set_admin_id(jo.getInt(GROUP_ADMIN_ID_KEY));
+            JSONArray jsonArrayMembers = jo.getJSONArray(GROUP_MEMBERS_KEY);
+            for (int i = 0; i < jsonArrayMembers.length(); i++){
+                org.json.JSONObject jsonObjectMember = jsonArrayMembers.getJSONObject(i);
+                GroupMember member = GroupMember.ParseSingleGroupMemberFromJSON(jsonObjectMember);
+                group.add_group_member(member);
+            }
         } catch (JSONException e) {
             e.printStackTrace();
             Log.e(MY_TAG, e.getMessage());

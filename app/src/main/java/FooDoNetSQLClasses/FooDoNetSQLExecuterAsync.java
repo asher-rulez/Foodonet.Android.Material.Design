@@ -17,6 +17,8 @@ import java.util.Map;
 
 import CommonUtilPackage.CommonUtil;
 import DataModel.FCPublication;
+import DataModel.Group;
+import DataModel.GroupMember;
 import DataModel.PublicationReport;
 import DataModel.RegisteredUserForPublication;
 import CommonUtilPackage.InternalRequest;
@@ -128,6 +130,44 @@ public class FooDoNetSQLExecuterAsync extends AsyncTask<InternalRequest, Void, V
                 for (Integer i : toRemoveFromDB) {
                     FCPublication.DeletePublicationFromCollectionByID(publicationsFromDB, i);
                 }
+                //region groups
+                Map<Integer, Group> groupsFromServer = new HashMap<>();
+                for(Group group : incomingRequest.groups)
+                    groupsFromServer.put(group.Get_id(), group);
+
+                ArrayList<Group> myGroupsFromSQL
+                        = Group.GetGroupsFromCursor(contentResolver
+                            .query(FooDoNetSQLProvider.URI_GROUP, Group.GetColumnNamesArray(),
+                            null, null, null));
+                Map<Integer, Group> groupsFromSql = new HashMap<>();
+                for (Group group : myGroupsFromSQL)
+                    groupsFromSql.put(group.Get_id(), group);
+
+                ArrayList<Group> groupsToAdd = new ArrayList<>();
+                //ArrayList<Group> groupsToDelete = new ArrayList<>();
+                ArrayList<String> groupsToDeleteIDS = new ArrayList<>();
+
+                for(int keyFromServer : groupsFromServer.keySet())
+                    if(!groupsFromSql.containsKey(keyFromServer))
+                        groupsToAdd.add(groupsFromServer.get(keyFromServer));
+
+                for(int keyFromSQL : groupsFromSql.keySet())
+                    if(!groupsFromServer.containsKey(keyFromSQL))
+                        groupsToDeleteIDS.add(String.valueOf(keyFromSQL));
+                String[] groupsToDeleteIDSArray = new String[groupsToDeleteIDS.size()];
+                groupsToDeleteIDSArray = groupsToDeleteIDS.toArray(groupsToDeleteIDSArray);
+
+                contentResolver.delete(FooDoNetSQLProvider.URI_GROUP_MEMBERS, GroupMember.GROUP_MEMBER_GROUP_ID_KEY + "=?", groupsToDeleteIDSArray);
+                contentResolver.delete(FooDoNetSQLProvider.URI_GROUP, Group.GROUP_ID_KEY + "=?", groupsToDeleteIDSArray);
+
+
+
+
+                ArrayList<GroupMember> myGroupMembersFromSQL
+                        = GroupMember.GetGroupMembersFromCursor(contentResolver
+                            .query(FooDoNetSQLProvider.URI_GROUP_MEMBERS, GroupMember.GetColumnNamesArray(),
+                                    null, null, null));
+
                 return null;
             //endregion
             //region get publications for list

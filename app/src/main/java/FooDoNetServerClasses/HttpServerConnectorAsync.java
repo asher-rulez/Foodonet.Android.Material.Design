@@ -71,6 +71,7 @@ public class HttpServerConnectorAsync extends AsyncTask<InternalRequest, Void, S
     private JSONObject responseJSONObject;
     private InternalRequest internalResponse;
     private ArrayList<FCPublication> resultPublications;
+    private ArrayList<Group> resultGroups;
     private FCPublication publicationForSaving;
     private RegisteredUserForPublication registrationToPublicationToPost;
     private PublicationReport publicationReport;
@@ -125,6 +126,7 @@ public class HttpServerConnectorAsync extends AsyncTask<InternalRequest, Void, S
         switch (Action_Command_ID) {
             //region case get all pubs
             case InternalRequest.ACTION_GET_ALL_PUBLICATIONS:
+                //region publications
                 MakeServerRequest(REQUEST_METHOD_GET, server_sub_path, null, true);
                 if (!isSuccess)
                     return "";
@@ -136,8 +138,10 @@ public class HttpServerConnectorAsync extends AsyncTask<InternalRequest, Void, S
                     e.printStackTrace();
                 }
                 responseString = "";
+                //endregion publications
                 ArrayList<RegisteredUserForPublication> regedUsers = new ArrayList<>();
                 ArrayList<PublicationReport> pubReports = new ArrayList<>();
+                //region registeredForPubs
                 for (FCPublication pub : publications) {
                     MakeServerRequest(REQUEST_METHOD_GET,
                             params[1].ServerSubPath.replace("{0}",
@@ -180,7 +184,8 @@ public class HttpServerConnectorAsync extends AsyncTask<InternalRequest, Void, S
                     //pubReports.clear();
                     responseString = "";
                 }
-
+                //endregion registeredForPubs
+                //region reports
                 MakeServerRequest(REQUEST_METHOD_GET,
                         params[2].ServerSubPath.replace("{0}",
                                 String.valueOf(0)), null, true);
@@ -196,7 +201,33 @@ public class HttpServerConnectorAsync extends AsyncTask<InternalRequest, Void, S
                 if (pubReports.size() > 0) {
                     publications = tmpConnectReportsToPublications(publications, pubReports);
                 }
+                responseString = "";
+                isSuccess = false;
+                //endregion reports
+                //region groups
+                MakeServerRequest(REQUEST_METHOD_GET,
+                        params[3].ServerSubPath.replace("{0}",
+                                String.valueOf(params[3].newUserID)), null, true);
+                if(!isSuccess){
+                    Log.e(MY_TAG, "cant get groups by userID");
+                } else {
+                    if(!TextUtils.isEmpty(responseString)){
+                        try {
+                            JSONArray jsonArray = new JSONArray(responseString);
+                            for(int i = 0; i < jsonArray.length(); i++){
+                                JSONObject jsonObject = jsonArray.getJSONObject(i);
+                                Group group = Group.ParseSingleGroupFromJSON(jsonObject);
+                                if(resultGroups == null)
+                                    resultGroups = new ArrayList<>();
+                                resultGroups.add(group);
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
 
+                }
+                //endregion groups
 
                 if (publications.size() > 0) {
                     if (resultPublications == null)
@@ -581,7 +612,7 @@ public class HttpServerConnectorAsync extends AsyncTask<InternalRequest, Void, S
                 InternalRequest irLoadData;
                 if (isSuccess) {
                     Log.i(MY_TAG, "data loaded from http, calling callback");
-                    irLoadData = new InternalRequest(InternalRequest.ACTION_GET_ALL_PUBLICATIONS, resultPublications, null);
+                    irLoadData = new InternalRequest(InternalRequest.ACTION_GET_ALL_PUBLICATIONS, resultPublications, null, resultGroups);
                     irLoadData.Status = InternalRequest.STATUS_OK;
                 } else {
                     Log.i(MY_TAG, "failed to load data from server");

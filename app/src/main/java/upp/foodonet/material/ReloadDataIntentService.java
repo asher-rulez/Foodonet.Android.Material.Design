@@ -14,6 +14,7 @@ import java.util.Map;
 import CommonUtilPackage.CommonUtil;
 import CommonUtilPackage.InternalRequest;
 import DataModel.FCPublication;
+import DataModel.Group;
 import FooDoNetSQLClasses.FooDoNetSQLExecuterAsync;
 import FooDoNetSQLClasses.IFooDoNetSQLCallback;
 import FooDoNetServerClasses.DownloadImageTask;
@@ -41,6 +42,7 @@ public class ReloadDataIntentService
     private String serverBaseUrl;
 
     ArrayList<FCPublication> loadedFromSQL, fetchedFromServer;
+    ArrayList<Group> groupsFetchedFromServer;
 
     HttpServerConnectorAsync connecterToServer;
     FooDoNetSQLExecuterAsync sqlExecuter;
@@ -93,14 +95,16 @@ public class ReloadDataIntentService
                         new InternalRequest(InternalRequest.ACTION_GET_ALL_REGISTERED_FOR_PUBLICATION,
                                 getResources().getString(R.string.server_get_registered_for_publications)),
                         new InternalRequest(InternalRequest.ACTION_GET_PUBLICATION_REPORTS,
-                                getResources().getString(R.string.server_get_publication_report)));
+                                getResources().getString(R.string.server_get_publication_report)),
+                        new InternalRequest(InternalRequest.ACTION_GET_GROUPS_BY_USER,
+                                getString(R.string.server_get_groups_by_user), CommonUtil.GetMyUserID(this)));
                 break;
             case taskSQL:
                 Log.i(MY_TAG, "Perfoming task " + workPlan[currentIndexInWorkPlan]);
                 sqlExecuter = new FooDoNetSQLExecuterAsync(this, getContentResolver());
                 sqlExecuter.SetContext(this);
                 sqlExecuter.execute(
-                        new InternalRequest(InternalRequest.ACTION_SQL_UPDATE_DB_PUBLICATIONS_FROM_SERVER, fetchedFromServer, null));
+                        new InternalRequest(InternalRequest.ACTION_SQL_UPDATE_DB_PUBLICATIONS_FROM_SERVER, fetchedFromServer, null, groupsFetchedFromServer));
                 sqlExecuter = null;
                 break;
             case taskActivity:
@@ -129,6 +133,7 @@ public class ReloadDataIntentService
         Log.i(MY_TAG, "finished task server");
         if(response.Status == InternalRequest.STATUS_OK) {
             fetchedFromServer = response.publications;
+            groupsFetchedFromServer = response.groups;
             DoNextTaskFromWorkPlan();
         } else {
             Log.i(MY_TAG, "failed loading from server, skipping this cycle");

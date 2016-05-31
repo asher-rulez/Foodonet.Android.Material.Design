@@ -75,6 +75,7 @@ public class InternalRequest implements Serializable {
     public FCPublication publicationForSaving;
     public FCPublication publicationForDetails;
     public ArrayList<FCPublication> publications;
+    public ArrayList<Group> groups;
     public ArrayList<RegisteredUserForPublication> registeredUsers;
     public ICanWriteSelfToJSONWriter canWriteSelfToJSONWriterObject;
     public int Status;
@@ -161,6 +162,12 @@ public class InternalRequest implements Serializable {
         ServerSubPath = sub_path;
     }
 
+    public InternalRequest(int com, String sub_path, int userId){
+        ActionCommand = com;
+        ServerSubPath = sub_path;
+        newUserID = userId;
+    }
+
     public InternalRequest(int com, boolean status) {
         ActionCommand = com;
         Status = status ? STATUS_OK : STATUS_FAIL;
@@ -176,6 +183,13 @@ public class InternalRequest implements Serializable {
         ActionCommand = com;
         this.publications =  publications;
         registeredUsers = regUsers;
+    }
+
+    public InternalRequest(int com, ArrayList<FCPublication> publications, ArrayList<RegisteredUserForPublication> regUsers, ArrayList<Group> groups){
+        ActionCommand = com;
+        this.publications =  publications;
+        registeredUsers = regUsers;
+        this.groups = groups;
     }
 
     public InternalRequest(int com){
