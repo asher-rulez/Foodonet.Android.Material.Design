@@ -207,7 +207,7 @@ public class HttpServerConnectorAsync extends AsyncTask<InternalRequest, Void, S
                 //region groups
                 MakeServerRequest(REQUEST_METHOD_GET,
                         params[3].ServerSubPath.replace("{0}",
-                                String.valueOf(params[3].newUserID)), null, true);
+                                String.valueOf(params[3].newUserID)), null, true);//"96"
                 if(!isSuccess){
                     Log.e(MY_TAG, "cant get groups by userID");
                 } else {

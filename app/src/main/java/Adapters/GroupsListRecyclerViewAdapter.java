@@ -24,6 +24,12 @@ public class GroupsListRecyclerViewAdapter extends RecyclerView.Adapter<GroupsLi
         groupSelectedListener = listener;
     }
 
+    public void UpdateGroupsList(ArrayList<Group> groups){
+        groupsList = new ArrayList<>();
+        groupsList.addAll(groups);
+        this.notifyDataSetChanged();
+    }
+
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.groups_list_item, parent, false);

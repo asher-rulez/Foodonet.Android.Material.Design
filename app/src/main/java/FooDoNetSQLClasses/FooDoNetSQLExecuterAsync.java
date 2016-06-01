@@ -34,6 +34,7 @@ public class FooDoNetSQLExecuterAsync extends AsyncTask<InternalRequest, Void, V
     ArrayList<FCPublication> publicationsFromServer;
     ArrayList<FCPublication> publicationsFromDB;
     ArrayList<FCPublication> resultPublications;
+    ArrayList<Group> resultGroups;
     ArrayList<FCPublication> publicationsForList;
     ArrayList<RegisteredUserForPublication> regUsersFromServer;
     ArrayList<RegisteredUserForPublication> regUsersFromDB;
@@ -131,6 +132,20 @@ public class FooDoNetSQLExecuterAsync extends AsyncTask<InternalRequest, Void, V
                     FCPublication.DeletePublicationFromCollectionByID(publicationsFromDB, i);
                 }
                 //region groups
+                contentResolver.delete(FooDoNetSQLProvider.URI_GROUP, null, null);
+                contentResolver.delete(FooDoNetSQLProvider.URI_GROUP_MEMBERS, null, null);
+
+                if(incomingRequest.groups != null && incomingRequest.groups.size() > 0){
+                    resultGroups = new ArrayList<>();
+
+                    for(Group groupFromServer : incomingRequest.groups){
+                        contentResolver.insert(FooDoNetSQLProvider.URI_GROUP, groupFromServer.GetContentValuesRow());
+                        for(GroupMember gm : groupFromServer.get_group_members())
+                            contentResolver.insert(FooDoNetSQLProvider.URI_GROUP_MEMBERS, gm.GetContentValuesRow());
+                        resultGroups.add(groupFromServer);
+                    }
+                }
+/*
                 Map<Integer, Group> groupsFromServer = new HashMap<>();
                 for(Group group : incomingRequest.groups)
                     groupsFromServer.put(group.Get_id(), group);
@@ -139,6 +154,15 @@ public class FooDoNetSQLExecuterAsync extends AsyncTask<InternalRequest, Void, V
                         = Group.GetGroupsFromCursor(contentResolver
                             .query(FooDoNetSQLProvider.URI_GROUP, Group.GetColumnNamesArray(),
                             null, null, null));
+                for(Group gSql : myGroupsFromSQL){
+                    ArrayList<GroupMember> groupMembersFromSQL
+                            = GroupMember.GetGroupMembersFromCursor(
+                                contentResolver.query(FooDoNetSQLProvider.URI_GROUP_MEMBERS,
+                                        GroupMember.GetColumnNamesArray(),
+                                        GroupMember.GROUP_MEMBER_GROUP_ID_KEY + "=" + String.valueOf(gSql.Get_id()), null, null));
+                    gSql.set_group_members(groupMembersFromSQL);
+                }
+
                 Map<Integer, Group> groupsFromSql = new HashMap<>();
                 for (Group group : myGroupsFromSQL)
                     groupsFromSql.put(group.Get_id(), group);
@@ -146,19 +170,39 @@ public class FooDoNetSQLExecuterAsync extends AsyncTask<InternalRequest, Void, V
                 ArrayList<Group> groupsToAdd = new ArrayList<>();
                 //ArrayList<Group> groupsToDelete = new ArrayList<>();
                 ArrayList<String> groupsToDeleteIDS = new ArrayList<>();
+                ArrayList<Group> groupsToCheck = new ArrayList<>();
 
                 for(int keyFromServer : groupsFromServer.keySet())
                     if(!groupsFromSql.containsKey(keyFromServer))
                         groupsToAdd.add(groupsFromServer.get(keyFromServer));
 
-                for(int keyFromSQL : groupsFromSql.keySet())
+
+                for(int keyFromSQL : groupsFromSql.keySet()){
                     if(!groupsFromServer.containsKey(keyFromSQL))
                         groupsToDeleteIDS.add(String.valueOf(keyFromSQL));
+                    else groupsToCheck.add(groupsFromSql.get(keyFromSQL));
+                }
+
+                for (Group gToCheck : groupsToCheck){
+                    Group gFromServer = groupsFromServer.get(gToCheck.Get_id());
+                    if(gFromServer.Get_name().compareToIgnoreCase(gToCheck.Get_name()) != 0)
+                        contentResolver.update(FooDoNetSQLProvider.URI_GROUP,
+                                gFromServer.GetContentValuesRow(),
+                                Group.GROUP_ID_KEY + "=" + String.valueOf(gToCheck.Get_id()), null);
+                }
+
                 String[] groupsToDeleteIDSArray = new String[groupsToDeleteIDS.size()];
                 groupsToDeleteIDSArray = groupsToDeleteIDS.toArray(groupsToDeleteIDSArray);
 
                 contentResolver.delete(FooDoNetSQLProvider.URI_GROUP_MEMBERS, GroupMember.GROUP_MEMBER_GROUP_ID_KEY + "=?", groupsToDeleteIDSArray);
                 contentResolver.delete(FooDoNetSQLProvider.URI_GROUP, Group.GROUP_ID_KEY + "=?", groupsToDeleteIDSArray);
+
+                for(Group g : groupsToAdd){
+                    contentResolver.insert(FooDoNetSQLProvider.URI_GROUP, g.GetContentValuesRow());
+                    for(GroupMember gm : g.get_group_members())
+                        contentResolver.insert(FooDoNetSQLProvider.URI_GROUP_MEMBERS, gm.GetContentValuesRow());
+                }
+
 
 
 
@@ -167,6 +211,7 @@ public class FooDoNetSQLExecuterAsync extends AsyncTask<InternalRequest, Void, V
                         = GroupMember.GetGroupMembersFromCursor(contentResolver
                             .query(FooDoNetSQLProvider.URI_GROUP_MEMBERS, GroupMember.GetColumnNamesArray(),
                                     null, null, null));
+*/
 
                 return null;
             //endregion
@@ -426,6 +471,7 @@ public class FooDoNetSQLExecuterAsync extends AsyncTask<InternalRequest, Void, V
         switch (incomingRequest.ActionCommand) {
             case InternalRequest.ACTION_SQL_UPDATE_DB_PUBLICATIONS_FROM_SERVER:
                 InternalRequest respond = new InternalRequest(incomingRequest.ActionCommand, resultPublications);
+                respond.groups = resultGroups;
                 respond.listOfPubsToFetchImageFor = needToLoadPicturesFor;
                 callbackHandler.OnSQLTaskComplete(respond);
                 break;

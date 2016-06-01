@@ -22,6 +22,7 @@ import CommonUtilPackage.CommonUtil;
 import DataModel.Group;
 import DataModel.GroupMember;
 import FooDoNetServiceUtil.FooDoNetCustomActivityConnectedToService;
+import FooDoNetServiceUtil.ServicesBroadcastReceiver;
 
 public class GroupsListActivity
         extends FooDoNetCustomActivityConnectedToService
@@ -34,8 +35,9 @@ public class GroupsListActivity
 
     private FloatingActionButton fab_add_group;
     private RecyclerView rv_groups_list;
-
     ProgressDialog pd_loadingGroup;
+
+    GroupsListRecyclerViewAdapter groupsListAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,14 +57,19 @@ public class GroupsListActivity
         super.onStart();
         if(pd_loadingGroup != null)
             pd_loadingGroup.dismiss();
-        setupRecyclerView(rv_groups_list);
+        setupRecyclerView();
     }
 
-    private void setupRecyclerView(RecyclerView rv){
-        rv.setLayoutManager(new LinearLayoutManager(rv_groups_list.getContext()));
+    private void setupRecyclerView(){
+        rv_groups_list.setLayoutManager(new LinearLayoutManager(rv_groups_list.getContext()));
+        ArrayList<Group> groupsList = LoadGroups();
+        groupsListAdapter = new GroupsListRecyclerViewAdapter(groupsList, this);
+        rv_groups_list.setAdapter(groupsListAdapter);
+    }
+
+    private ArrayList<Group> LoadGroups(){
         Cursor groupsCursor = getContentResolver().query(FooDoNetSQLProvider.URI_GROUPS_LIST, Group.GetColumnNamesForListArray(), null, null, null);
-        ArrayList<Group> groupsList = Group.GetGroupsFromCursorForList(groupsCursor);
-        rv.setAdapter(new GroupsListRecyclerViewAdapter(groupsList, this));
+        return Group.GetGroupsFromCursorForList(groupsCursor);
     }
 
     @Override
@@ -116,6 +123,25 @@ public class GroupsListActivity
     }
 */
 
+    @Override
+    public void onBroadcastReceived(Intent intent){
+        int actionCode = intent.getIntExtra(ServicesBroadcastReceiver.BROADCAST_REC_EXTRA_ACTION_KEY, -1);
+        switch (actionCode) {
+            case ServicesBroadcastReceiver.ACTION_CODE_RELOAD_DATA_SUCCESS:
+                ArrayList<Group> groupList = LoadGroups();
+                if(groupsListAdapter == null)
+                    setupRecyclerView();
+                else {
+                    groupsListAdapter.UpdateGroupsList(groupList);
+                }
+                break;
+            default:
+                super.onBroadcastReceived(intent);
+                break;
+        }
+    }
+
+
     private class ExistingGroupGetter extends AsyncTask<Integer, Void, Void>{
         Group group;
 
@@ -140,6 +166,7 @@ public class GroupsListActivity
             if(group != null)
                 OnGroupFetchedForOpening(group);
         }
+
     }
 
 }

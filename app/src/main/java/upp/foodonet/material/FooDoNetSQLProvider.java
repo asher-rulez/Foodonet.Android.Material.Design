@@ -478,6 +478,14 @@ public class FooDoNetSQLProvider extends ContentProvider {
                 rowsDeleted += db.delete(GroupMemberTable.GROUP_MEMBER_TABLE_NAME,
                         GroupMember.GROUP_MEMBER_ID_KEY + " = " + uri.getLastPathSegment(), null);
                 return rowsDeleted;
+            case GROUP:
+                rowsDeleted = 0;
+                rowsDeleted += db.delete(GroupTable.GROUP_TABLE_NAME, null, null);
+                return rowsDeleted;
+            case GROUP_MEMBER:
+                rowsDeleted = 0;
+                rowsDeleted += db.delete(GroupMemberTable.GROUP_MEMBER_TABLE_NAME, null, null);
+                return rowsDeleted;
             default:
                 throw new IllegalArgumentException("Unknown URI: " + uri);
         }

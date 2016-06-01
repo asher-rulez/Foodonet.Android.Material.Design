@@ -16,16 +16,14 @@
 
             <!--android:layout_above="@+id/hsv_image_gallery"-->
 
-            <LinearLayout
+            <RelativeLayout
                 android:id="@+id/ll_map_and_gallery"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical">
+                android:layout_height="match_parent">
 
                 <RelativeLayout
-                    android:layout_width="fill_parent"
-                    android:layout_height="0dip"
-                    android:layout_weight="4">
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
 
                     <fragment
                         android:id="@+id/map"
@@ -58,12 +56,11 @@
                 <HorizontalScrollView
                     android:id="@+id/hsv_image_gallery"
                     android:layout_width="match_parent"
-                    android:layout_height="0dip"
-                    android:layout_above="@+id/ll_nav_btns_panel"
-                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
                     android:background="@color/gallery_normal"
-                    android:gravity="bottom"
+                    android:layout_alignParentBottom="true"
                     android:visibility="visible">
+                    <!--android:layout_above="@+id/ll_nav_btns_panel"-->
                     <!--android:layout_marginBottom="6dp"-->
                     <!--android:layout_alignParentBottom="true"-->
                     <!--android:layout_marginBottom="@dimen/gallery_panel_bootom_margin_xhdpi"-->
@@ -88,9 +85,13 @@
                                     </HorizontalScrollView>
                 -->
 
-            </LinearLayout>
+            </RelativeLayout>
 
-
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/rv_all_publications_list"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone"/>
 
             <!--                xmlns:android="http://schemas.android.com/apk/res/android"
                 xmlns:map="http://schemas.android.com/apk/res-auto"
@@ -118,8 +119,10 @@ tools:context="com.example.asher.mapappexample.MapsActivity"-->
             android:layout_marginRight="10dp"
             android:src="@drawable/white_plus"
             app:backgroundTint="@color/plus_button_red"
-            app:layout_anchor="@id/map"
-            app:layout_anchorGravity="bottom|right|end" />
+            app:layout_anchor="@id/hsv_image_gallery"
+            app:layout_anchorGravity="top|right|end" />
+        <!--app:layout_anchor="@id/map"-->
+
 
     </android.support.design.widget.CoordinatorLayout>
 

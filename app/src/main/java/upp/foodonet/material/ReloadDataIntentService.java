@@ -145,12 +145,14 @@ public class ReloadDataIntentService
         switch (request.ActionCommand){
             case InternalRequest.ACTION_SQL_UPDATE_DB_PUBLICATIONS_FROM_SERVER:
                 Log.i(MY_TAG, "finished task sql");
-                loadedFromSQL = request.publications;
+                //loadedFromSQL = request.publications;
                 DoNextTaskFromWorkPlan();
                 break;
+/*
             case InternalRequest.ACTION_SQL_UPDATE_IMAGES_FOR_PUBLICATIONS:
                 DoNextTaskFromWorkPlan();
                 break;
+*/
             default:
                 Log.e(MY_TAG, "Unexpected action code!!");
                 return;

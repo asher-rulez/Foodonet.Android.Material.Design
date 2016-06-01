@@ -21,6 +21,8 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -29,10 +31,12 @@ import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Adapter;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdate;
@@ -51,9 +55,13 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import Adapters.AllPublicationsListRecyclerViewAdapter;
+import Adapters.IOnPublicationFromListSelected;
 import Adapters.MapMarkerInfoWindowAdapter;
 import CommonUtilPackage.CommonUtil;
+import CommonUtilPackage.ImageDictionarySyncronized;
 import DataModel.FCPublication;
+import FooDoNetServerClasses.ImageDownloader;
 import FooDoNetServiceUtil.FooDoNetCustomActivityConnectedToService;
 import upp.foodonet.material.R;
 
@@ -64,7 +72,7 @@ public class EntarenceMapAndListActivity
         GoogleMap.OnMarkerClickListener,
         GoogleMap.OnInfoWindowClickListener,
         GoogleMap.OnMyLocationChangeListener,
-        LoaderManager.LoaderCallbacks<Cursor> {
+        LoaderManager.LoaderCallbacks<Cursor>, IOnPublicationFromListSelected {
 
     private static final String MY_TAG = "food_mapAndList";
 
@@ -87,14 +95,27 @@ public class EntarenceMapAndListActivity
     int myLocationRefreshRate;
     ImageButton btn_focus_on_my_location;
     Date lastLocationUpdateDate;
+    RelativeLayout ll_map_and_gallery;
+
+    //endregion
+
+    //region Gallery
 
     HorizontalScrollView hsv_gallery;
     LinearLayout gallery_pubs;
+    ImageDownloader imageDownloader;
+    ImageDictionarySyncronized imageDictionary;
+
+    //endregion
+
+    //region Publications list
+
+    RecyclerView rv_all_publications_list;
+    AllPublicationsListRecyclerViewAdapter adapter;
 
     //endregion
 
 
-    LinearLayout ll_map_and_gallery;
     CoordinatorLayout.LayoutParams fabLayoutParams;
 
     @Override
@@ -113,7 +134,8 @@ public class EntarenceMapAndListActivity
 //        lp.setBehavior(new FrameSwitchFABBehavior(this, null));
 //        fab.setLayoutParams(lp);
 
-        ll_map_and_gallery = (LinearLayout) findViewById(R.id.ll_map_and_gallery);
+        ll_map_and_gallery = (RelativeLayout) findViewById(R.id.ll_map_and_gallery);
+        rv_all_publications_list = (RecyclerView)findViewById(R.id.rv_all_publications_list);
 
         btn_focus_on_my_location = (ImageButton) findViewById(R.id.btn_center_on_my_location_map);
         btn_focus_on_my_location.setOnClickListener(this);
@@ -130,7 +152,18 @@ public class EntarenceMapAndListActivity
 
         mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         if (mapFragment != null) mapFragment.getMapAsync(this);
+
+        imageDictionary = new ImageDictionarySyncronized();
+        imageDownloader = new ImageDownloader(this, imageDictionary);
+
+        SetupRecyclerViewPublications();
         //   initTabs();
+    }
+
+    private void SetupRecyclerViewPublications(){
+        rv_all_publications_list.setLayoutManager(new LinearLayoutManager(rv_all_publications_list.getContext()));
+        adapter = new AllPublicationsListRecyclerViewAdapter(this, new ArrayList<FCPublication>(), this);
+        rv_all_publications_list.setAdapter(adapter);
     }
 
     private void initToolBar() {
@@ -143,9 +176,11 @@ public class EntarenceMapAndListActivity
                         switch (ll_map_and_gallery.getVisibility()) {
                             case View.VISIBLE:
                                 ll_map_and_gallery.setVisibility(View.GONE);
+                                rv_all_publications_list.setVisibility(View.VISIBLE);
                                 break;
                             case View.GONE:
                                 ll_map_and_gallery.setVisibility(View.VISIBLE);
+                                rv_all_publications_list.setVisibility(View.GONE);
                                 break;
                         }
                     }
@@ -425,12 +460,16 @@ public class EntarenceMapAndListActivity
         imageButton.setLayoutParams(lp);
         imageButton.setBackgroundResource(R.drawable.map_gallery_border);
 
+        SetPublicationImage(publication, imageButton);
+
+/*
         Drawable drawable
                 = CommonUtil.GetBitmapDrawableFromFile(
                 publication.GetImageFileName(), getString(R.string.image_folder_path), size, size);
         if (drawable == null)
             drawable = getResources().getDrawable(R.drawable.foodonet_logo_200_200);
         imageButton.setImageDrawable(drawable);
+*/
         imageButton.setScaleType(ImageView.ScaleType.FIT_XY);
         imageButton.setOnClickListener(new View.OnClickListener() {
             int id = publication.getUniqueId();
@@ -458,6 +497,16 @@ public class EntarenceMapAndListActivity
         //Toast.makeText(this, "selected image id: " + String.valueOf(id), Toast.LENGTH_SHORT).show();
     }
 
+    private void SetPublicationImage(FCPublication publication, ImageView publicationImage) {
+        final int id = publication.getUniqueId();
+        final int version = publication.getVersion();
+        Drawable imageDrawable;
+        imageDrawable = imageDictionary.Get(id);
+        if(imageDrawable == null) {
+            imageDownloader.Download(id, version, publicationImage);
+        } else
+            publicationImage.setImageDrawable(imageDrawable);
+    }
 
     //endregion PUBS GALLERY
 
@@ -502,6 +551,11 @@ public class EntarenceMapAndListActivity
                 if (data != null && data.moveToFirst()) {
                     //Log.i(MY_TAG, "num of rows in adapter: " + data.getCount());
                     ArrayList<FCPublication> publications = FCPublication.GetArrayListOfPublicationsForMapFromCursor(data);
+
+                    if(adapter != null)
+                        adapter.UpdatePublicationsList(publications);
+
+
                     if (publications == null) {
                         Log.e(MY_TAG, "error getting publications from sql");
                         return;
@@ -542,6 +596,11 @@ public class EntarenceMapAndListActivity
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
+
+    }
+
+    @Override
+    public void OnPublicationFromListClicked(int publicationID) {
 
     }
 
