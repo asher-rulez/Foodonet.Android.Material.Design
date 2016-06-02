@@ -9,6 +9,7 @@ import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.StateListDrawable;
 import android.location.Location;
+import android.net.Uri;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -61,6 +62,7 @@ import Adapters.MapMarkerInfoWindowAdapter;
 import CommonUtilPackage.CommonUtil;
 import CommonUtilPackage.ImageDictionarySyncronized;
 import DataModel.FCPublication;
+import FooDoNetSQLClasses.FooDoNetSQLHelper;
 import FooDoNetServerClasses.ImageDownloader;
 import FooDoNetServiceUtil.FooDoNetCustomActivityConnectedToService;
 import upp.foodonet.material.R;
@@ -79,8 +81,8 @@ public class EntarenceMapAndListActivity
 
     private Toolbar toolbar;
     DrawerLayout drawerLayout;
-    TabLayout tl;
-    ViewPager viewPager;
+    //TabLayout tl;
+    //ViewPager viewPager;
     FloatingActionButton fab;
 
     //region Map variables
@@ -115,8 +117,15 @@ public class EntarenceMapAndListActivity
 
     //endregion
 
+    //region list variables
+
+    int currentFilterID;
+
+    //endregion
 
     CoordinatorLayout.LayoutParams fabLayoutParams;
+
+    //region Activity overrides
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -156,9 +165,28 @@ public class EntarenceMapAndListActivity
         imageDictionary = new ImageDictionarySyncronized();
         imageDownloader = new ImageDownloader(this, imageDictionary);
 
+        currentFilterID = FooDoNetSQLHelper.FILTER_ID_LIST_ALL_BY_CLOSEST;
         SetupRecyclerViewPublications();
         //   initTabs();
     }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        switch (ll_map_and_gallery.getVisibility()){
+            case View.VISIBLE:
+                if(googleMap != null)
+                    StartLoadingForMarkers();
+                break;
+            case View.GONE:
+                StartLoadingForPublicationsList();
+                break;
+        }
+    }
+
+    //endregion
+
+    //region All publications list
 
     private void SetupRecyclerViewPublications(){
         rv_all_publications_list.setLayoutManager(new LinearLayoutManager(rv_all_publications_list.getContext()));
@@ -166,101 +194,15 @@ public class EntarenceMapAndListActivity
         rv_all_publications_list.setAdapter(adapter);
     }
 
-    private void initToolBar() {
-        toolbar = (Toolbar) findViewById(R.id.tb_map_and_list);
-        if (toolbar != null) //toolbar.setTitle(R.string.app_name);
-            toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
-                @Override
-                public boolean onMenuItemClick(MenuItem item) {
-                    if(item.getTitle().toString().compareToIgnoreCase("list") == 0){
-                        switch (ll_map_and_gallery.getVisibility()) {
-                            case View.VISIBLE:
-                                ll_map_and_gallery.setVisibility(View.GONE);
-                                rv_all_publications_list.setVisibility(View.VISIBLE);
-                                break;
-                            case View.GONE:
-                                ll_map_and_gallery.setVisibility(View.VISIBLE);
-                                rv_all_publications_list.setVisibility(View.GONE);
-                                break;
-                        }
-                    }
-                    switch (ll_map_and_gallery.getVisibility()) {
-                        case View.GONE:
-//                int width = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, fab.getWidth(), getResources().getDisplayMetrics());
-//                int height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, fab.getHeight(), getResources().getDisplayMetrics());
-                            CoordinatorLayout.LayoutParams layoutParams = new CoordinatorLayout.LayoutParams(fabLayoutParams);
-                            layoutParams.setAnchorId(View.NO_ID);
-                            layoutParams.gravity = Gravity.RIGHT | Gravity.BOTTOM;
-                            layoutParams.bottomMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 50, getResources().getDisplayMetrics());
-                            layoutParams.rightMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 50, getResources().getDisplayMetrics());
-                            fab.setLayoutParams(layoutParams);
-                            break;
-                        case View.VISIBLE:
-                            fab.setLayoutParams(fabLayoutParams);
-//                layoutParams.setAnchorId(R.id.map);
-//                layoutParams.anchorGravity = Gravity.BOTTOM | Gravity.RIGHT | Gravity.END;
-//                layoutParams.rightMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 50, getResources().getDisplayMetrics());
-//                layoutParams.bottomMargin = 0;
-//                fab.setLayoutParams(layoutParams);
-                            break;
-                    }
-                    return true;
-                }
-            });
-
-        toolbar.inflateMenu(R.menu.menu);
+    private void SetPublicationsListToAdapter(ArrayList<FCPublication> publications){
+        if(adapter != null){
+            adapter.UpdatePublicationsList(publications);
+        }
     }
 
-    private void initNavVew() {
-        drawerLayout = (DrawerLayout) findViewById(R.id.dl_main);
+    //endregion
 
-        ActionBarDrawerToggle actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.open, R.string.close);
-
-        if (drawerLayout != null) drawerLayout.addDrawerListener(actionBarDrawerToggle);
-
-        actionBarDrawerToggle.syncState();
-
-        NavigationView v = (NavigationView) findViewById(R.id.nv_main);
-        if (v != null)
-            v.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-                @Override
-                public boolean onNavigationItemSelected(MenuItem item) {
-                    drawerLayout.closeDrawers();
-
-                    switch (item.getItemId()) {
-                        case R.id.nav_item_sharings:
-                            Intent intent = new Intent(getApplicationContext(), SplashScreenActivity.class);
-                            startActivity(intent);
-                            break;
-                        case R.id.nav_item_subscriptions:
-
-                            break;
-                        case R.id.nav_item_groups:
-                            Intent intentGroups = new Intent(getApplicationContext(), GroupsListActivity.class);
-                            startActivity(intentGroups);
-                            break;
-                        case R.id.nav_item_settings:
-
-                            break;
-
-                        case R.id.nav_item_contact_us:
-
-                            break;
-
-                        case R.id.nav_item_terms:
-
-                            break;
-
-                    }
-
-                    return true;
-                }
-            });
-    }
-
-    private void showNotifyTab(int TAB) {
-        viewPager.setCurrentItem(TAB);
-    }
+    //region CLICK LISTENERS
 
     @Override
     public void onClick(View v) {
@@ -280,10 +222,11 @@ public class EntarenceMapAndListActivity
         }
         //CoordinatorLayout.LayoutParams layoutParams = (CoordinatorLayout.LayoutParams)fab.getLayoutParams();
         //new CoordinatorLayout.LayoutParams(fab.getWidth(), fab.getHeight());//
-
     }
 
-    //region MAP METHODS
+    //endregion
+
+    //region MAP AND MARKERS METHODS
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -311,19 +254,6 @@ public class EntarenceMapAndListActivity
             progressDialog.dismiss();
 
         SetCamera();
-
-//        // Add a marker in Sydney and move the camera
-//        LatLng sydney = new LatLng(-34, 151);
-//        googleMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-//        googleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
-    }
-
-    private void StartLoadingForMarkers() {
-        getSupportLoaderManager().initLoader(0, null, this);
-    }
-
-    private void RestartLoadingForMarkers() {
-        getSupportLoaderManager().restartLoader(0, null, this);
     }
 
     private Marker AddMarker(float latitude, float longtitude, String title, BitmapDescriptor icon) {
@@ -441,7 +371,51 @@ public class EntarenceMapAndListActivity
             OnReadyToUpdateCamera();
     }
 
-    //endregion MAP METHODS
+    public void ResetMarkers() {
+        if (myMarkers == null)
+            myMarkers = new HashMap<>();
+        else {
+            for (Marker m : myMarkers.keySet())
+                m.remove();
+            myMarkers.clear();
+        }
+    }
+
+    public void SetMarkers(ArrayList<FCPublication> publications){
+        for (FCPublication publication : publications) {
+            Bitmap markerIcon;
+            BitmapDescriptor icon = null;
+
+            markerIcon = CommonUtil.decodeScaledBitmapFromDrawableResource(
+                    getResources(), R.drawable.map_marker, 13, 13);
+            icon = BitmapDescriptorFactory.fromBitmap(markerIcon);
+
+            myMarkers.put(AddMarker(publication.getLatitude().floatValue(),
+                    publication.getLongitude().floatValue(),
+                    publication.getTitle(), icon), publication.getUniqueId());
+
+            AddImageToGallery(publication);
+        }
+        if (isMapLoaded)
+            SetCamera();
+    }
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        return false;
+    }
+
+    @Override
+    public void onInfoWindowClick(Marker marker) {
+
+    }
+
+    private void showNotifyTab(int TAB) {
+        //viewPager.setCurrentItem(TAB);
+        //todo: implement
+    }
+
+    //endregion MAP AND REGIONS METHODS
 
     //region PUBS GALLERY
 
@@ -508,7 +482,190 @@ public class EntarenceMapAndListActivity
             publicationImage.setImageDrawable(imageDrawable);
     }
 
+    private void SetGalleryAndMarkers(ArrayList<FCPublication> publications){
+        gallery_pubs.setVisibility(View.GONE);
+        gallery_pubs.removeAllViews();
+        ResetMarkers();
+        SetMarkers(publications);
+        gallery_pubs.setVisibility(View.VISIBLE);
+    }
+
     //endregion PUBS GALLERY
+
+    //region loading data
+
+    private void StartLoadingForMarkers() {
+        getSupportLoaderManager().initLoader(-1, null, this);
+    }
+
+    private void RestartLoadingForMarkers() {
+        getSupportLoaderManager().restartLoader(-1, null, this);
+    }
+
+    private void StartLoadingForPublicationsList(){
+        getSupportLoaderManager().initLoader(currentFilterID, null, this);
+    }
+
+    private void RestartLoadingForPublicationsList(){
+        getSupportLoaderManager().restartLoader(currentFilterID, null, this);
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        android.support.v4.content.CursorLoader cursorLoader = null;
+        String[] projection;
+        switch (id) {
+            case -1:
+                projection = FCPublication.GetColumnNamesArray();
+                cursorLoader = new android.support.v4.content.CursorLoader(this, FooDoNetSQLProvider.URI_GET_PUBS_FOR_MAP_MARKERS,
+                        projection, null, null, null);
+                break;
+            default:
+                projection = FCPublication.GetColumnNamesForListArray();
+                cursorLoader = new android.support.v4.content.CursorLoader(
+                        this, Uri.parse(FooDoNetSQLProvider.URI_GET_PUBS_FOR_LIST_BY_FILTER_ID + "/" + id),
+                        projection, null, null, null);
+                break;
+        }
+        return cursorLoader;
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        if (data != null && data.moveToFirst()) {
+            ArrayList<FCPublication> publications       = null;
+            switch (loader.getId()) {
+                case -1:
+                    publications = FCPublication.GetArrayListOfPublicationsForMapFromCursor(data);
+                    if (publications == null || publications.size() == 0) {
+                        Log.e(MY_TAG, "error getting publications from sql");
+                        return;
+                    }
+                    SetGalleryAndMarkers(publications);
+                    break;
+                default:
+                    publications = FCPublication.GetArrayListOfPublicationsFromCursor(data, true);
+                    if (publications == null || publications.size() == 0) {
+                        Log.e(MY_TAG, "error getting publications from sql");
+                        return;
+                    }
+                    SetPublicationsListToAdapter(publications);
+                    break;
+            }
+        }
+    }
+
+    //endregion
+
+    //region Navigation and toolbar
+
+    private void initToolBar() {
+        toolbar = (Toolbar) findViewById(R.id.tb_map_and_list);
+        if (toolbar != null) //toolbar.setTitle(R.string.app_name);
+            toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem item) {
+                    if (item.getTitle().toString().compareToIgnoreCase("list") == 0) {
+                        switch (ll_map_and_gallery.getVisibility()) {
+                            case View.VISIBLE:
+                                ll_map_and_gallery.setVisibility(View.GONE);
+                                rv_all_publications_list.setVisibility(View.VISIBLE);
+                                StartLoadingForPublicationsList();
+                                break;
+                            case View.GONE:
+                                ll_map_and_gallery.setVisibility(View.VISIBLE);
+                                if (hsv_gallery != null)
+                                    hsv_gallery.setVisibility(View.VISIBLE);
+                                rv_all_publications_list.setVisibility(View.GONE);
+                                break;
+                        }
+                    }
+                    switch (ll_map_and_gallery.getVisibility()) {
+                        case View.GONE:
+//                int width = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, fab.getWidth(), getResources().getDisplayMetrics());
+//                int height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, fab.getHeight(), getResources().getDisplayMetrics());
+                            CoordinatorLayout.LayoutParams layoutParams = new CoordinatorLayout.LayoutParams(fabLayoutParams);
+                            layoutParams.setAnchorId(View.NO_ID);
+                            layoutParams.gravity = Gravity.RIGHT | Gravity.BOTTOM;
+                            layoutParams.bottomMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 50, getResources().getDisplayMetrics());
+                            layoutParams.rightMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 50, getResources().getDisplayMetrics());
+                            fab.setLayoutParams(layoutParams);
+                            break;
+                        case View.VISIBLE:
+                            fab.setLayoutParams(fabLayoutParams);
+//                layoutParams.setAnchorId(R.id.map);
+//                layoutParams.anchorGravity = Gravity.BOTTOM | Gravity.RIGHT | Gravity.END;
+//                layoutParams.rightMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 50, getResources().getDisplayMetrics());
+//                layoutParams.bottomMargin = 0;
+//                fab.setLayoutParams(layoutParams);
+                            break;
+                    }
+                    return true;
+                }
+            });
+
+        toolbar.inflateMenu(R.menu.menu);
+    }
+
+    private void initNavVew() {
+        drawerLayout = (DrawerLayout) findViewById(R.id.dl_main);
+
+        ActionBarDrawerToggle actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.open, R.string.close);
+
+        if (drawerLayout != null) drawerLayout.addDrawerListener(actionBarDrawerToggle);
+
+        actionBarDrawerToggle.syncState();
+
+        NavigationView v = (NavigationView) findViewById(R.id.nv_main);
+        if (v != null)
+            v.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+                @Override
+                public boolean onNavigationItemSelected(MenuItem item) {
+                    drawerLayout.closeDrawers();
+
+                    switch (item.getItemId()) {
+                        case R.id.nav_item_sharings:
+                            Intent intent = new Intent(getApplicationContext(), SplashScreenActivity.class);
+                            startActivity(intent);
+                            break;
+                        case R.id.nav_item_subscriptions:
+
+                            break;
+                        case R.id.nav_item_groups:
+                            Intent intentGroups = new Intent(getApplicationContext(), GroupsListActivity.class);
+                            startActivity(intentGroups);
+                            break;
+                        case R.id.nav_item_settings:
+
+                            break;
+
+                        case R.id.nav_item_contact_us:
+
+                            break;
+
+                        case R.id.nav_item_terms:
+
+                            break;
+
+                    }
+                    return true;
+                }
+            });
+    }
+
+    //endregion
+
+    //region callback methods
+
+    @Override
+    public void OnPublicationFromListClicked(int publicationID) {
+
+    }
 
     @Override
     public void OnGooglePlayServicesCheckError() {
@@ -520,90 +677,7 @@ public class EntarenceMapAndListActivity
 
     }
 
-    @Override
-    public boolean onMarkerClick(Marker marker) {
-        return false;
-    }
-
-    @Override
-    public void onInfoWindowClick(Marker marker) {
-
-    }
-
-    @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        android.support.v4.content.CursorLoader cursorLoader = null;
-        String[] projection;
-        switch (id) {
-            case 0:
-                projection = FCPublication.GetColumnNamesArray();
-                cursorLoader = new android.support.v4.content.CursorLoader(this, FooDoNetSQLProvider.URI_GET_PUBS_FOR_MAP_MARKERS,
-                        projection, null, null, null);
-                break;
-        }
-        return cursorLoader;
-    }
-
-    @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        switch (loader.getId()) {
-            case 0:
-                if (data != null && data.moveToFirst()) {
-                    //Log.i(MY_TAG, "num of rows in adapter: " + data.getCount());
-                    ArrayList<FCPublication> publications = FCPublication.GetArrayListOfPublicationsForMapFromCursor(data);
-
-                    if(adapter != null)
-                        adapter.UpdatePublicationsList(publications);
-
-
-                    if (publications == null) {
-                        Log.e(MY_TAG, "error getting publications from sql");
-                        return;
-                    }
-
-                    if (myMarkers == null)
-                        myMarkers = new HashMap<>();
-                    else {
-                        for (Marker m : myMarkers.keySet())
-                            m.remove();
-                        myMarkers.clear();
-                    }
-                    gallery_pubs.setVisibility(View.GONE);
-                    gallery_pubs.removeAllViews();
-
-                    for (FCPublication publication : publications) {
-                        Bitmap markerIcon;
-                        BitmapDescriptor icon = null;
-
-                        markerIcon = CommonUtil.decodeScaledBitmapFromDrawableResource(
-                                getResources(), R.drawable.map_marker, 13, 13);
-                        icon = BitmapDescriptorFactory.fromBitmap(markerIcon);
-
-                        myMarkers.put(AddMarker(publication.getLatitude().floatValue(),
-                                publication.getLongitude().floatValue(),
-                                publication.getTitle(), icon), publication.getUniqueId());
-                        AddImageToGallery(publication);
-                    }
-
-                    gallery_pubs.setVisibility(View.VISIBLE);
-
-                    if (isMapLoaded)
-                        SetCamera();
-                }
-                break;
-        }
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-
-    }
-
-    @Override
-    public void OnPublicationFromListClicked(int publicationID) {
-
-    }
-
+    //endregion
 /*
     class FrameSwitchFABBehavior extends CoordinatorLayout.Behavior<FloatingActionButton>{
         Context context;

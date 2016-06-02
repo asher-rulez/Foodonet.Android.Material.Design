@@ -57,7 +57,7 @@ public class AllPublicationsListRecyclerViewAdapter extends RecyclerView.Adapter
 
     @Override
     public void onBindViewHolder(PublicationListItemViewHolder holder, int position) {
-
+        holder.SetupPublicationDetails(myPublicationsList.get(position));
     }
 
     @Override
