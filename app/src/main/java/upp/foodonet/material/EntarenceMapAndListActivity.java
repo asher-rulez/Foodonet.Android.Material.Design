@@ -2,6 +2,7 @@ package upp.foodonet.material;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -29,15 +30,20 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.Adapter;
+import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdate;
@@ -74,15 +80,14 @@ public class EntarenceMapAndListActivity
         GoogleMap.OnMarkerClickListener,
         GoogleMap.OnInfoWindowClickListener,
         GoogleMap.OnMyLocationChangeListener,
-        LoaderManager.LoaderCallbacks<Cursor>, IOnPublicationFromListSelected {
+        LoaderManager.LoaderCallbacks<Cursor>, IOnPublicationFromListSelected, TabLayout.OnTabSelectedListener {
 
     private static final String MY_TAG = "food_mapAndList";
 
 
     private Toolbar toolbar;
     DrawerLayout drawerLayout;
-    //TabLayout tl;
-    //ViewPager viewPager;
+    TabLayout tl_list_filter_buttons;
     FloatingActionButton fab;
 
     //region Map variables
@@ -114,12 +119,10 @@ public class EntarenceMapAndListActivity
 
     RecyclerView rv_all_publications_list;
     AllPublicationsListRecyclerViewAdapter adapter;
-
-    //endregion
-
-    //region list variables
-
+    FrameLayout fl_search_and_list;
     int currentFilterID;
+    Toolbar tb_search;
+
 
     //endregion
 
@@ -139,6 +142,20 @@ public class EntarenceMapAndListActivity
         fab = (FloatingActionButton) findViewById(R.id.fab_map_and_list);
         if (fab != null) fab.setOnClickListener(this);
         fabLayoutParams = (CoordinatorLayout.LayoutParams) fab.getLayoutParams();
+
+        fl_search_and_list = (FrameLayout)findViewById(R.id.fl_all_publications_list);
+        fl_search_and_list.setVisibility(View.GONE);
+        tl_list_filter_buttons = (TabLayout)findViewById(R.id.tl_list_filter_buttons);
+        SetupFilterTabButtons();
+        tl_list_filter_buttons.setVisibility(View.GONE);
+        tb_search = (Toolbar)findViewById(R.id.tb_search_pub_in_list);
+        //tb_search.setVisibility(View.GONE);
+/*
+        View tab1view = LayoutInflater.from(tl_list_filter_buttons.getContext()).inflate(R.layout.tab_button_list_filter, tl_list_filter_buttons, false);
+        TextView tv_tab1_title = (TextView)tab1view.findViewById(R.id.tv_tab_button_filter_title);
+        tv_tab1_title.setText("tab1");
+*/
+
 //        CoordinatorLayout.LayoutParams lp = (CoordinatorLayout.LayoutParams)fab.getLayoutParams();
 //        lp.setBehavior(new FrameSwitchFABBehavior(this, null));
 //        fab.setLayoutParams(lp);
@@ -186,22 +203,6 @@ public class EntarenceMapAndListActivity
 
     //endregion
 
-    //region All publications list
-
-    private void SetupRecyclerViewPublications(){
-        rv_all_publications_list.setLayoutManager(new LinearLayoutManager(rv_all_publications_list.getContext()));
-        adapter = new AllPublicationsListRecyclerViewAdapter(this, new ArrayList<FCPublication>(), this);
-        rv_all_publications_list.setAdapter(adapter);
-    }
-
-    private void SetPublicationsListToAdapter(ArrayList<FCPublication> publications){
-        if(adapter != null){
-            adapter.UpdatePublicationsList(publications);
-        }
-    }
-
-    //endregion
-
     //region CLICK LISTENERS
 
     @Override
@@ -242,7 +243,7 @@ public class EntarenceMapAndListActivity
         googleMap.setOnInfoWindowClickListener(this);
         googleMap.setOnMyLocationChangeListener(this);
         googleMap.setInfoWindowAdapter(new MapMarkerInfoWindowAdapter(getLayoutInflater()));
-        googleMap.getUiSettings().setMyLocationButtonEnabled(true);
+        googleMap.getUiSettings().setMyLocationButtonEnabled(false);
         StartLoadingForMarkers();
 
         if (btn_focus_on_my_location != null && googleMap != null)
@@ -574,14 +575,18 @@ public class EntarenceMapAndListActivity
                         switch (ll_map_and_gallery.getVisibility()) {
                             case View.VISIBLE:
                                 ll_map_and_gallery.setVisibility(View.GONE);
-                                rv_all_publications_list.setVisibility(View.VISIBLE);
+                                tl_list_filter_buttons.setVisibility(View.VISIBLE);
+                                //rv_all_publications_list.setVisibility(View.VISIBLE);
+                                fl_search_and_list.setVisibility(View.VISIBLE);
                                 StartLoadingForPublicationsList();
                                 break;
                             case View.GONE:
                                 ll_map_and_gallery.setVisibility(View.VISIBLE);
                                 if (hsv_gallery != null)
                                     hsv_gallery.setVisibility(View.VISIBLE);
-                                rv_all_publications_list.setVisibility(View.GONE);
+                                tl_list_filter_buttons.setVisibility(View.GONE);
+                                //rv_all_publications_list.setVisibility(View.GONE);
+                                fl_search_and_list.setVisibility(View.GONE);
                                 break;
                         }
                     }
@@ -660,6 +665,115 @@ public class EntarenceMapAndListActivity
 
     //endregion
 
+    //region All publications list
+
+    private void SetupRecyclerViewPublications(){
+        rv_all_publications_list.setLayoutManager(new LinearLayoutManager(rv_all_publications_list.getContext()));
+        adapter = new AllPublicationsListRecyclerViewAdapter(this, new ArrayList<FCPublication>(), this);
+        rv_all_publications_list.setAdapter(adapter);
+        rv_all_publications_list.addOnScrollListener(new HidingScrollListener(this) {
+            @Override
+            public void onMoved(int distance) {
+                tb_search.setTranslationY(-distance);
+            }
+            @Override
+            public void onShow() {
+                tb_search.animate().translationY(0).setInterpolator(new DecelerateInterpolator(2)).start();
+            }
+
+            @Override
+            public void onHide() {
+                tb_search.animate().translationY(-mToolbarHeight).setInterpolator(new AccelerateInterpolator(2)).start();
+            }
+        });
+    }
+
+    private void SetPublicationsListToAdapter(ArrayList<FCPublication> publications){
+        if(adapter != null){
+            adapter.UpdatePublicationsList(publications);
+        }
+    }
+
+    public abstract class HidingScrollListener extends RecyclerView.OnScrollListener{
+        private static final float HIDE_THRESHOLD = 10;
+        private static final float SHOW_THRESHOLD = 70;
+        private int mToolbarOffset = 0;
+        private boolean mControlsVisible = true;
+        public int mToolbarHeight;
+
+        public HidingScrollListener(Context context) {
+            TypedValue tv = new TypedValue();
+            if (getTheme().resolveAttribute(android.R.attr.actionBarSize, tv, true))
+            {
+                mToolbarHeight = TypedValue.complexToDimensionPixelSize(tv.data,getResources().getDisplayMetrics());
+            }
+        }
+
+        @Override
+        public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+            super.onScrollStateChanged(recyclerView, newState);
+
+            if(newState == RecyclerView.SCROLL_STATE_IDLE) {
+                if (mControlsVisible) {
+                    if (mToolbarOffset > HIDE_THRESHOLD) {
+                        setInvisible();
+                    } else {
+                        setVisible();
+                    }
+                } else {
+                    if ((mToolbarHeight - mToolbarOffset) > SHOW_THRESHOLD) {
+                        setVisible();
+                    } else {
+                        setInvisible();
+                    }
+                }
+            }
+        }
+
+        private void setVisible() {
+            if(mToolbarOffset > 0) {
+                onShow();
+                mToolbarOffset = 0;
+            }
+            mControlsVisible = true;
+        }
+
+        private void setInvisible() {
+            if(mToolbarOffset < mToolbarHeight) {
+                onHide();
+                mToolbarOffset = mToolbarHeight;
+            }
+            mControlsVisible = false;
+        }
+
+
+        @Override
+        public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+            super.onScrolled(recyclerView, dx, dy);
+
+            clipToolbarOffset();
+            onMoved(mToolbarOffset);
+
+            if((mToolbarOffset <mToolbarHeight && dy>0) || (mToolbarOffset >0 && dy<0)) {
+                mToolbarOffset += dy;
+            }
+        }
+
+        private void clipToolbarOffset() {
+            if(mToolbarOffset > mToolbarHeight) {
+                mToolbarOffset = mToolbarHeight;
+            } else if(mToolbarOffset < 0) {
+                mToolbarOffset = 0;
+            }
+        }
+
+        public abstract void onMoved(int distance);
+        public abstract void onShow();
+        public abstract void onHide();
+    }
+
+    //endregion
+
     //region callback methods
 
     @Override
@@ -674,6 +788,43 @@ public class EntarenceMapAndListActivity
 
     @Override
     public void OnInternetNotConnected() {
+
+    }
+
+    //endregion
+
+    //region Tab filter buttons
+
+    private void SetupFilterTabButtons(){
+        tl_list_filter_buttons.addTab(tl_list_filter_buttons.newTab().setText(getString(R.string.filter_closest_btn_text)), 0);
+        tl_list_filter_buttons.addTab(tl_list_filter_buttons.newTab().setText(getString(R.string.filter_new_btn_text)), 1);
+        tl_list_filter_buttons.addTab(tl_list_filter_buttons.newTab().setText(getString(R.string.filter_all_btn_text)), 2);
+        tl_list_filter_buttons.setOnTabSelectedListener(this);
+    }
+
+    @Override
+    public void onTabSelected(TabLayout.Tab tab) {
+        switch (tab.getPosition()){
+            case 0:
+                currentFilterID = FooDoNetSQLHelper.FILTER_ID_LIST_ALL_BY_CLOSEST;
+                break;
+            case 1:
+                currentFilterID = FooDoNetSQLHelper.FILTER_ID_LIST_ALL_BY_NEWEST;
+                break;
+            case 2:
+                currentFilterID = FooDoNetSQLHelper.FILTER_ID_LIST_ALL_BY_LESS_REGS;
+                break;
+        }
+        StartLoadingForPublicationsList();
+    }
+
+    @Override
+    public void onTabUnselected(TabLayout.Tab tab) {
+
+    }
+
+    @Override
+    public void onTabReselected(TabLayout.Tab tab) {
 
     }
 

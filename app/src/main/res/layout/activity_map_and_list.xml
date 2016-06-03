@@ -36,15 +36,15 @@
                         android:id="@+id/btn_center_on_my_location_map"
                         android:layout_width="62dp"
                         android:layout_height="62dp"
+                        android:layout_alignParentBottom="true"
                         android:layout_alignParentLeft="true"
-                        android:layout_marginBottom="40dp"
+                        android:layout_marginBottom="140dp"
                         android:layout_marginLeft="10dp"
                         android:background="@drawable/rounded_button"
                         android:padding="10dp"
                         android:scaleType="fitCenter"
                         android:src="@drawable/location"
-                        android:visibility="gone"
-                        android:layout_alignParentBottom="true"/>
+                        android:visibility="gone" />
 
                 </RelativeLayout>
 
@@ -58,8 +58,8 @@
                     android:id="@+id/hsv_image_gallery"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@color/gallery_normal"
                     android:layout_alignParentBottom="true"
+                    android:background="@color/gallery_normal"
                     android:visibility="visible">
                     <!--android:layout_above="@+id/ll_nav_btns_panel"-->
                     <!--android:layout_marginBottom="6dp"-->
@@ -88,11 +88,33 @@
 
             </RelativeLayout>
 
-            <android.support.v7.widget.RecyclerView
-                android:id="@+id/rv_all_publications_list"
+            <FrameLayout
+                android:id="@+id/fl_all_publications_list"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:visibility="gone"/>
+                android:layout_height="match_parent">
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/rv_all_publications_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:paddingTop="?attr/actionBarSize"
+                    android:clipToPadding="false"/>
+
+                <android.support.v7.widget.Toolbar
+                    android:id="@+id/tb_search_pub_in_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="?attr/actionBarSize"
+                    android:background="?attr/colorPrimary">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="aaaa" />
+
+                </android.support.v7.widget.Toolbar>
+
+            </FrameLayout>
+
 
             <!--                xmlns:android="http://schemas.android.com/apk/res/android"
                 xmlns:map="http://schemas.android.com/apk/res-auto"
@@ -109,8 +131,29 @@ tools:context="com.example.asher.mapappexample.MapsActivity"-->
                 android:id="@+id/tb_map_and_list"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                android:background="?attr/colorPrimary"/>
+                android:background="?attr/colorPrimary" />
 
+            <android.support.design.widget.TabLayout
+                android:id="@+id/tl_list_filter_buttons"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                app:tabIndicatorColor="@android:color/white"
+                app:tabMode="fixed" />
+
+            <!--
+                        <android.support.design.widget.CollapsingToolbarLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            app:contentScrim="?attr/colorPrimary"
+                            app:layout_scrollFlags="scroll|exitUntilCollapsed">
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="searchHere"
+                                app:layout_collapseMode="parallax"/>
+                        </android.support.design.widget.CollapsingToolbarLayout>
+            -->
         </android.support.design.widget.AppBarLayout>
 
         <android.support.design.widget.FloatingActionButton
