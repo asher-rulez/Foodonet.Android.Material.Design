@@ -26,6 +26,9 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.TypedValue;
@@ -37,6 +40,7 @@ import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.Adapter;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
@@ -80,15 +84,16 @@ public class EntarenceMapAndListActivity
         GoogleMap.OnMarkerClickListener,
         GoogleMap.OnInfoWindowClickListener,
         GoogleMap.OnMyLocationChangeListener,
-        LoaderManager.LoaderCallbacks<Cursor>, IOnPublicationFromListSelected, TabLayout.OnTabSelectedListener {
+        LoaderManager.LoaderCallbacks<Cursor>,
+        IOnPublicationFromListSelected,
+        TabLayout.OnTabSelectedListener,
+        TextWatcher {
 
     private static final String MY_TAG = "food_mapAndList";
 
-
-    private Toolbar toolbar;
-    DrawerLayout drawerLayout;
-    TabLayout tl_list_filter_buttons;
-    FloatingActionButton fab;
+    private static final int MODE_MAP = 0;
+    private static final int MODE_LIST = 1;
+    private int currentMode;
 
     //region Map variables
     SupportMapFragment mapFragment;
@@ -103,6 +108,8 @@ public class EntarenceMapAndListActivity
     ImageButton btn_focus_on_my_location;
     Date lastLocationUpdateDate;
     RelativeLayout ll_map_and_gallery;
+    CoordinatorLayout.LayoutParams fabLayoutParams;
+    FloatingActionButton fab;
 
     //endregion
 
@@ -115,18 +122,25 @@ public class EntarenceMapAndListActivity
 
     //endregion
 
-    //region Publications list
+    //region Publications list variables
 
     RecyclerView rv_all_publications_list;
     AllPublicationsListRecyclerViewAdapter adapter;
     FrameLayout fl_search_and_list;
     int currentFilterID;
     Toolbar tb_search;
-
+    EditText et_search;
+    private Toolbar toolbar;
+    TabLayout tl_list_filter_buttons;
 
     //endregion
 
-    CoordinatorLayout.LayoutParams fabLayoutParams;
+    //region Nav menu variables
+
+    DrawerLayout drawerLayout;
+    boolean isSideMenuOpened;
+
+    //endregion
 
     //region Activity overrides
 
@@ -136,6 +150,8 @@ public class EntarenceMapAndListActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map_and_list);
 
+        currentMode = MODE_LIST;
+
         initToolBar();
         initNavVew();
 
@@ -143,12 +159,14 @@ public class EntarenceMapAndListActivity
         if (fab != null) fab.setOnClickListener(this);
         fabLayoutParams = (CoordinatorLayout.LayoutParams) fab.getLayoutParams();
 
-        fl_search_and_list = (FrameLayout)findViewById(R.id.fl_all_publications_list);
+        fl_search_and_list = (FrameLayout) findViewById(R.id.fl_all_publications_list);
         fl_search_and_list.setVisibility(View.GONE);
-        tl_list_filter_buttons = (TabLayout)findViewById(R.id.tl_list_filter_buttons);
+        tl_list_filter_buttons = (TabLayout) findViewById(R.id.tl_list_filter_buttons);
         SetupFilterTabButtons();
         tl_list_filter_buttons.setVisibility(View.GONE);
-        tb_search = (Toolbar)findViewById(R.id.tb_search_pub_in_list);
+        tb_search = (Toolbar) findViewById(R.id.tb_search_pub_in_list);
+        et_search = (EditText) findViewById(R.id.et_publication_list_search);
+        et_search.addTextChangedListener(this);
         //tb_search.setVisibility(View.GONE);
 /*
         View tab1view = LayoutInflater.from(tl_list_filter_buttons.getContext()).inflate(R.layout.tab_button_list_filter, tl_list_filter_buttons, false);
@@ -161,7 +179,7 @@ public class EntarenceMapAndListActivity
 //        fab.setLayoutParams(lp);
 
         ll_map_and_gallery = (RelativeLayout) findViewById(R.id.ll_map_and_gallery);
-        rv_all_publications_list = (RecyclerView)findViewById(R.id.rv_all_publications_list);
+        rv_all_publications_list = (RecyclerView) findViewById(R.id.rv_all_publications_list);
 
         btn_focus_on_my_location = (ImageButton) findViewById(R.id.btn_center_on_my_location_map);
         btn_focus_on_my_location.setOnClickListener(this);
@@ -176,27 +194,57 @@ public class EntarenceMapAndListActivity
         width = size.x;
         height = size.y;
 
-        mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
-        if (mapFragment != null) mapFragment.getMapAsync(this);
 
         imageDictionary = new ImageDictionarySyncronized();
         imageDownloader = new ImageDownloader(this, imageDictionary);
 
         currentFilterID = FooDoNetSQLHelper.FILTER_ID_LIST_ALL_BY_CLOSEST;
-        SetupRecyclerViewPublications();
+        //SetupRecyclerViewPublications();
         //   initTabs();
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        switch (ll_map_and_gallery.getVisibility()){
+        SetupMode();
+/*
+        switch (ll_map_and_gallery.getVisibility()) {
             case View.VISIBLE:
-                if(googleMap != null)
+                if (googleMap != null)
                     StartLoadingForMarkers();
                 break;
             case View.GONE:
                 StartLoadingForPublicationsList();
+                break;
+        }
+*/
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (isSideMenuOpened) {
+            drawerLayout.closeDrawers();
+            return;
+        }
+
+        super.onBackPressed();
+    }
+
+    public void SetupMode(){
+        switch (currentMode) {
+            case MODE_LIST:
+                SetFrameList();
+                if (adapter == null)
+                    SetupRecyclerViewPublications();
+                StartLoadingForPublicationsList();
+                break;
+            case MODE_MAP:
+                SetFrameMap();
+                if (googleMap == null) {
+                    mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+                    if (mapFragment != null) mapFragment.getMapAsync(this);
+                } else
+                    StartLoadingForMarkers();
                 break;
         }
     }
@@ -248,8 +296,7 @@ public class EntarenceMapAndListActivity
 
         if (btn_focus_on_my_location != null && googleMap != null)
             btn_focus_on_my_location.setVisibility(View.VISIBLE);
-        if (hsv_gallery != null)
-            hsv_gallery.setVisibility(View.VISIBLE);
+        hsv_gallery.setVisibility(View.VISIBLE);
 
         if (progressDialog != null)
             progressDialog.dismiss();
@@ -382,7 +429,7 @@ public class EntarenceMapAndListActivity
         }
     }
 
-    public void SetMarkers(ArrayList<FCPublication> publications){
+    public void SetMarkers(ArrayList<FCPublication> publications) {
         for (FCPublication publication : publications) {
             Bitmap markerIcon;
             BitmapDescriptor icon = null;
@@ -397,6 +444,7 @@ public class EntarenceMapAndListActivity
 
             AddImageToGallery(publication);
         }
+
         if (isMapLoaded)
             SetCamera();
     }
@@ -477,18 +525,18 @@ public class EntarenceMapAndListActivity
         final int version = publication.getVersion();
         Drawable imageDrawable;
         imageDrawable = imageDictionary.Get(id);
-        if(imageDrawable == null) {
+        if (imageDrawable == null) {
             imageDownloader.Download(id, version, publicationImage);
         } else
             publicationImage.setImageDrawable(imageDrawable);
     }
 
-    private void SetGalleryAndMarkers(ArrayList<FCPublication> publications){
-        gallery_pubs.setVisibility(View.GONE);
+    private void SetGalleryAndMarkers(ArrayList<FCPublication> publications) {
+        //gallery_pubs.setVisibility(View.GONE);
         gallery_pubs.removeAllViews();
         ResetMarkers();
         SetMarkers(publications);
-        gallery_pubs.setVisibility(View.VISIBLE);
+        //gallery_pubs.setVisibility(View.VISIBLE);
     }
 
     //endregion PUBS GALLERY
@@ -503,11 +551,11 @@ public class EntarenceMapAndListActivity
         getSupportLoaderManager().restartLoader(-1, null, this);
     }
 
-    private void StartLoadingForPublicationsList(){
+    private void StartLoadingForPublicationsList() {
         getSupportLoaderManager().initLoader(currentFilterID, null, this);
     }
 
-    private void RestartLoadingForPublicationsList(){
+    private void RestartLoadingForPublicationsList() {
         getSupportLoaderManager().restartLoader(currentFilterID, null, this);
     }
 
@@ -539,7 +587,7 @@ public class EntarenceMapAndListActivity
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         if (data != null && data.moveToFirst()) {
-            ArrayList<FCPublication> publications       = null;
+            ArrayList<FCPublication> publications = null;
             switch (loader.getId()) {
                 case -1:
                     publications = FCPublication.GetArrayListOfPublicationsForMapFromCursor(data);
@@ -574,41 +622,14 @@ public class EntarenceMapAndListActivity
                     if (item.getTitle().toString().compareToIgnoreCase("list") == 0) {
                         switch (ll_map_and_gallery.getVisibility()) {
                             case View.VISIBLE:
-                                ll_map_and_gallery.setVisibility(View.GONE);
-                                tl_list_filter_buttons.setVisibility(View.VISIBLE);
-                                //rv_all_publications_list.setVisibility(View.VISIBLE);
-                                fl_search_and_list.setVisibility(View.VISIBLE);
-                                StartLoadingForPublicationsList();
+                                currentMode = MODE_LIST;
+                                SetupMode();
                                 break;
                             case View.GONE:
-                                ll_map_and_gallery.setVisibility(View.VISIBLE);
-                                if (hsv_gallery != null)
-                                    hsv_gallery.setVisibility(View.VISIBLE);
-                                tl_list_filter_buttons.setVisibility(View.GONE);
-                                //rv_all_publications_list.setVisibility(View.GONE);
-                                fl_search_and_list.setVisibility(View.GONE);
+                                currentMode = MODE_MAP;
+                                SetupMode();
                                 break;
                         }
-                    }
-                    switch (ll_map_and_gallery.getVisibility()) {
-                        case View.GONE:
-//                int width = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, fab.getWidth(), getResources().getDisplayMetrics());
-//                int height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, fab.getHeight(), getResources().getDisplayMetrics());
-                            CoordinatorLayout.LayoutParams layoutParams = new CoordinatorLayout.LayoutParams(fabLayoutParams);
-                            layoutParams.setAnchorId(View.NO_ID);
-                            layoutParams.gravity = Gravity.RIGHT | Gravity.BOTTOM;
-                            layoutParams.bottomMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 50, getResources().getDisplayMetrics());
-                            layoutParams.rightMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 50, getResources().getDisplayMetrics());
-                            fab.setLayoutParams(layoutParams);
-                            break;
-                        case View.VISIBLE:
-                            fab.setLayoutParams(fabLayoutParams);
-//                layoutParams.setAnchorId(R.id.map);
-//                layoutParams.anchorGravity = Gravity.BOTTOM | Gravity.RIGHT | Gravity.END;
-//                layoutParams.rightMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 50, getResources().getDisplayMetrics());
-//                layoutParams.bottomMargin = 0;
-//                fab.setLayoutParams(layoutParams);
-                            break;
                     }
                     return true;
                 }
@@ -617,10 +638,48 @@ public class EntarenceMapAndListActivity
         toolbar.inflateMenu(R.menu.menu);
     }
 
+    private void SetFrameMap() {
+        ll_map_and_gallery.setVisibility(View.VISIBLE);
+        hsv_gallery.setVisibility(View.VISIBLE);
+        tl_list_filter_buttons.setVisibility(View.GONE);
+        //rv_all_publications_list.setVisibility(View.GONE);
+        fl_search_and_list.setVisibility(View.GONE);
+
+        fab.setLayoutParams(fabLayoutParams);
+    }
+
+    private void SetFrameList() {
+        ll_map_and_gallery.setVisibility(View.GONE);
+        tl_list_filter_buttons.setVisibility(View.VISIBLE);
+        //rv_all_publications_list.setVisibility(View.VISIBLE);
+        fl_search_and_list.setVisibility(View.VISIBLE);
+        StartLoadingForPublicationsList();
+
+        CoordinatorLayout.LayoutParams layoutParams = new CoordinatorLayout.LayoutParams(fabLayoutParams);
+        layoutParams.setAnchorId(View.NO_ID);
+        layoutParams.gravity = Gravity.RIGHT | Gravity.BOTTOM;
+        layoutParams.bottomMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 50, getResources().getDisplayMetrics());
+        layoutParams.rightMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 50, getResources().getDisplayMetrics());
+        fab.setLayoutParams(layoutParams);
+    }
+
     private void initNavVew() {
         drawerLayout = (DrawerLayout) findViewById(R.id.dl_main);
 
-        ActionBarDrawerToggle actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.open, R.string.close);
+        ActionBarDrawerToggle actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.open, R.string.close){
+            @Override
+            public void onDrawerClosed(View drawerView) {
+                isSideMenuOpened = false;
+                super.onDrawerClosed(drawerView);
+            }
+
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                isSideMenuOpened = true;
+                super.onDrawerOpened(drawerView);
+                CommonUtil.PostGoogleAnalyticsUIEvent(getApplicationContext(), "Map and list", "Side menu", "Open menu");
+            }
+        };
 
         if (drawerLayout != null) drawerLayout.addDrawerListener(actionBarDrawerToggle);
 
@@ -667,7 +726,7 @@ public class EntarenceMapAndListActivity
 
     //region All publications list
 
-    private void SetupRecyclerViewPublications(){
+    private void SetupRecyclerViewPublications() {
         rv_all_publications_list.setLayoutManager(new LinearLayoutManager(rv_all_publications_list.getContext()));
         adapter = new AllPublicationsListRecyclerViewAdapter(this, new ArrayList<FCPublication>(), this);
         rv_all_publications_list.setAdapter(adapter);
@@ -676,6 +735,7 @@ public class EntarenceMapAndListActivity
             public void onMoved(int distance) {
                 tb_search.setTranslationY(-distance);
             }
+
             @Override
             public void onShow() {
                 tb_search.animate().translationY(0).setInterpolator(new DecelerateInterpolator(2)).start();
@@ -688,13 +748,13 @@ public class EntarenceMapAndListActivity
         });
     }
 
-    private void SetPublicationsListToAdapter(ArrayList<FCPublication> publications){
-        if(adapter != null){
+    private void SetPublicationsListToAdapter(ArrayList<FCPublication> publications) {
+        if (adapter != null) {
             adapter.UpdatePublicationsList(publications);
         }
     }
 
-    public abstract class HidingScrollListener extends RecyclerView.OnScrollListener{
+    public abstract class HidingScrollListener extends RecyclerView.OnScrollListener {
         private static final float HIDE_THRESHOLD = 10;
         private static final float SHOW_THRESHOLD = 70;
         private int mToolbarOffset = 0;
@@ -703,9 +763,8 @@ public class EntarenceMapAndListActivity
 
         public HidingScrollListener(Context context) {
             TypedValue tv = new TypedValue();
-            if (getTheme().resolveAttribute(android.R.attr.actionBarSize, tv, true))
-            {
-                mToolbarHeight = TypedValue.complexToDimensionPixelSize(tv.data,getResources().getDisplayMetrics());
+            if (getTheme().resolveAttribute(android.R.attr.actionBarSize, tv, true)) {
+                mToolbarHeight = TypedValue.complexToDimensionPixelSize(tv.data, getResources().getDisplayMetrics());
             }
         }
 
@@ -713,7 +772,7 @@ public class EntarenceMapAndListActivity
         public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
             super.onScrollStateChanged(recyclerView, newState);
 
-            if(newState == RecyclerView.SCROLL_STATE_IDLE) {
+            if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                 if (mControlsVisible) {
                     if (mToolbarOffset > HIDE_THRESHOLD) {
                         setInvisible();
@@ -731,7 +790,7 @@ public class EntarenceMapAndListActivity
         }
 
         private void setVisible() {
-            if(mToolbarOffset > 0) {
+            if (mToolbarOffset > 0) {
                 onShow();
                 mToolbarOffset = 0;
             }
@@ -739,7 +798,7 @@ public class EntarenceMapAndListActivity
         }
 
         private void setInvisible() {
-            if(mToolbarOffset < mToolbarHeight) {
+            if (mToolbarOffset < mToolbarHeight) {
                 onHide();
                 mToolbarOffset = mToolbarHeight;
             }
@@ -754,21 +813,23 @@ public class EntarenceMapAndListActivity
             clipToolbarOffset();
             onMoved(mToolbarOffset);
 
-            if((mToolbarOffset <mToolbarHeight && dy>0) || (mToolbarOffset >0 && dy<0)) {
+            if ((mToolbarOffset < mToolbarHeight && dy > 0) || (mToolbarOffset > 0 && dy < 0)) {
                 mToolbarOffset += dy;
             }
         }
 
         private void clipToolbarOffset() {
-            if(mToolbarOffset > mToolbarHeight) {
+            if (mToolbarOffset > mToolbarHeight) {
                 mToolbarOffset = mToolbarHeight;
-            } else if(mToolbarOffset < 0) {
+            } else if (mToolbarOffset < 0) {
                 mToolbarOffset = 0;
             }
         }
 
         public abstract void onMoved(int distance);
+
         public abstract void onShow();
+
         public abstract void onHide();
     }
 
@@ -795,7 +856,7 @@ public class EntarenceMapAndListActivity
 
     //region Tab filter buttons
 
-    private void SetupFilterTabButtons(){
+    private void SetupFilterTabButtons() {
         tl_list_filter_buttons.addTab(tl_list_filter_buttons.newTab().setText(getString(R.string.filter_closest_btn_text)), 0);
         tl_list_filter_buttons.addTab(tl_list_filter_buttons.newTab().setText(getString(R.string.filter_new_btn_text)), 1);
         tl_list_filter_buttons.addTab(tl_list_filter_buttons.newTab().setText(getString(R.string.filter_all_btn_text)), 2);
@@ -804,7 +865,7 @@ public class EntarenceMapAndListActivity
 
     @Override
     public void onTabSelected(TabLayout.Tab tab) {
-        switch (tab.getPosition()){
+        switch (tab.getPosition()) {
             case 0:
                 currentFilterID = FooDoNetSQLHelper.FILTER_ID_LIST_ALL_BY_CLOSEST;
                 break;
@@ -826,6 +887,37 @@ public class EntarenceMapAndListActivity
     @Override
     public void onTabReselected(TabLayout.Tab tab) {
 
+    }
+
+    @Override
+    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+    }
+
+    @Override
+    public void onTextChanged(CharSequence s, int start, int before, int count) {
+        boolean isRestart = !TextUtils.isEmpty(et_search.getText().toString())
+                && currentFilterID == FooDoNetSQLHelper.FILTER_ID_LIST_ALL_BY_TEXT_FILTER;
+        if (TextUtils.isEmpty(et_search.getText().toString())) {
+            currentFilterID = FooDoNetSQLHelper.FILTER_ID_LIST_ALL_BY_CLOSEST;
+        } else {
+            FooDoNetCustomActivityConnectedToService.UpdateFilterTextPreferences(this, et_search.getText().toString());
+            currentFilterID = FooDoNetSQLHelper.FILTER_ID_LIST_ALL_BY_TEXT_FILTER;
+        }
+        if (isRestart)
+            RestartLoadingForPublicationsList();
+        else
+            StartLoadingForPublicationsList();
+    }
+
+    @Override
+    public void afterTextChanged(Editable s) {
+        if (s.toString().length() > 0) {
+            et_search.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+        } else {
+            //Assign your image again to the view, otherwise it will always be gone even if the text is 0 again.
+            et_search.setCompoundDrawablesWithIntrinsicBounds(R.drawable.toolbar_find, 0, 0, 0);
+        }
     }
 
     //endregion

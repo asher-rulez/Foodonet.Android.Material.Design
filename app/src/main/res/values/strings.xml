@@ -195,7 +195,7 @@
     <!-- SplashScreen -->
 
 
-<!--     <string name="progress_foodonet_loading">טוען..</string> -->
+    <!--     <string name="progress_foodonet_loading">טוען..</string> -->
     <string name="progress_load">Loading...</string>
     <string name="progress_first_load">First load...</string>
 
@@ -375,5 +375,12 @@
     <string name="filter_closest_btn_text">Closest</string>
     <string name="filter_new_btn_text">New</string>
     <string name="filter_all_btn_text">All</string>
+    <string name="title_activity_my_publications">MyPublicationsActivity</string>
+
+    <!-- My publications list -->
+
+    <string name="filter_all_my_pubs">All</string>
+    <string name="filter_active_my_pubs">Active</string>
+    <string name="filter_ended_my_pubs">Ended</string>
 
 </resources>

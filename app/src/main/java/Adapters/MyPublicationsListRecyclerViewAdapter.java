@@ -28,19 +28,26 @@ public class MyPublicationsListRecyclerViewAdapter extends RecyclerView.Adapter<
 
     private static final String MY_TAG = "food_myPubsAdapter";
 
-    ArrayList<FCPublication> myPublicationsList;
+    ArrayList<FCPublication> allPublicationsList;
     IOnPublicationFromListSelected parentListCallback;
     public Context context;
 
     ImageDictionarySyncronized imageDictionary;
     ImageDownloader imageDownloader;
 
-    public MyPublicationsListRecyclerViewAdapter(Context context, ArrayList<FCPublication> myPublications, IOnPublicationFromListSelected parent){
-        myPublicationsList = myPublications;
+    public MyPublicationsListRecyclerViewAdapter(Context context, ArrayList<FCPublication> allPublications, IOnPublicationFromListSelected parent) {
+        allPublicationsList = new ArrayList<>();
+        allPublicationsList.addAll(allPublications);
         parentListCallback = parent;
         this.context = context;
         imageDictionary = new ImageDictionarySyncronized();
         imageDownloader = new ImageDownloader(context, imageDictionary);
+    }
+
+    public void UpdatePublicationsList(ArrayList<FCPublication> pubs){
+        allPublicationsList = new ArrayList<>();
+        allPublicationsList.addAll(pubs);
+        this.notifyDataSetChanged();
     }
 
     @Override
@@ -51,12 +58,12 @@ public class MyPublicationsListRecyclerViewAdapter extends RecyclerView.Adapter<
 
     @Override
     public void onBindViewHolder(MyPublicationListItemViewHolder holder, int position) {
-
+        holder.SetupPublicationDetails(allPublicationsList.get(position));
     }
 
     @Override
     public int getItemCount() {
-        return myPublicationsList.size();
+        return allPublicationsList.size();
     }
 
     public class MyPublicationListItemViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
@@ -74,16 +81,16 @@ public class MyPublicationsListRecyclerViewAdapter extends RecyclerView.Adapter<
         public MyPublicationListItemViewHolder(View itemView, IOnPublicationFromListSelected callback) {
             super(itemView);
             this.callback = callback;
-            publicationImage = (RoundedImageView)itemView.findViewById(R.id.riv_publication_item_image);
-            groupTypeIcon = (ImageView)itemView.findViewById(R.id.iv_publication_item_group_icon);
-            tv_title = (TextView)itemView.findViewById(R.id.tv_publication_item_title);
-            tv_address = (TextView)itemView.findViewById(R.id.tv_publication_item_address);
-            tv_number_of_users = (TextView)itemView.findViewById(R.id.tv_publication_item_users_registered_number);
-            tv_time_left = (TextView)itemView.findViewById(R.id.tv_publication_item_time_left);
+            publicationImage = (RoundedImageView) itemView.findViewById(R.id.riv_publication_item_image);
+            groupTypeIcon = (ImageView) itemView.findViewById(R.id.iv_publication_item_group_icon);
+            tv_title = (TextView) itemView.findViewById(R.id.tv_publication_item_title);
+            tv_address = (TextView) itemView.findViewById(R.id.tv_publication_item_address);
+            tv_number_of_users = (TextView) itemView.findViewById(R.id.tv_publication_item_users_registered_number);
+            tv_time_left = (TextView) itemView.findViewById(R.id.tv_publication_item_time_left);
             itemView.setOnClickListener(this);
         }
 
-        public void SetupPublicationDetails(FCPublication publication){
+        public void SetupPublicationDetails(FCPublication publication) {
             publicationID = publication.getUniqueId();
             tv_title.setText(publication.getTitle());
             tv_number_of_users.setText(
@@ -92,6 +99,8 @@ public class MyPublicationsListRecyclerViewAdapter extends RecyclerView.Adapter<
             tv_address.setText(context.getString(R.string.address_format_for_list).replace("{0}",
                     publication.getAddress()).replace("{1}", CommonUtil.GetDistanceStringFromCurrentLocation(
                     new LatLng(publication.getLatitude(), publication.getLongitude()), context)));
+            tv_time_left.setText("00:00");
+            SetPublicationImage(publication, publicationImage);
             //tv_time_left.setText(CommonUtil.); commonUtil.gettimeleftforpublication
         }
 
@@ -105,7 +114,7 @@ public class MyPublicationsListRecyclerViewAdapter extends RecyclerView.Adapter<
             final int version = publication.getVersion();
             Drawable imageDrawable;
             imageDrawable = imageDictionary.Get(id);
-            if(imageDrawable == null) {
+            if (imageDrawable == null) {
                 imageDownloader.Download(id, version, publicationImage);
             } else
                 publicationImage.setImageDrawable(imageDrawable);

@@ -60,7 +60,8 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentBottom="true"
                     android:background="@color/gallery_normal"
-                    android:visibility="visible">
+                    android:visibility="visible"
+                    android:elevation="2dp">
                     <!--android:layout_above="@+id/ll_nav_btns_panel"-->
                     <!--android:layout_marginBottom="6dp"-->
                     <!--android:layout_alignParentBottom="true"-->
@@ -70,8 +71,7 @@
                         android:id="@+id/ll_image_btns_gallery"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:orientation="horizontal"
-                        android:visibility="gone" />
+                        android:orientation="horizontal"/>
 
                 </HorizontalScrollView>
 
@@ -97,19 +97,22 @@
                     android:id="@+id/rv_all_publications_list"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:paddingTop="?attr/actionBarSize"
-                    android:clipToPadding="false"/>
+                    android:clipToPadding="false"
+                    android:paddingTop="?attr/actionBarSize" />
 
                 <android.support.v7.widget.Toolbar
                     android:id="@+id/tb_search_pub_in_list"
                     android:layout_width="match_parent"
                     android:layout_height="?attr/actionBarSize"
-                    android:background="?attr/colorPrimary">
+                    android:background="@color/windowBackground">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="aaaa" />
+                    <EditText
+                        android:id="@+id/et_publication_list_search"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:hint="Search"
+                        android:inputType="textShortMessage"
+                        android:theme="@style/MyEditTextTheme" />
 
                 </android.support.v7.widget.Toolbar>
 
@@ -160,8 +163,8 @@ tools:context="com.example.asher.mapappexample.MapsActivity"-->
             android:id="@+id/fab_map_and_list"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="10dp"
             android:src="@drawable/white_plus"
+            android:layout_marginRight="10dp"
             app:backgroundTint="@color/plus_button_red"
             app:layout_anchor="@id/hsv_image_gallery"
             app:layout_anchorGravity="top|right|end" />

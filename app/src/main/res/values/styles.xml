@@ -1,7 +1,6 @@
 <resources>
 
 
-
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar" />
 
     <style name="AppDefault" parent="AppTheme">
@@ -10,9 +9,22 @@
         <item name="colorControlNormal">@color/white</item>
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowActionBar">false</item>
-        <item name="android:colorAccent">@color/colorAccent</item>
+        <!--<item name="android:colorAccent">@color/colorAccent</item>-->
     </style>
 
+    <style name="MyEditTextTheme">
+        <item name="colorControlNormal">#9e9e9e</item>
+        <item name="colorControlActivated">@color/colorPrimary</item>
+        <item name="colorControlHighlight">@color/colorPrimary</item>
+    </style>
+    <!--
+    <style name="EditTextSearchPublication" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="colorControlNormal">#c5c5c5</item>
+        <item name="colorControlActivated">@color/colorPrimary</item>
+        <item name="colorControlHighlight">@color/colorPrimary</item>
+    </style>
+
+-->
     <style name="FullscreenTheme" parent="android:Theme.NoTitleBar">
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:windowBackground">@null</item>

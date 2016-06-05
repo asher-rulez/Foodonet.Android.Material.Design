@@ -25,18 +25,18 @@ import upp.foodonet.material.R;
  */
 public class AllPublicationsListRecyclerViewAdapter extends RecyclerView.Adapter<AllPublicationsListRecyclerViewAdapter.PublicationListItemViewHolder> {
 
-    private static final String MY_TAG = "food_myPubsAdapter";
+    private static final String MY_TAG = "food_allPubsAdapter";
 
-    ArrayList<FCPublication> myPublicationsList;
+    ArrayList<FCPublication> allPublicationsList;
     IOnPublicationFromListSelected parentListCallback;
     public Context context;
 
     ImageDictionarySyncronized imageDictionary;
     ImageDownloader imageDownloader;
 
-    public AllPublicationsListRecyclerViewAdapter(Context context, ArrayList<FCPublication> myPublications, IOnPublicationFromListSelected parent) {
-        myPublicationsList = new ArrayList<>();
-        myPublications.addAll(myPublications);
+    public AllPublicationsListRecyclerViewAdapter(Context context, ArrayList<FCPublication> allPublications, IOnPublicationFromListSelected parent) {
+        allPublicationsList = new ArrayList<>();
+        allPublicationsList.addAll(allPublications);
         parentListCallback = parent;
         this.context = context;
         imageDictionary = new ImageDictionarySyncronized();
@@ -44,25 +44,25 @@ public class AllPublicationsListRecyclerViewAdapter extends RecyclerView.Adapter
     }
 
     public void UpdatePublicationsList(ArrayList<FCPublication> pubs){
-        myPublicationsList = new ArrayList<>();
-        myPublicationsList.addAll(pubs);
+        allPublicationsList = new ArrayList<>();
+        allPublicationsList.addAll(pubs);
         this.notifyDataSetChanged();
     }
 
     @Override
     public PublicationListItemViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.my_publication_list_item, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.all_publications_list_item, parent, false);
         return new PublicationListItemViewHolder(view, parentListCallback);
     }
 
     @Override
     public void onBindViewHolder(PublicationListItemViewHolder holder, int position) {
-        holder.SetupPublicationDetails(myPublicationsList.get(position));
+        holder.SetupPublicationDetails(allPublicationsList.get(position));
     }
 
     @Override
     public int getItemCount() {
-        return myPublicationsList.size();
+        return allPublicationsList.size();
     }
 
     public class PublicationListItemViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
