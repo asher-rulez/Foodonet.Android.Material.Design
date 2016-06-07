@@ -34,10 +34,10 @@
         android:id="@+id/fab_my_list_add_new_pub"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/white_plus"
-        android:layout_marginRight="10dp"
-        app:backgroundTint="@color/plus_button_red"
+        android:layout_marginRight="50dp"
+        android:layout_marginBottom="50dp"
         android:layout_gravity="bottom|end"
-        android:layout_margin="@dimen/fab_margin"/>
+        app:backgroundTint="@color/plus_button_red"
+        android:src="@drawable/white_plus"/>
 
 </android.support.design.widget.CoordinatorLayout>

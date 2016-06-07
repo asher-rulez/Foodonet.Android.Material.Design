@@ -382,5 +382,6 @@
     <string name="filter_all_my_pubs">All</string>
     <string name="filter_active_my_pubs">Active</string>
     <string name="filter_ended_my_pubs">Ended</string>
+    <string name="new_pub_waiting_for_save_on_server">Saving publications to server, please wait</string>
 
 </resources>

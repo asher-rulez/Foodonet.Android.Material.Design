@@ -18,6 +18,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -95,8 +96,7 @@ public class AddEditPublicationActivity extends FragmentActivity
 
     private Toolbar toolbar;
     private ImageView mAddPicImageView;
-    private static ImageButton submitButton, cameraBtn;
-
+    FloatingActionButton fab_add_photo;
 
     private TextView mIdTextView;
     private EditText et_publication_title;
@@ -182,8 +182,8 @@ public class AddEditPublicationActivity extends FragmentActivity
             TryLoadExistingImage();
         }
 
-        cameraBtn = (ImageButton) findViewById(R.id.btn_camera_add_pub);
-        cameraBtn.setOnClickListener(this);
+        fab_add_photo = (FloatingActionButton) findViewById(R.id.fab_add_photo);
+        fab_add_photo.setOnClickListener(this);
 
         et_address = (EditText) findViewById(R.id.et_address_edit_add_pub);
         et_address.setOnClickListener(this);
@@ -252,7 +252,7 @@ public class AddEditPublicationActivity extends FragmentActivity
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.btn_camera_add_pub:
+            case R.id.fab_add_photo:
                 selectImage();
                 break;
       /*      case R.id.btn_menu_add_pub:

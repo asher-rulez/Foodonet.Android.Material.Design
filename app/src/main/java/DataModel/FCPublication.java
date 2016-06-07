@@ -378,6 +378,16 @@ public class FCPublication implements Serializable, ICanWriteSelfToJSONWriter {
 
     public boolean pictureWasChangedDuringEditing = false;
 
+    private String _group_name;
+
+    public String get_group_name(){
+        return _group_name;
+    }
+
+    public void set_group_name(String name){
+        _group_name = name;
+    }
+
     public static String[] GetColumnNamesArray() {
         return
                 new String[]{

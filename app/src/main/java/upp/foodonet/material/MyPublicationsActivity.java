@@ -1,8 +1,10 @@
 package upp.foodonet.material;
 
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -17,14 +19,22 @@ import android.util.TypedValue;
 import android.view.View;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.widget.Toast;
 
+
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
 
 import java.util.ArrayList;
 
 import Adapters.IOnPublicationFromListSelected;
 import Adapters.MyPublicationsListRecyclerViewAdapter;
+import CommonUtilPackage.CommonUtil;
+import CommonUtilPackage.InternalRequest;
 import DataModel.FCPublication;
+import FooDoNetSQLClasses.FooDoNetSQLExecuterAsync;
 import FooDoNetSQLClasses.FooDoNetSQLHelper;
+import FooDoNetSQLClasses.IFooDoNetSQLCallback;
 import FooDoNetServiceUtil.FooDoNetCustomActivityConnectedToService;
 
 public class MyPublicationsActivity
@@ -32,7 +42,7 @@ public class MyPublicationsActivity
         implements LoaderManager.LoaderCallbacks<Cursor>,
         IOnPublicationFromListSelected,
         TabLayout.OnTabSelectedListener,
-        TextWatcher, View.OnClickListener {
+        TextWatcher, View.OnClickListener, IFooDoNetSQLCallback {
 
     private static final String MY_TAG = "food_myPubsList";
 
@@ -69,6 +79,8 @@ public class MyPublicationsActivity
 
         SetupFilterTabButtons();
 
+        currentFilterID = FooDoNetSQLHelper.FILTER_ID_LIST_MY_BY_ENDING_SOON;
+        StartLoadingForPublicationsList();
     }
 
     //endregion
@@ -87,13 +99,13 @@ public class MyPublicationsActivity
     public void onTabSelected(TabLayout.Tab tab) {
         switch (tab.getPosition()) {
             case 0:
-                currentFilterID = FooDoNetSQLHelper.FILTER_ID_LIST_ALL_BY_CLOSEST;
+                currentFilterID = FooDoNetSQLHelper.FILTER_ID_LIST_MY_BY_ENDING_SOON;
                 break;
             case 1:
-                currentFilterID = FooDoNetSQLHelper.FILTER_ID_LIST_ALL_BY_NEWEST;
+                currentFilterID = FooDoNetSQLHelper.FILTER_ID_LIST_MY_ACTIVE_ID_DESC;
                 break;
             case 2:
-                currentFilterID = FooDoNetSQLHelper.FILTER_ID_LIST_ALL_BY_LESS_REGS;
+                currentFilterID = FooDoNetSQLHelper.FILTER_ID_LIST_MY_NOT_ACTIVE_ID_ASC;
                 break;
         }
         StartLoadingForPublicationsList();
@@ -139,15 +151,15 @@ public class MyPublicationsActivity
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        ArrayList<FCPublication> publications = null;
         if (data != null && data.moveToFirst()) {
-            ArrayList<FCPublication> publications = null;
             publications = FCPublication.GetArrayListOfPublicationsFromCursor(data, true);
             if (publications == null || publications.size() == 0) {
                 Log.e(MY_TAG, "error getting publications from sql");
                 return;
             }
-            SetPublicationsListToAdapter(publications);
         }
+        SetPublicationsListToAdapter(publications);
     }
 
     private void SetPublicationsListToAdapter(ArrayList<FCPublication> publications) {
@@ -245,7 +257,6 @@ public class MyPublicationsActivity
 
     @Override
     public void OnGooglePlayServicesCheckError() {
-
     }
 
     @Override
@@ -255,7 +266,38 @@ public class MyPublicationsActivity
 
     @Override
     public void OnPublicationFromListClicked(int publicationID) {
+        if(publicationID<0){
+            Toast.makeText(this, getString(R.string.new_pub_waiting_for_save_on_server), Toast.LENGTH_LONG).show();
+            return;
+        }
+        progressDialog = CommonUtil.ShowProgressDialog(this, getString(R.string.progress_loading));
+        FooDoNetSQLExecuterAsync sqlGetPubAsync = new FooDoNetSQLExecuterAsync(this, getContentResolver());
+        InternalRequest ir = new InternalRequest(InternalRequest.ACTION_SQL_GET_SINGLE_PUBLICATION_BY_ID);
+        ir.PublicationID = publicationID;
+        sqlGetPubAsync.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, ir);
+    }
 
+    @Override
+    public void OnSQLTaskComplete(InternalRequest request) {
+/*
+        switch (request.ActionCommand) {
+            case InternalRequest.ACTION_SQL_GET_SINGLE_PUBLICATION_BY_ID:
+                FCPublication result = request.publicationForDetails;
+                if (result == null)
+                    Log.e(MY_TAG, "OnSQLTaskComplete got null request.publicationForDetails");
+                String myIMEI = CommonUtil.GetIMEI(this);
+                if (result.getPublisherUID() != null)
+                    result.isOwnPublication = result.getPublisherUID().compareTo(myIMEI) == 0;
+                Intent intent = new Intent(getApplicationContext(), PublicationDetailsActivity.class);
+                intent.putExtra(PublicationDetailsActivity.PUBLICATION_PARAM, result);
+                startActivityForResult(intent, 1);
+                if(progressDialog != null){
+                    progressDialog.dismiss();
+                    progressDialog = null;
+                }
+                break;
+        }
+*/
     }
 
     @Override
@@ -275,6 +317,17 @@ public class MyPublicationsActivity
 
     @Override
     public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.fab_map_and_list:
+                Intent addPub = new Intent(this, AddEditPublicationActivity.class);
+                startActivityForResult(addPub, 0);
+                break;
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
 
     }
 

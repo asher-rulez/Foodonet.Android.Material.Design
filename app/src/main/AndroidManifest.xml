@@ -14,17 +14,20 @@
     <!-- This needed to get IMEI -->
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
-    <!-- This needed for push notifications -->
-    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
-
+<!--
     <permission
         android:name="upp.foodonet.permission.C2D_MESSAGE"
         android:protectionLevel="signature" />
+-->
 
-    <uses-permission
-        android:name="upp.foodonet.permission.C2D_MESSAGE"
+    <!-- This needed for push notifications -->
+    <permission
+        android:name="upp.foodonet.material.permission.C2D_MESSAGE"
         android:protectionLevel="signature" />
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+    <uses-permission android:name="upp.foodonet.material.permission.C2D_MESSAGE"/>
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+
 
     <!-- Reading contacts -->
 
@@ -60,17 +63,30 @@
 
         <receiver
             android:name="com.google.android.gms.gcm.GcmReceiver"
-            android:exported="true"
             android:permission="com.google.android.c2dm.permission.SEND">
             <intent-filter>
+                <!--android:exported="true"                -->
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
-
-                <category android:name="com.nikoxes.foodonetwmd" />
-
+                <category android:name="upp.foodonet.material" />
                 <!-- action android:name="com.google.android.c2dm.intent.REGISTRATION" / -->
             </intent-filter>
         </receiver>
-
+<!--
+        <service
+            android:name=".FooDoNetGcmListenerService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+            </intent-filter>
+        </service>
+        <service
+            android:name=".FooDoNetInstanceIDListenerService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.android.gms.iid.InstanceID" />
+            </intent-filter>
+        </service>
+-->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />

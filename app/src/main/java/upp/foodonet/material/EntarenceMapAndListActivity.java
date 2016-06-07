@@ -257,9 +257,8 @@ public class EntarenceMapAndListActivity
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.fab_map_and_list:
-
                 Intent addPub = new Intent(this, AddEditPublicationActivity.class);
-                startActivity(addPub);
+                startActivityForResult(addPub, 0);
                 break;
             case R.id.btn_center_on_my_location_map:
                 if (myLocation == null)
@@ -586,23 +585,18 @@ public class EntarenceMapAndListActivity
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        ArrayList<FCPublication> publications = null;
         if (data != null && data.moveToFirst()) {
-            ArrayList<FCPublication> publications = null;
+            publications = loader.getId() == -1
+                    ? FCPublication.GetArrayListOfPublicationsForMapFromCursor(data)
+                    : FCPublication.GetArrayListOfPublicationsFromCursor(data, true);
+            if (publications == null || publications.size() == 0)
+                Log.e(MY_TAG, "no publications got from sql");
             switch (loader.getId()) {
                 case -1:
-                    publications = FCPublication.GetArrayListOfPublicationsForMapFromCursor(data);
-                    if (publications == null || publications.size() == 0) {
-                        Log.e(MY_TAG, "error getting publications from sql");
-                        return;
-                    }
                     SetGalleryAndMarkers(publications);
                     break;
                 default:
-                    publications = FCPublication.GetArrayListOfPublicationsFromCursor(data, true);
-                    if (publications == null || publications.size() == 0) {
-                        Log.e(MY_TAG, "error getting publications from sql");
-                        return;
-                    }
                     SetPublicationsListToAdapter(publications);
                     break;
             }
@@ -694,7 +688,7 @@ public class EntarenceMapAndListActivity
 
                     switch (item.getItemId()) {
                         case R.id.nav_item_sharings:
-                            Intent intent = new Intent(getApplicationContext(), SplashScreenActivity.class);
+                            Intent intent = new Intent(getApplicationContext(), MyPublicationsActivity.class);
                             startActivity(intent);
                             break;
                         case R.id.nav_item_subscriptions:

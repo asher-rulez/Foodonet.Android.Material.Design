@@ -72,7 +72,7 @@ public class MyPublicationsListRecyclerViewAdapter extends RecyclerView.Adapter<
         RoundedImageView publicationImage;
         ImageView groupTypeIcon;
         TextView tv_title;
-        TextView tv_address;
+        TextView tv_group_name;
         TextView tv_number_of_users;
         TextView tv_time_left;
 
@@ -81,12 +81,12 @@ public class MyPublicationsListRecyclerViewAdapter extends RecyclerView.Adapter<
         public MyPublicationListItemViewHolder(View itemView, IOnPublicationFromListSelected callback) {
             super(itemView);
             this.callback = callback;
-            publicationImage = (RoundedImageView) itemView.findViewById(R.id.riv_publication_item_image);
-            groupTypeIcon = (ImageView) itemView.findViewById(R.id.iv_publication_item_group_icon);
-            tv_title = (TextView) itemView.findViewById(R.id.tv_publication_item_title);
-            tv_address = (TextView) itemView.findViewById(R.id.tv_publication_item_address);
-            tv_number_of_users = (TextView) itemView.findViewById(R.id.tv_publication_item_users_registered_number);
-            tv_time_left = (TextView) itemView.findViewById(R.id.tv_publication_item_time_left);
+            publicationImage = (RoundedImageView) itemView.findViewById(R.id.riv_my_pub_item_image);
+            groupTypeIcon = (ImageView) itemView.findViewById(R.id.iv_my_pub_item_group_icon);
+            tv_title = (TextView) itemView.findViewById(R.id.tv_my_pub_item_title);
+            tv_group_name = (TextView) itemView.findViewById(R.id.tv_my_pub_group_name);
+            tv_number_of_users = (TextView) itemView.findViewById(R.id.tv_my_pub_item_reg_users_number);
+            tv_time_left = (TextView) itemView.findViewById(R.id.tv_my_pub_item_time_left);
             itemView.setOnClickListener(this);
         }
 
@@ -96,9 +96,10 @@ public class MyPublicationsListRecyclerViewAdapter extends RecyclerView.Adapter<
             tv_number_of_users.setText(
                     context.getString(R.string.users_joined_format_for_list)
                             .replace("{0}", String.valueOf(publication.getNumberOfRegistered())));
-            tv_address.setText(context.getString(R.string.address_format_for_list).replace("{0}",
-                    publication.getAddress()).replace("{1}", CommonUtil.GetDistanceStringFromCurrentLocation(
-                    new LatLng(publication.getLatitude(), publication.getLongitude()), context)));
+            tv_group_name.setText(publication.get_group_name());
+//            context.getString(R.string.address_format_for_list).replace("{0}",
+//                    publication.getAddress()).replace("{1}", CommonUtil.GetDistanceStringFromCurrentLocation(
+//                    new LatLng(publication.getLatitude(), publication.getLongitude()), context))
             tv_time_left.setText("00:00");
             SetPublicationImage(publication, publicationImage);
             //tv_time_left.setText(CommonUtil.); commonUtil.gettimeleftforpublication
