@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -44,8 +45,14 @@ public class FCPublication implements Serializable, ICanWriteSelfToJSONWriter {
     public static final String PUBLICATION_PHOTO_URL = "photo_url";
     public static final String PUBLICATION_COUNT_OF_REGISTER_USERS_KEY = "pulbicationCountOfRegisteredUsersKey";
     public static final String PUBLICATION_IS_ON_AIR_KEY = "is_on_air";
+    public static final String PUBLICATION_PUBLISHER_USER_NAME_KEY = "identity_provider_user_name";
+    public static final String PUBLICATION_PUBLISHER_ID_KEY = "publisher_id";
+    public static final String PUBLICATION_PRICE_KEY = "price";
+    public static final String PUBLICATION_PRICE_DESCRIPTION_KEY = "price_description";
+    public static final String PUBLICATION_USER_RATING_KEY = "user_rating";
+    public static final String PUBLICATION_AUDIENCE_KEY = "audience";
 
-    public static final String PUBLICATION_TRIED_TO_LOAD_IMAGE = "tried_load_image";
+//    public static final String PUBLICATION_TRIED_TO_LOAD_IMAGE = "tried_load_image";
 
     //public static final String PUBLICATION_IMAGE_BYTEARRAY_KEY = "image_bytes";
 
@@ -53,6 +60,7 @@ public class FCPublication implements Serializable, ICanWriteSelfToJSONWriter {
 
     public static final String PUBLICATION_NUMBER_OF_REGISTERED = "num_of_regs";
     public static final String PUBLICATION_NEW_NEGATIVE_ID = "new_neg_id";
+    public static final String PUBLICATION_GROUP_NAME = "group_name";
 
     public static final String DID_REGISTER_FOR_CURRENT_PUBLICATION = "did_Register_for_current_publication";
     public static final String DID_MODIFY_COORDS = "did_modify_coords";
@@ -61,10 +69,11 @@ public class FCPublication implements Serializable, ICanWriteSelfToJSONWriter {
     public FCPublication() {
         setVersion(0);
         setCountOfRegisteredUsers(0);
-        setIfTriedToGetPictureBefore(false);
+        //setIfTriedToGetPictureBefore(false);
         setTypeOfCollecting(FCTypeOfCollecting.FreePickUp);
     }
 
+/*
     public FCPublication(int id, String publisherUID, String title, String subtitle, String address, FCTypeOfCollecting typeOfCollecting, double latitude, double longitude, Date startingDate, Date endingDate, String contactInfo, String photoUrl, boolean isOnAir) {
         this();
         setUniqueId(id);
@@ -81,6 +90,7 @@ public class FCPublication implements Serializable, ICanWriteSelfToJSONWriter {
         setPhotoUrl(photoUrl);
         setIsOnAir(isOnAir);
     }
+*/
 
     public FCPublication(FCPublication publication){
         this();
@@ -288,7 +298,6 @@ public class FCPublication implements Serializable, ICanWriteSelfToJSONWriter {
         this.isOnAir = isOnAir;
     }
 
-
     private Boolean didModifyCoords;
 
     public Boolean getDidModifyCoords() {
@@ -298,7 +307,6 @@ public class FCPublication implements Serializable, ICanWriteSelfToJSONWriter {
     public void setDidModifyCoords(Boolean didModifyCoords) {
         this.didModifyCoords = didModifyCoords;
     }
-
 
     private String photoUrl;
 
@@ -340,13 +348,73 @@ public class FCPublication implements Serializable, ICanWriteSelfToJSONWriter {
         countOfRegisteredUsers = value;
     }
 
-    private boolean ifTriedToGetPictureBefore;
+    private String publisherUserName;
 
-    public boolean getIfTriedToGetPictureBefore() { return ifTriedToGetPictureBefore; }
+    public String getPublisherUserName() {
+        return publisherUserName;
+    }
 
-    public void setIfTriedToGetPictureBefore(boolean value) { ifTriedToGetPictureBefore = value; }
+    public void setPublisherUserName(String publisherUserName) {
+        this.publisherUserName = publisherUserName;
+    }
 
-    public void setIfTriedToGetPictureBefore(int value) { ifTriedToGetPictureBefore = value != 0; }
+    private int publisherID;
+
+    public int getPublisherID() {
+        return publisherID;
+    }
+
+    public void setPublisherID(int publisherID) {
+        this.publisherID = publisherID;
+    }
+
+    private Double price;
+
+    public Double getPrice() {
+        return price;
+    }
+
+    public void setPrice(Double price) {
+        this.price = price;
+    }
+
+    private String priceDescription;
+
+    public String getPriceDescription() {
+        return priceDescription;
+    }
+
+    public void setPriceDescription(String priceDescription) {
+        this.priceDescription = priceDescription;
+    }
+
+    private double rating;
+
+    public double getRating() {
+        return rating;
+    }
+
+    public void setRating(double rating) {
+        this.rating = rating;
+    }
+
+    private int audience;
+
+    public int getAudience() {
+        return audience;
+    }
+
+    public void setAudience(int audience) {
+        this.audience = audience;
+    }
+
+//    private boolean ifTriedToGetPictureBefore;
+//
+//    public boolean getIfTriedToGetPictureBefore() { return ifTriedToGetPictureBefore; }
+//
+//    public void setIfTriedToGetPictureBefore(boolean value) { ifTriedToGetPictureBefore = value; }
+//
+//    public void setIfTriedToGetPictureBefore(int value) { ifTriedToGetPictureBefore = value != 0; }
 
     private ArrayList<RegisteredUserForPublication> registeredForThisPublication;
 
@@ -406,7 +474,14 @@ public class FCPublication implements Serializable, ICanWriteSelfToJSONWriter {
                         PUBLICATION_PHOTO_URL,
                         PUBLICATION_COUNT_OF_REGISTER_USERS_KEY,
                         PUBLICATION_IS_ON_AIR_KEY,
-                        PUBLICATION_TRIED_TO_LOAD_IMAGE
+                        PUBLICATION_PUBLISHER_USER_NAME_KEY,
+                        PUBLICATION_PUBLISHER_ID_KEY,
+                        PUBLICATION_PRICE_KEY,
+                        PUBLICATION_PRICE_DESCRIPTION_KEY,
+                        PUBLICATION_USER_RATING_KEY,
+                        PUBLICATION_AUDIENCE_KEY//,
+                        //PUBLICATION_GROUP_NAME
+                        //PUBLICATION_TRIED_TO_LOAD_IMAGE,
                         //PUBLICATION_IMAGE_BYTEARRAY_KEY
                 };
     }
@@ -422,7 +497,8 @@ public class FCPublication implements Serializable, ICanWriteSelfToJSONWriter {
                 PUBLICATION_ENDING_DATE_KEY,
                 PUBLICATION_IS_ON_AIR_KEY,
                 PUBLICATION_NUMBER_OF_REGISTERED,
-                PUBLICATION_PHOTO_URL
+                PUBLICATION_PHOTO_URL,
+                PUBLICATION_GROUP_NAME
         };
     }
 
@@ -443,7 +519,13 @@ public class FCPublication implements Serializable, ICanWriteSelfToJSONWriter {
         cv.put(PUBLICATION_PHOTO_URL, getPhotoUrl());
         cv.put(PUBLICATION_COUNT_OF_REGISTER_USERS_KEY, getCountOfRegisteredUsers());
         cv.put(PUBLICATION_IS_ON_AIR_KEY, getIsOnAir());
-        cv.put(PUBLICATION_TRIED_TO_LOAD_IMAGE, getIfTriedToGetPictureBefore());
+        cv.put(PUBLICATION_PUBLISHER_USER_NAME_KEY, getPublisherUserName());
+        cv.put(PUBLICATION_PUBLISHER_ID_KEY, getPublisherID());
+        cv.put(PUBLICATION_PRICE_KEY, getPrice());
+        cv.put(PUBLICATION_PRICE_DESCRIPTION_KEY, getPriceDescription());
+        cv.put(PUBLICATION_USER_RATING_KEY, getRating());
+        cv.put(PUBLICATION_AUDIENCE_KEY, getAudience());
+        //cv.put(PUBLICATION_TRIED_TO_LOAD_IMAGE, getIfTriedToGetPictureBefore());
         //cv.put(PUBLICATION_IMAGE_BYTEARRAY_KEY, getImageByteArray());
         return cv;
     }
@@ -461,6 +543,7 @@ public class FCPublication implements Serializable, ICanWriteSelfToJSONWriter {
                 publication.setVersion(cursor.getInt(cursor.getColumnIndex(PUBLICATION_VERSION_KEY)));
                 if(isForList){
                     publication.setNumberOfRegistered(cursor.getInt(cursor.getColumnIndex(PUBLICATION_NUMBER_OF_REGISTERED)));
+                    publication.set_group_name(cursor.getString(cursor.getColumnIndex(PUBLICATION_GROUP_NAME)));
                 } else {
                     publication.setPhotoUrl(cursor.getString(cursor.getColumnIndex(PUBLICATION_PHOTO_URL)));
                     publication.setPublisherUID(cursor.getString(cursor.getColumnIndex(PUBLICATION_PUBLISHER_UUID_KEY)));
@@ -470,7 +553,7 @@ public class FCPublication implements Serializable, ICanWriteSelfToJSONWriter {
                     publication.setEndingDate(cursor.getLong(cursor.getColumnIndex(PUBLICATION_ENDING_DATE_KEY)));
                     publication.setContactInfo(cursor.getString(cursor.getColumnIndex(PUBLICATION_CONTACT_INFO_KEY)));
                     publication.setIsOnAir(cursor.getInt(cursor.getColumnIndex(PUBLICATION_IS_ON_AIR_KEY)) == 1);
-                    publication.setIfTriedToGetPictureBefore(cursor.getInt(cursor.getColumnIndex(PUBLICATION_TRIED_TO_LOAD_IMAGE)));
+                    //publication.setIfTriedToGetPictureBefore(cursor.getInt(cursor.getColumnIndex(PUBLICATION_TRIED_TO_LOAD_IMAGE)));
                 }
                 result.add(publication);
             } while (cursor.moveToNext());
@@ -528,6 +611,12 @@ public class FCPublication implements Serializable, ICanWriteSelfToJSONWriter {
             publication.setPhotoUrl(jo.getString(PUBLICATION_PHOTO_URL));
             //publication.setCountOfRegisteredUsers(jo.getInt(PUBLICATION_COUNT_OF_REGISTER_USERS_KEY));
             publication.setIsOnAir(jo.getBoolean(PUBLICATION_IS_ON_AIR_KEY));
+            publication.setAudience(jo.getInt(PUBLICATION_AUDIENCE_KEY));
+            publication.setPublisherID(jo.getInt(PUBLICATION_PUBLISHER_ID_KEY));
+            publication.setPublisherUserName(jo.getString(PUBLICATION_PUBLISHER_USER_NAME_KEY));
+            publication.setPrice(jo.isNull(PUBLICATION_PRICE_KEY) ? null : jo.getDouble(PUBLICATION_PRICE_KEY));
+            publication.setPriceDescription(jo.getString(PUBLICATION_PRICE_DESCRIPTION_KEY));
+            publication.setRating(jo.getDouble(PUBLICATION_USER_RATING_KEY));
         } catch (JSONException e) {
             e.printStackTrace();
             Log.e(MY_TAG, e.getMessage());
@@ -552,18 +641,23 @@ public class FCPublication implements Serializable, ICanWriteSelfToJSONWriter {
     @Override
     public org.json.simple.JSONObject GetJsonObjectForPost() {
         Map<String, Object> publicationData = new HashMap<String, Object>();
-        publicationData.put(PUBLICATION_PUBLISHER_UUID_KEY, getPublisherUID());
-        publicationData.put(PUBLICATION_TITLE_KEY, getTitle());
-        publicationData.put(PUBLICATION_SUBTITLE_KEY, TextUtils.isEmpty(getSubtitle())? "": getSubtitle());
-        publicationData.put(PUBLICATION_ADDRESS_KEY, getAddress());
         publicationData.put(PUBLICATION_LATITUDE_KEY, getLatitude());
         publicationData.put(PUBLICATION_LONGITUDE_KEY, getLongitude());
         publicationData.put(PUBLICATION_STARTING_DATE_KEY, getStartingDateUnixTime());
+        publicationData.put(PUBLICATION_ADDRESS_KEY, getAddress());
         publicationData.put(PUBLICATION_ENDING_DATE_KEY, getEndingDateUnixTime());
-        publicationData.put(PUBLICATION_TYPE_OF_COLLECTION_KEY, getTypeOfCollecting() + 1);
         publicationData.put(PUBLICATION_CONTACT_INFO_KEY, TextUtils.isEmpty(getContactInfo())? "":getContactInfo());
-        publicationData.put(PUBLICATION_PHOTO_URL, "");//getPhotoUrl());
+        publicationData.put(PUBLICATION_SUBTITLE_KEY, TextUtils.isEmpty(getSubtitle())? "": getSubtitle());
+        publicationData.put(PUBLICATION_TITLE_KEY, getTitle());
+        publicationData.put(PUBLICATION_TYPE_OF_COLLECTION_KEY, getTypeOfCollecting() + 1);
         publicationData.put(PUBLICATION_IS_ON_AIR_KEY, true);//getIsOnAir());
+        publicationData.put(PUBLICATION_PHOTO_URL, "");//getPhotoUrl());
+        publicationData.put(PUBLICATION_PUBLISHER_UUID_KEY, getPublisherUID());
+        publicationData.put(PUBLICATION_PUBLISHER_USER_NAME_KEY, getPublisherUserName());
+        publicationData.put(PUBLICATION_PUBLISHER_ID_KEY, getPublisherID());
+        publicationData.put(PUBLICATION_PRICE_KEY, getPrice());
+        publicationData.put(PUBLICATION_AUDIENCE_KEY, getAudience());
+        publicationData.put(PUBLICATION_PRICE_DESCRIPTION_KEY, getPriceDescription());
         //publicationData.put(PUBLICATION_UNIQUE_ID_KEY, 0);
         //publicationData.put(PUBLICATION_VERSION_KEY, getVersion());
         //publicationData.put(PUBLICATION_COUNT_OF_REGISTER_USERS_KEY, getCountOfRegisteredUsers());

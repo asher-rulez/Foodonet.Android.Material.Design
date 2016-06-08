@@ -333,7 +333,7 @@ public class AddEditPublicationActivity extends FragmentActivity
         publication.setTypeOfCollecting(FCTypeOfCollecting.ContactPublisher);
         publication.setVersion(publication.getVersion());
         publication.setIsOnAir(true);
-        publication.setIfTriedToGetPictureBefore(true);
+//        publication.setIfTriedToGetPictureBefore(true);
     }
 
     private boolean ValidateInputData() {

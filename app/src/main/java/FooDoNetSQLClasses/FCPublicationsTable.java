@@ -45,7 +45,17 @@ public class FCPublicationsTable {
         sb.append(" int not null, ");
         sb.append(FCPublication.PUBLICATION_IS_ON_AIR_KEY);
         sb.append(" int not null, ");
-        sb.append(FCPublication.PUBLICATION_TRIED_TO_LOAD_IMAGE);
+        sb.append(FCPublication.PUBLICATION_PUBLISHER_ID_KEY);
+        sb.append(" int not null, ");
+        sb.append(FCPublication.PUBLICATION_PUBLISHER_USER_NAME_KEY);
+        sb.append(" text not null, ");
+        sb.append(FCPublication.PUBLICATION_PRICE_KEY);
+        sb.append(" int null, ");
+        sb.append(FCPublication.PUBLICATION_PRICE_DESCRIPTION_KEY);
+        sb.append(" text null, ");
+        sb.append(FCPublication.PUBLICATION_USER_RATING_KEY);
+        sb.append(" int not null, ");
+        sb.append(FCPublication.PUBLICATION_AUDIENCE_KEY);
         sb.append(" int not null);");
         return sb.toString();
     }

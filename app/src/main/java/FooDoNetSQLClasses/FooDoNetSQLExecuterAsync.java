@@ -46,7 +46,7 @@ public class FooDoNetSQLExecuterAsync extends AsyncTask<InternalRequest, Void, V
     ContentResolver contentResolver;
     InternalRequest incomingRequest;
     int newNegativeID;
-    Map<Integer, Integer> needToLoadPicturesFor;
+//    Map<Integer, Integer> needToLoadPicturesFor;
     Context context;
 
     public FooDoNetSQLExecuterAsync(IFooDoNetSQLCallback callback, ContentResolver content) {
@@ -70,7 +70,7 @@ public class FooDoNetSQLExecuterAsync extends AsyncTask<InternalRequest, Void, V
             case InternalRequest.ACTION_SQL_UPDATE_DB_PUBLICATIONS_FROM_SERVER:
                 publicationsFromServer = params[0].publications;
                 regUsersFromServer = params[0].registeredUsers;
-                needToLoadPicturesFor = new HashMap<>();
+//                needToLoadPicturesFor = new HashMap<>();
                 if (publicationsFromServer == null || publicationsFromServer.size() == 0
                         || contentResolver == null || callbackHandler == null)
                     return null;
@@ -92,15 +92,15 @@ public class FooDoNetSQLExecuterAsync extends AsyncTask<InternalRequest, Void, V
                     if (pubFromDB == null) {
                         //todo: logics of pub.setIfTriedToGetPictureBefore can be improved
                         //todo: by updating this field only after call to amazon
-                        publicationFromServer.setIfTriedToGetPictureBefore(true);
+//                        publicationFromServer.setIfTriedToGetPictureBefore(true);
                         InsertPublicationToDB(contentResolver, publicationFromServer);
-                        needToLoadPicturesFor.put(publicationFromServer.getUniqueId(), publicationFromServer.getVersion());
+//                        needToLoadPicturesFor.put(publicationFromServer.getUniqueId(), publicationFromServer.getVersion());
                     } else {
                         if (pubFromDB.getVersion() < publicationFromServer.getVersion()) {
                             DeletePublicationFromDB(contentResolver, pubFromDB);
-                            publicationFromServer.setIfTriedToGetPictureBefore(true);
+//                            publicationFromServer.setIfTriedToGetPictureBefore(true);
                             InsertPublicationToDB(contentResolver, publicationFromServer);
-                            needToLoadPicturesFor.put(publicationFromServer.getUniqueId(), publicationFromServer.getVersion());
+//                            needToLoadPicturesFor.put(publicationFromServer.getUniqueId(), publicationFromServer.getVersion());
                         } else {
                             UpdateRegsAndReports(contentResolver, publicationFromServer);
                             //if(pubFromDB.getImageByteArray() == null || pubFromDB.getImageByteArray().length == 0)
@@ -108,12 +108,12 @@ public class FooDoNetSQLExecuterAsync extends AsyncTask<InternalRequest, Void, V
                                     pubFromDB.getUniqueId() + "." + pubFromDB.getVersion() + ".jpg");
                             if(!f.exists())
                                 needToLoadPicturesFor.put(pubFromDB.getUniqueId(), pubFromDB.getVersion());*/
-                            if(!pubFromDB.getIfTriedToGetPictureBefore()){
-                                needToLoadPicturesFor.put(pubFromDB.getUniqueId(), pubFromDB.getVersion());
+//                            if(!pubFromDB.getIfTriedToGetPictureBefore()){
+//                                needToLoadPicturesFor.put(pubFromDB.getUniqueId(), pubFromDB.getVersion());
                                 DeletePublicationFromDB(contentResolver, pubFromDB);
-                                pubFromDB.setIfTriedToGetPictureBefore(true);
+//                                pubFromDB.setIfTriedToGetPictureBefore(true);
                                 InsertPublicationToDB(contentResolver, pubFromDB);
-                            }
+//                            }
                         }
                         publicationsFromDB.remove(pubFromDB);
                     }
@@ -472,7 +472,7 @@ public class FooDoNetSQLExecuterAsync extends AsyncTask<InternalRequest, Void, V
             case InternalRequest.ACTION_SQL_UPDATE_DB_PUBLICATIONS_FROM_SERVER:
                 InternalRequest respond = new InternalRequest(incomingRequest.ActionCommand, resultPublications);
                 respond.groups = resultGroups;
-                respond.listOfPubsToFetchImageFor = needToLoadPicturesFor;
+//                respond.listOfPubsToFetchImageFor = needToLoadPicturesFor;
                 callbackHandler.OnSQLTaskComplete(respond);
                 break;
             case InternalRequest.ACTION_SQL_GET_ALL_PUBS_FOR_LIST_BY_ID_DESC:

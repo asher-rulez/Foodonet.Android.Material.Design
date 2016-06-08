@@ -870,7 +870,7 @@ public class EntarenceMapAndListActivity
                 currentFilterID = FooDoNetSQLHelper.FILTER_ID_LIST_ALL_BY_LESS_REGS;
                 break;
         }
-        StartLoadingForPublicationsList();
+        RestartLoadingForPublicationsList();
     }
 
     @Override

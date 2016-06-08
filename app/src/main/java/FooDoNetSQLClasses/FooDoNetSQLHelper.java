@@ -20,7 +20,7 @@ public class FooDoNetSQLHelper extends SQLiteOpenHelper {
     private static final String MY_TAG = "food_SQLHelper";
 
     public static final String FC_DATABASE_NAME = "FoodCollector.db";
-    public static final int FC_DATABASE_VERSION = 12;
+    public static final int FC_DATABASE_VERSION = 13;
 
     public static final int FILTER_ID_LIST_ALL_BY_CLOSEST = 0;
     public static final int FILTER_ID_LIST_ALL_BY_NEWEST = 1;
@@ -147,7 +147,9 @@ public class FooDoNetSQLHelper extends SQLiteOpenHelper {
             //+ "PUBS." + FCPublication.PUBLICATION_PHOTO_URL + ", "
             //+ "PUBS." + FCPublication.PUBLICATION_IMAGE_BYTEARRAY_KEY + ", "
             + "COUNT (REGS." + RegisteredUserForPublication.REGISTERED_FOR_PUBLICATION_KEY_ID + ") "
-            + FCPublication.PUBLICATION_NUMBER_OF_REGISTERED;
+            + FCPublication.PUBLICATION_NUMBER_OF_REGISTERED + ", "
+            + "CASE WHEN GROUPS." + Group.GROUP_NAME_KEY + " IS NULL THEN '0' ELSE GROUPS."
+            + Group.GROUP_NAME_KEY + " END " + FCPublication.PUBLICATION_GROUP_NAME;
 
     private static final String RAW_FOR_LIST_SELECT_MY
             = "SELECT "
@@ -156,16 +158,24 @@ public class FooDoNetSQLHelper extends SQLiteOpenHelper {
             + "PUBS." + FCPublication.PUBLICATION_VERSION_KEY + ", "
             + "PUBS." + FCPublication.PUBLICATION_ENDING_DATE_KEY + ", "
             + "PUBS." + FCPublication.PUBLICATION_PHOTO_URL + ", "
-            + "PUBS." + FCPublication.PUBLICATION_IS_ON_AIR_KEY;
+            + "PUBS." + FCPublication.PUBLICATION_IS_ON_AIR_KEY + ", "
+            + "CASE WHEN GROUPS." + Group.GROUP_NAME_KEY + " IS NULL THEN '0' ELSE GROUPS."
+            + Group.GROUP_NAME_KEY + " END " + FCPublication.PUBLICATION_GROUP_NAME;
 
     private static final String RAW_FOR_LIST_FROM_OTHERS
             = " FROM " + FCPublicationsTable.FCPUBLICATIONS_TABLE_NAME + " PUBS "
             + "LEFT JOIN " + RegisteredForPublicationTable.REGISTERED_FOR_PUBLICATION_TABLE_NAME + " REGS "
             + "ON PUBS." + FCPublication.PUBLICATION_UNIQUE_ID_KEY
-            + " = REGS." + RegisteredUserForPublication.REGISTERED_FOR_PUBLICATION_KEY_PUBLICATION_ID;
+            + " = REGS." + RegisteredUserForPublication.REGISTERED_FOR_PUBLICATION_KEY_PUBLICATION_ID
+            + " LEFT JOIN " + GroupTable.GROUP_TABLE_NAME + " GROUPS "
+            + "ON PUBS." + FCPublication.PUBLICATION_AUDIENCE_KEY
+            + " = GROUPS." + Group.GROUP_ID_KEY;
 
     private static final String RAW_FOR_LIST_FROM_MY
-            = " FROM " + FCPublicationsTable.FCPUBLICATIONS_TABLE_NAME + " PUBS ";
+            = " FROM " + FCPublicationsTable.FCPUBLICATIONS_TABLE_NAME + " PUBS "
+            + " LEFT JOIN " + GroupTable.GROUP_TABLE_NAME + " GROUPS "
+            + "ON PUBS." + FCPublication.PUBLICATION_AUDIENCE_KEY
+            + " = GROUPS." + Group.GROUP_ID_KEY;
 
     private static final String RAW_FOR_LIST_GROUP
             = " GROUP BY "
