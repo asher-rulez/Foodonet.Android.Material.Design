@@ -17,6 +17,7 @@ import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.LoaderManager;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
@@ -618,10 +619,12 @@ public class EntarenceMapAndListActivity
                             case View.VISIBLE:
                                 currentMode = MODE_LIST;
                                 SetupMode();
+                                item.setIcon(ContextCompat.getDrawable(getApplicationContext(), R.drawable.map_menu_icon));
                                 break;
                             case View.GONE:
                                 currentMode = MODE_MAP;
                                 SetupMode();
+                                item.setIcon(ContextCompat.getDrawable(getApplicationContext(), R.drawable.list_xxh));
                                 break;
                         }
                     }

@@ -438,6 +438,11 @@ public class FooDoNetSQLProvider extends ContentProvider {
                             RegisteredUserForPublication.REGISTERED_FOR_PUBLICATION_KEY_PUBLICATION_ID + "=" + id + selection, selectionArgs);
                 }
                 break;
+            case PUBLICATION_REPORTS_BY_ID:
+                id = uri.getLastPathSegment();
+                    rowsDeleted = db.delete(PublicationReportsTable.PUBLICATION_REPORTS_TABLE_NAME,
+                        PublicationReport.PUBLICATION_REPORT_FIELD_KEY_PUBLICATION_ID + "=" + id, null);
+                break;
             case PUBLICATION_REPORT_ID:
                 id = uri.getLastPathSegment();
                 if (TextUtils.isEmpty(selection)) {

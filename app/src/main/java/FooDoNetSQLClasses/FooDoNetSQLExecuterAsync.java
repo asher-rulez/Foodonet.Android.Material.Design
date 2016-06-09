@@ -93,6 +93,7 @@ public class FooDoNetSQLExecuterAsync extends AsyncTask<InternalRequest, Void, V
                         //todo: logics of pub.setIfTriedToGetPictureBefore can be improved
                         //todo: by updating this field only after call to amazon
 //                        publicationFromServer.setIfTriedToGetPictureBefore(true);
+                        DeletePublicationFromDB(contentResolver, publicationFromServer);
                         InsertPublicationToDB(contentResolver, publicationFromServer);
 //                        needToLoadPicturesFor.put(publicationFromServer.getUniqueId(), publicationFromServer.getVersion());
                     } else {
@@ -110,9 +111,9 @@ public class FooDoNetSQLExecuterAsync extends AsyncTask<InternalRequest, Void, V
                                 needToLoadPicturesFor.put(pubFromDB.getUniqueId(), pubFromDB.getVersion());*/
 //                            if(!pubFromDB.getIfTriedToGetPictureBefore()){
 //                                needToLoadPicturesFor.put(pubFromDB.getUniqueId(), pubFromDB.getVersion());
-                                DeletePublicationFromDB(contentResolver, pubFromDB);
+//                                DeletePublicationFromDB(contentResolver, pubFromDB);
 //                                pubFromDB.setIfTriedToGetPictureBefore(true);
-                                InsertPublicationToDB(contentResolver, pubFromDB);
+//                                InsertPublicationToDB(contentResolver, pubFromDB);
 //                            }
                         }
                         publicationsFromDB.remove(pubFromDB);
@@ -446,12 +447,14 @@ public class FooDoNetSQLExecuterAsync extends AsyncTask<InternalRequest, Void, V
     }
 
     private void UpdateRegsAndReports(ContentResolver contentResolver, FCPublication publication) {
-        for (RegisteredUserForPublication reg : publication.getRegisteredForThisPublication())
-            contentResolver.delete(
-                    Uri.parse(FooDoNetSQLProvider.URI_DELETE_REGISTERED_FOR_PUBLICATION + "/" + reg.getId()), null, null);
-        for (PublicationReport pr : publication.getPublicationReports())
-            contentResolver.delete(
-                    Uri.parse(FooDoNetSQLProvider.URI_GET_ALL_REPORTS + "/" + pr.getId()), null, null);
+//        for (RegisteredUserForPublication reg : publication.getRegisteredForThisPublication())
+//            contentResolver.delete(
+//                    Uri.parse(FooDoNetSQLProvider.URI_DELETE_REGISTERED_FOR_PUBLICATION + "/" + reg.getId()), null, null);
+        contentResolver.delete(Uri.parse(FooDoNetSQLProvider.URI_DELETE_REGISTERED_USER_BY_PUBLICATION_ID + "/" + publication.getUniqueId()), null, null);
+//        for (PublicationReport pr : publication.getPublicationReports())
+//            contentResolver.delete(
+//                    Uri.parse(FooDoNetSQLProvider.URI_GET_ALL_REPORTS + "/" + pr.getId()), null, null);
+        contentResolver.delete(Uri.parse(FooDoNetSQLProvider.URI_GET_ALL_REPORTS_BY_PUB_ID + "/" + publication.getUniqueId()), null, null);
         for (RegisteredUserForPublication reg : publication.getRegisteredForThisPublication())
             contentResolver.insert(FooDoNetSQLProvider.URI_INSERT_REGISTERED_FOR_PUBLICATION, reg.GetContentValuesRow());
         for (PublicationReport pr : publication.getPublicationReports()) {
