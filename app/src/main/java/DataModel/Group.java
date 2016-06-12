@@ -29,6 +29,9 @@ public class Group implements ICanWriteSelfToJSONWriter, Serializable {
 
     public static final String GROUP_ITEM_JSON_KEY = "group";
 
+    public static final String GROUP_ID_FOR_JSON_KEY = "group_id";
+    public static final String GROUP_NAME_KEY_FOR_INCOMING_JSON = "group_name";
+
     public Group() {
     }
 
@@ -108,6 +111,16 @@ public class Group implements ICanWriteSelfToJSONWriter, Serializable {
         _group_members.addAll(members);
     }
 
+    private String groupOwnerName;
+
+    public String getGroupOwnerName() {
+        return groupOwnerName;
+    }
+
+    public void setGroupOwnerName(String groupOwnerName) {
+        this.groupOwnerName = groupOwnerName;
+    }
+
     public static String[] GetColumnNamesArray() {
         return
                 new String[]{
@@ -173,8 +186,8 @@ public class Group implements ICanWriteSelfToJSONWriter, Serializable {
         if (jo == null) return null;
         Group group = new Group();
         try {
-            group.Set_id(jo.getInt(GROUP_ID_KEY));
-            group.Set_name(jo.getString(GROUP_NAME_KEY));
+            group.Set_id(jo.getInt(GROUP_ID_FOR_JSON_KEY));
+            group.Set_name(jo.getString(GROUP_NAME_KEY_FOR_INCOMING_JSON));
             group.Set_admin_id(jo.getInt(GROUP_ADMIN_ID_KEY));
             JSONArray jsonArrayMembers = jo.getJSONArray(GROUP_MEMBERS_KEY);
             for (int i = 0; i < jsonArrayMembers.length(); i++){

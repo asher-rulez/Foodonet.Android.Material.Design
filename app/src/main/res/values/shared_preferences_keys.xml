@@ -25,5 +25,7 @@
     <string name="shared_preferences_user_data_token">user_data</string>
     <string name="shared_preferences_user_data_id_key">user_id</string>
     <string name="shared_preferences_user_data_phone_num_key">user_phone_num</string>
+    <string name="shared_preferences_user_data_user_name">user_name</string>
+    <string name="shared_preferences_user_data_email">email</string>
 
 </resources>

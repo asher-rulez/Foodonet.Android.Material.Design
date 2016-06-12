@@ -351,7 +351,7 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
         ir.SocialNetworkID = profile.getId();
         ir.SocialNetworkToken = "token1";
         ir.PhoneNumber = "";
-        ir.Email = "email_from_facebook";
+        ir.Email = "";
         ir.UserName = profile.getName();
         ir.IsLoggedIn = true;
         ir.DeviceUUID = CommonUtil.GetIMEI(this);

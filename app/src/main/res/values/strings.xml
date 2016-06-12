@@ -2,12 +2,6 @@
 <resources>
 
     <string name="app_name">Foodonet</string>
-    <string name="ttl_item_your_sh_menu">Your sharings</string>
-    <string name="ttl_item_sub_menu">Subscription</string>
-    <string name="ttl_item_groups_menu">Groups</string>
-    <string name="ttl_item_settings_menu">Settings</string>
-    <string name="ttl_item_contact_menu">Contact us</string>
-    <string name="ttl_item_terms_menu"><![CDATA[Terms & conditions]]></string>
     <string name="open">open</string>
     <string name="close">close</string>
     <string name="title_activity_sql_loader_result">SqlLoaderResultActivity</string>
@@ -364,6 +358,9 @@
     <string name="title_activity_select_contacts_for_group">SelectContactsForGroupActivity</string>
     <string name="title_activity_add_edit_publication">AddEditPublicationActivity</string>
     <string name="hello_world">Hello world!</string>
+    <string name="user_avatar_file_name">avatar.jpeg</string>
+
+    <string name="title_activity_select_group_for_publication">aaa</string>
 
     <!-- Publications list -->
 
@@ -383,5 +380,19 @@
     <string name="filter_active_my_pubs">Active</string>
     <string name="filter_ended_my_pubs">Ended</string>
     <string name="new_pub_waiting_for_save_on_server">Saving publications to server, please wait</string>
+
+    <!-- Navigation side menu -->
+
+    <string name="ttl_item_your_sh_menu">Your sharings</string>
+    <string name="ttl_item_sub_menu">Subscription</string>
+    <string name="ttl_item_groups_menu">Groups</string>
+    <string name="ttl_item_settings_menu">Settings</string>
+    <string name="ttl_item_contact_menu">Contact us</string>
+    <string name="ttl_item_terms_menu"><![CDATA[Terms & conditions]]></string>
+
+    <!-- Add/edit publication -->
+
+    <string name="public_share_group_name">Public</string>
+    <string name="loading_groups">Loading groups</string>
 
 </resources>

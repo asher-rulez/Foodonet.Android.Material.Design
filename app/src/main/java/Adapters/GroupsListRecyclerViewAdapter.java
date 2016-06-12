@@ -14,7 +14,7 @@ import upp.foodonet.material.R;
 /**
  * Created by Asher on 30.04.2016.
  */
-public class GroupsListRecyclerViewAdapter extends RecyclerView.Adapter<GroupsListRecyclerViewAdapter.ViewHolder> {
+public class GroupsListRecyclerViewAdapter extends RecyclerView.Adapter<GroupsListRecyclerViewAdapter.GroupsListViewHolder> {
     private ArrayList<Group> groupsList;
     private IOnGroupSelecterFromListListener groupSelectedListener;
 
@@ -31,13 +31,13 @@ public class GroupsListRecyclerViewAdapter extends RecyclerView.Adapter<GroupsLi
     }
 
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public GroupsListViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.groups_list_item, parent, false);
-        return new ViewHolder(view);
+        return new GroupsListViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(final ViewHolder holder, int position) {
+    public void onBindViewHolder(final GroupsListViewHolder holder, int position) {
         Group group = groupsList.get(position);
         holder.setGroupID(group.Get_id());
         holder.setGroupMembersCount(group.get_members_count());
@@ -55,13 +55,13 @@ public class GroupsListRecyclerViewAdapter extends RecyclerView.Adapter<GroupsLi
         return groupsList.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    public class GroupsListViewHolder extends RecyclerView.ViewHolder {
         private TextView groupTitle;
         private TextView groupMembersCount;
         private int groupID;
         public View view;
 
-        public ViewHolder(View itemView) {
+        public GroupsListViewHolder(View itemView) {
             super(itemView);
             view = itemView;
             groupTitle = (TextView) view.findViewById(R.id.tv_groups_list_item_title);

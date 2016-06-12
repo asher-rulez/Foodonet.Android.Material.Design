@@ -62,6 +62,7 @@ public class InternalRequest implements Serializable {
     public static final int ACTION_POST_EDIT_USER = 30;
     public static final int ACTION_POST_NEW_GROUP = 31;
     public static final int ACTION_GET_GROUPS_BY_USER = 32;
+    public static final int ACTION_GET_GROUPS_FROM_SQL = 33;
     public static final int ACTION_POST_FEEDBACK = 99;
 
 

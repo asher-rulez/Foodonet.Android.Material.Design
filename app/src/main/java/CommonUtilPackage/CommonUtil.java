@@ -447,10 +447,14 @@ public class CommonUtil {
 
     public static void PutCommonPreferencesIsRegisteredGoogleFacebook(Context context, GoogleSignInAccount account) {
         PutCommonPreferencesSocialAccountData(context, "google", account.getDisplayName(), account.getIdToken());
+        SaveMyUserNameToPreferences(context, account.getDisplayName());
+        SaveMyEmailToPreferences(context, account.getEmail());
     }
 
     public static void PutCommonPreferencesIsRegisteredGoogleFacebook(Context context, Profile account) {
         PutCommonPreferencesSocialAccountData(context, "facebook", account.getName(), account.getId());
+        SaveMyUserNameToPreferences(context, account.getName());
+        SaveMyEmailToPreferences(context, "");
     }
 
     private static void PutCommonPreferencesSocialAccountData(Context context, String socialAccountType, String socialAccountName, String socialAccountToken) {
@@ -616,6 +620,30 @@ public class CommonUtil {
         SharedPreferences sp = context.getSharedPreferences(context.getString(R.string.shared_preferences_user_data_token), Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sp.edit();
         editor.putString(context.getString(R.string.shared_preferences_user_data_phone_num_key), phoneNum);
+        return editor.commit();
+    }
+
+    public static String GetMyUserNameFromPreferences(Context context) {
+        SharedPreferences sp = context.getSharedPreferences(context.getString(R.string.shared_preferences_user_data_token), Context.MODE_PRIVATE);
+        return sp.getString(context.getString(R.string.shared_preferences_user_data_user_name), "");
+    }
+
+    public static boolean SaveMyUserNameToPreferences(Context context, String phoneNum) {
+        SharedPreferences sp = context.getSharedPreferences(context.getString(R.string.shared_preferences_user_data_token), Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sp.edit();
+        editor.putString(context.getString(R.string.shared_preferences_user_data_user_name), phoneNum);
+        return editor.commit();
+    }
+
+    public static String GetMyEmailFromPreferences(Context context) {
+        SharedPreferences sp = context.getSharedPreferences(context.getString(R.string.shared_preferences_user_data_token), Context.MODE_PRIVATE);
+        return sp.getString(context.getString(R.string.shared_preferences_user_data_email), "");
+    }
+
+    public static boolean SaveMyEmailToPreferences(Context context, String phoneNum) {
+        SharedPreferences sp = context.getSharedPreferences(context.getString(R.string.shared_preferences_user_data_token), Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sp.edit();
+        editor.putString(context.getString(R.string.shared_preferences_user_data_email), phoneNum);
         return editor.commit();
     }
 

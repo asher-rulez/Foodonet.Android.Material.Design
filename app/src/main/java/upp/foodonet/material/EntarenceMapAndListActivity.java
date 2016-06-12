@@ -19,6 +19,7 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -35,6 +36,7 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -76,6 +78,7 @@ import DataModel.FCPublication;
 import FooDoNetSQLClasses.FooDoNetSQLHelper;
 import FooDoNetServerClasses.ImageDownloader;
 import FooDoNetServiceUtil.FooDoNetCustomActivityConnectedToService;
+import UIUtil.RoundedImageView;
 import upp.foodonet.material.R;
 
 public class EntarenceMapAndListActivity
@@ -140,6 +143,16 @@ public class EntarenceMapAndListActivity
 
     DrawerLayout drawerLayout;
     boolean isSideMenuOpened;
+    RoundedImageView riv_user_portrait;
+    TextView tv_user_name;
+    TextView tv_user_email;
+    RelativeLayout btn_nav_menu_my_pubs;
+    RelativeLayout btn_nav_menu_subscriptions;
+    RelativeLayout btn_nav_menu_groups;
+    RelativeLayout btn_nav_menu_settings;
+    RelativeLayout btn_nav_menu_contact_us;
+    RelativeLayout btn_nav_menu_terms;
+
 
     //endregion
 
@@ -231,7 +244,7 @@ public class EntarenceMapAndListActivity
         super.onBackPressed();
     }
 
-    public void SetupMode(){
+    public void SetupMode() {
         switch (currentMode) {
             case MODE_LIST:
                 SetFrameList();
@@ -267,7 +280,22 @@ public class EntarenceMapAndListActivity
                 CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(CommonUtil.GetBoundsByCenterLatLng(myLocation, maxDistance), width, height, 0);
                 googleMap.animateCamera(cu);
                 break;
-
+            case R.id.rl_btn_my_publications_list:
+                Intent intent = new Intent(getApplicationContext(), MyPublicationsActivity.class);
+                startActivity(intent);
+                break;
+            case R.id.rl_btn_subscriptions:
+                break;
+            case R.id.rl_btn_groups:
+                Intent intentGroups = new Intent(getApplicationContext(), GroupsListActivity.class);
+                startActivity(intentGroups);
+                break;
+            case R.id.rl_btn_settings:
+                break;
+            case R.id.rl_btn_contact_us:
+                break;
+            case R.id.rl_btn_terms_and_conditions:
+                break;
         }
         //CoordinatorLayout.LayoutParams layoutParams = (CoordinatorLayout.LayoutParams)fab.getLayoutParams();
         //new CoordinatorLayout.LayoutParams(fab.getWidth(), fab.getHeight());//
@@ -663,7 +691,7 @@ public class EntarenceMapAndListActivity
     private void initNavVew() {
         drawerLayout = (DrawerLayout) findViewById(R.id.dl_main);
 
-        ActionBarDrawerToggle actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.open, R.string.close){
+        ActionBarDrawerToggle actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.open, R.string.close) {
             @Override
             public void onDrawerClosed(View drawerView) {
                 isSideMenuOpened = false;
@@ -682,9 +710,45 @@ public class EntarenceMapAndListActivity
 
         actionBarDrawerToggle.syncState();
 
-        NavigationView v = (NavigationView) findViewById(R.id.nv_main);
-        if (v != null)
-            v.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+
+        //NavigationView navView = (NavigationView) findViewById(R.id.nv_main);
+        //View navHeader = navView.getHeaderView(0);
+        riv_user_portrait = (RoundedImageView) findViewById(R.id.riv_nav_header_user_portrait);
+        tv_user_name = (TextView) findViewById(R.id.tv_nav_header_user_name);
+        tv_user_email = (TextView) findViewById(R.id.tv_nav_header_user_email);
+
+        riv_user_portrait.setImageDrawable(
+                CommonUtil.GetBitmapDrawableFromFile(getString(R.string.user_avatar_file_name),
+                        getString(R.string.image_folder_path), 90, 90));
+        tv_user_name.setText(CommonUtil.GetMyUserNameFromPreferences(this));
+        tv_user_email.setText(CommonUtil.GetMyEmailFromPreferences(this));
+
+        btn_nav_menu_my_pubs = (RelativeLayout) findViewById(R.id.rl_btn_my_publications_list);
+        btn_nav_menu_my_pubs.setOnClickListener(this);
+        btn_nav_menu_subscriptions = (RelativeLayout) findViewById(R.id.rl_btn_subscriptions);
+        btn_nav_menu_subscriptions.setOnClickListener(this);
+        btn_nav_menu_groups = (RelativeLayout) findViewById(R.id.rl_btn_groups);
+        btn_nav_menu_groups.setOnClickListener(this);
+        btn_nav_menu_settings = (RelativeLayout) findViewById(R.id.rl_btn_settings);
+        btn_nav_menu_settings.setOnClickListener(this);
+        btn_nav_menu_contact_us = (RelativeLayout) findViewById(R.id.rl_btn_contact_us);
+        btn_nav_menu_contact_us.setOnClickListener(this);
+        btn_nav_menu_terms = (RelativeLayout) findViewById(R.id.rl_btn_terms_and_conditions);
+        btn_nav_menu_terms.setOnClickListener(this);
+
+//        Menu menuNav = v.getMenu();
+//        menuNav.clear();
+//        menuNav.add(0,0,0,"mySharings");
+//        MenuItem menuItemMyList = menuNav.findItem(0);
+//        View view = View.inflate(this, R.layout.nav_menu_item, null);
+//        menuItemMyList.setActionView(view);
+        //MenuItemCompat.setActionView(menuItemMyList, view);
+
+        //View view1 = MenuItemCompat.getActionView(menuItemMyList);
+
+/*
+        if (navView != null) {
+            navView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
                 @Override
                 public boolean onNavigationItemSelected(MenuItem item) {
                     drawerLayout.closeDrawers();
@@ -717,6 +781,8 @@ public class EntarenceMapAndListActivity
                     return true;
                 }
             });
+        }
+*/
     }
 
     //endregion

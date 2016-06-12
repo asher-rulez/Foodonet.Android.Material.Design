@@ -39,13 +39,14 @@ public class DownloadImageTask extends AsyncTask<Void, Void, Void> {
 
     private static final String MY_TAG = "DownloadImageTask";
 
-    private static final String AVATAR_PICTURE_FILE_NAME = "avatar.jpeg";
+    //private static final String AVATAR_PICTURE_FILE_NAME = "avatar.jpeg";
 
     private boolean isAvatarPicture;
 
     IDownloadImageCallBack callback;
     String baseUrl;
     String avatarUrl;
+    String avatarFileName;
 
     private int maxImageWidthHeight;
     private String imageFolderPath;
@@ -77,7 +78,7 @@ public class DownloadImageTask extends AsyncTask<Void, Void, Void> {
         this.imageView = null;
     }
 
-    public DownloadImageTask(String photoUrl, int maxImageWidthHeight, String imageFolderPath, ImageView imageView) {
+    public DownloadImageTask(String photoUrl, int maxImageWidthHeight, String imageFolderPath, ImageView imageView, String fileName) {
         this.imageView = imageView;
         this.callback = null;
         avatarUrl = photoUrl;
@@ -85,6 +86,7 @@ public class DownloadImageTask extends AsyncTask<Void, Void, Void> {
         this.maxImageWidthHeight = maxImageWidthHeight;
         this.imageFolderPath = imageFolderPath;
         isAvatarPicture = true;
+        avatarFileName = fileName;
     }
 
     public synchronized void setRequestHashMap(Map<Integer, Integer> urls) {
@@ -100,7 +102,7 @@ public class DownloadImageTask extends AsyncTask<Void, Void, Void> {
     protected Void doInBackground(Void... params) {
         if (isAvatarPicture) {
             InputStream is = null;
-            imageAvatar = CommonUtil.LoadAndSavePicture(is, avatarUrl, maxImageWidthHeight, imageFolderPath, AVATAR_PICTURE_FILE_NAME);
+            imageAvatar = CommonUtil.LoadAndSavePicture(is, avatarUrl, maxImageWidthHeight, imageFolderPath, avatarFileName);
             Log.i(MY_TAG, "loaded avatar picture from " + avatarUrl);
         } else {
             resultImages = new HashMap<>();

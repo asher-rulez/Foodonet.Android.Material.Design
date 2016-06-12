@@ -103,10 +103,10 @@ public class SplashScreenActivity
             case 1:
                 InternalRequest ir = (InternalRequest)data.getSerializableExtra(InternalRequest.INTERNAL_REQUEST_EXTRA_KEY);
                 if(ir != null){
-                    if(ir.PhotoURL != null){
-                        DownloadImageTask imageTask = new DownloadImageTask(ir.PhotoURL, 100, getString(R.string.image_folder_path));
-                        imageTask.execute();
-                    }
+//                    if(ir.PhotoURL != null){
+//                        DownloadImageTask imageTask = new DownloadImageTask(ir.PhotoURL, 100, getString(R.string.image_folder_path));
+//                        imageTask.execute();
+//                    }
                     HttpServerConnectorAsync connectorAsync
                             = new HttpServerConnectorAsync(getString(R.string.server_base_url), (IFooDoNetServerCallback)this);
                     connectorAsync.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, ir);

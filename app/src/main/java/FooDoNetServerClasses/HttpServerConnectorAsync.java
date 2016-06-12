@@ -486,25 +486,35 @@ public class HttpServerConnectorAsync extends AsyncTask<InternalRequest, Void, S
                     ArrayList<GroupMember> members = new ArrayList<>();
                     members.add(params[0].groupOwner);
                     members.addAll(params[0].groupMembersToAdd);
-                    for(GroupMember member : members){
                         isSuccess = false;
                         responseString = "";
                         GroupMembersForPost memberOwner = new GroupMembersForPost();
-                        member.set_group_id(group.Get_id());
+                        for(GroupMember member : members){
+                            member.set_group_id(group.Get_id());
                         memberOwner.AddGroupMembers(member);
+                        }
                         MakeServerRequest(REQUEST_METHOD_POST, params[0].MembersServerSubPath, memberOwner, true);
                         if(!isSuccess || TextUtils.isEmpty(responseString)){
-                            Log.e(MY_TAG, "failed to save user: " + member.get_name() + " " + member.get_phone_number() + (member.get_is_admin() ? "(admin)":""));
+                            //Log.e(MY_TAG, "failed to save user: " + member.get_name() + " " + member.get_phone_number() + (member.get_is_admin() ? "(admin)":""));
+                            Log.e(MY_TAG, "failed to save users");
                         }else{
                             try {
                                 JSONArray memberObjArray = new JSONArray(responseString);
-                                member.set_id(memberObjArray.getJSONObject(0).getInt("id"));
-                                group.add_group_member(member);
+                                for(int i = 0; i < memberOwner.groupMembers.size(); i++) {
+                                    members.get(i).set_id(memberObjArray.getJSONObject(0).getInt("id"));
+                                    group.add_group_member(members.get(i));
+                                }
                             } catch (JSONException e) {
                                 e.printStackTrace();
+//                                try {
+//                                    JSONArray memberObjArray = new JSONArray(responseString);
+//                                    member.set_id(memberObjArray.getInt(0));
+//                                    group.add_group_member(member);
+//                                } catch (JSONException e1){
+//                                    e.printStackTrace();
+//                                }
                             }
                         }
-                    }
                 } else
                     isSuccess = false;
                 return "";

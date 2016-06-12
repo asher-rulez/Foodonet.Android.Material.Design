@@ -71,7 +71,7 @@ public class MyPublicationsActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_my_publications);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.tb_my_list);
         setSupportActionBar(toolbar);
 
         fab_add_pub = (FloatingActionButton) findViewById(R.id.fab_my_list_add_new_pub);

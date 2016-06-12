@@ -82,7 +82,7 @@ import DataModel.FCTypeOfCollecting;
 
 
 public class AddEditPublicationActivity extends FragmentActivity
-        implements View.OnClickListener, Toolbar.OnMenuItemClickListener,GoogleApiClient.OnConnectionFailedListener,
+        implements View.OnClickListener, Toolbar.OnMenuItemClickListener, GoogleApiClient.OnConnectionFailedListener,
         GoogleApiClient.ConnectionCallbacks, View.OnTouchListener, DialogInterface.OnDismissListener,
         DialogInterface.OnCancelListener, IGotMyLocationCallback, AdapterView.OnItemClickListener,
         TextWatcher, TextView.OnEditorActionListener {
@@ -101,6 +101,7 @@ public class AddEditPublicationActivity extends FragmentActivity
     private TextView mIdTextView;
     private EditText et_publication_title;
     private EditText et_address;
+    private EditText et_share_with;
     private EditText et_more_details;
 
     //address picker
@@ -133,6 +134,10 @@ public class AddEditPublicationActivity extends FragmentActivity
     private static final LatLngBounds BOUNDS_ISRAEL_VIEW = new LatLngBounds(
             new LatLng(29.525670, 34.991455), new LatLng(33.252470, 35.897827));
     private String addressTmpForEdit = "";
+
+    private boolean startedSelectGroup = false;
+    private final int ACTIVITY_FOR_RESULT_REQUEST_CODE_SELECT_GROUP = 3;
+
 
     Context context = this;
 
@@ -188,6 +193,9 @@ public class AddEditPublicationActivity extends FragmentActivity
         et_address = (EditText) findViewById(R.id.et_address_edit_add_pub);
         et_address.setOnClickListener(this);
         et_address.setOnTouchListener(this);
+
+        et_share_with = (EditText) findViewById(R.id.et_share_with);
+        et_share_with.setOnTouchListener(this);
 
         if (isNew || publication.getEndingDate().compareTo(new Date()) <= 0) {
             Calendar calendar = Calendar.getInstance();
@@ -278,12 +286,12 @@ public class AddEditPublicationActivity extends FragmentActivity
             case R.id.et_title_new_publication:
                 CommonUtil.RemoveValidationFromEditText(this, et_publication_title);
                 break;
-            case R.id.et_address_edit_add_pub:
-                et_publication_title.getBackground()
-                        .setColorFilter(getResources()
-                                .getColor(R.color.edit_text_input_default_color), PorterDuff.Mode.SRC_ATOP);
-                ShowAddressDialog();
-                break;
+//            case R.id.et_address_edit_add_pub:
+//                et_publication_title.getBackground()
+//                        .setColorFilter(getResources()
+//                                .getColor(R.color.edit_text_input_default_color), PorterDuff.Mode.SRC_ATOP);
+//                ShowAddressDialog();
+//                break;
             case R.id.actv_address_new_publication:
                 CommonUtil.RemoveValidationFromEditText(this, atv_address);
                 break;
@@ -429,6 +437,13 @@ public class AddEditPublicationActivity extends FragmentActivity
                 if (!addressDialogStarted)
                     ShowAddressDialog();
                 break;
+            case R.id.et_share_with:
+                if (startedSelectGroup)
+                    return true;
+                startedSelectGroup = true;
+                Intent chooseGroupIntent = new Intent(this, SelectGroupForPublicationActivity.class);
+                startActivityForResult(chooseGroupIntent, ACTIVITY_FOR_RESULT_REQUEST_CODE_SELECT_GROUP);
+                break;
         }
         return true;
     }
@@ -474,50 +489,57 @@ public class AddEditPublicationActivity extends FragmentActivity
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
         Log.i(MY_TAG, "Entered onActivityResult()");
-
-        if (resultCode == RESULT_OK) {
-            publication.pictureWasChangedDuringEditing = true;
-            if (requestCode == REQUEST_CAMERA) {
-                Bitmap thumbnail = (Bitmap) data.getExtras().get("data");
-                thumbnail = CommonUtil.CompressBitmapByMaxSize(thumbnail,
-                        getResources().getInteger(R.integer.max_image_width_height));
-                publication.setImageByteArrayFromBitmap(thumbnail);
-                ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-                thumbnail.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
-                File destination = new File(Environment.getExternalStorageDirectory()
-                        + getResources().getString(R.string.image_folder_path),
-                        System.currentTimeMillis() + getString(R.string.file_name_part_just_shot) + ".jpg");
-                FileOutputStream fo;
-                try {
-                    destination.createNewFile();
-                    fo = new FileOutputStream(destination);
-                    fo.write(bytes.toByteArray());
-                    fo.close();
-                    publication.setPhotoUrl(destination.getAbsolutePath());
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
+        switch (requestCode) {
+            case REQUEST_CAMERA:
+            case SELECT_FILE:
+                if (resultCode == RESULT_OK) {
+                    publication.pictureWasChangedDuringEditing = true;
+                    if (requestCode == REQUEST_CAMERA) {
+                        Bitmap thumbnail = (Bitmap) data.getExtras().get("data");
+                        thumbnail = CommonUtil.CompressBitmapByMaxSize(thumbnail,
+                                getResources().getInteger(R.integer.max_image_width_height));
+                        publication.setImageByteArrayFromBitmap(thumbnail);
+                        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+                        thumbnail.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+                        File destination = new File(Environment.getExternalStorageDirectory()
+                                + getResources().getString(R.string.image_folder_path),
+                                System.currentTimeMillis() + getString(R.string.file_name_part_just_shot) + ".jpg");
+                        FileOutputStream fo;
+                        try {
+                            destination.createNewFile();
+                            fo = new FileOutputStream(destination);
+                            fo.write(bytes.toByteArray());
+                            fo.close();
+                            publication.setPhotoUrl(destination.getAbsolutePath());
+                        } catch (FileNotFoundException e) {
+                            e.printStackTrace();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        mAddPicImageView.setImageBitmap(thumbnail);
+                    } else if (requestCode == SELECT_FILE) {
+                        Uri selectedImageUri = data.getData();
+                        String[] projection = {MediaStore.MediaColumns.DATA};
+                        Cursor cursor = managedQuery(selectedImageUri, projection, null, null,
+                                null);
+                        if (cursor == null)
+                            throw new NullPointerException("can't get picture cursor, critical error");
+                        int column_index = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
+                        cursor.moveToFirst();
+                        String selectedImagePath = cursor.getString(column_index);
+                        publication.setPhotoUrl(selectedImagePath);
+                        Bitmap bm = CommonUtil.decodeScaledBitmapFromSdCard(selectedImagePath, 200, 200);
+                        mAddPicImageView.setImageBitmap(bm);
+                        publication.setImageByteArrayFromBitmap(bm);
+                    }
                 }
-                mAddPicImageView.setImageBitmap(thumbnail);
-            } else if (requestCode == SELECT_FILE) {
-                Uri selectedImageUri = data.getData();
-                String[] projection = {MediaStore.MediaColumns.DATA};
-                Cursor cursor = managedQuery(selectedImageUri, projection, null, null,
-                        null);
-                if (cursor == null)
-                    throw new NullPointerException("can't get picture cursor, critical error");
-                int column_index = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
-                cursor.moveToFirst();
-                String selectedImagePath = cursor.getString(column_index);
-                publication.setPhotoUrl(selectedImagePath);
-                Bitmap bm = CommonUtil.decodeScaledBitmapFromSdCard(selectedImagePath, 200, 200);
-                mAddPicImageView.setImageBitmap(bm);
-                publication.setImageByteArrayFromBitmap(bm);
-            }
-        }
-        if (resultCode == RESULT_CANCELED) {
+                if (resultCode == RESULT_CANCELED) {
 
+                }
+                break;
+            case ACTIVITY_FOR_RESULT_REQUEST_CODE_SELECT_GROUP:
+                startedSelectGroup = false;
+                break;
         }
     }
 
@@ -746,7 +768,7 @@ public class AddEditPublicationActivity extends FragmentActivity
 
     @Override
     public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-        if(v.getId() == R.id.et_title_new_publication && actionId == EditorInfo.IME_ACTION_NEXT){
+        if (v.getId() == R.id.et_title_new_publication && actionId == EditorInfo.IME_ACTION_NEXT) {
             onTouch(et_address, null);
             return true;
         }
@@ -792,15 +814,15 @@ public class AddEditPublicationActivity extends FragmentActivity
     @Override
     public boolean onMenuItemClick(MenuItem item) {
         switch (item.getItemId()) {
-                    case R.id.done:
-                        if (publication.IsEqualTo(publicationOldVersion))
-                            onBackPressed();
-                        if (!ValidateInputData()) return false;
-                        ArrangePublicationFromInput(publication);
-                        ReturnPublication();
-                        return true;
-                }
-                return false;
+            case R.id.done:
+                if (publication.IsEqualTo(publicationOldVersion))
+                    onBackPressed();
+                if (!ValidateInputData()) return false;
+                ArrangePublicationFromInput(publication);
+                ReturnPublication();
+                return true;
+        }
+        return false;
     }
 
     //endregion

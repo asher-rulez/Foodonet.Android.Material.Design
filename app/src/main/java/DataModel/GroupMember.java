@@ -20,7 +20,7 @@ public class GroupMember implements ICanWriteSelfToJSONWriter, Serializable {
 
     private static final String MY_TAG = "food_groupMember";
 
-    public static final String GROUP_MEMBER_ID_KEY_JSON = "member_id";
+    public static final String GROUP_MEMBER_ID_KEY_JSON = "id";
     public static final String GROUP_MEMBER_ID_KEY = "_id";
     public static final String GROUP_MEMBER_USER_ID_KEY = "user_id";
     public static final String GROUP_MEMBER_GROUP_ID_KEY = "Group_id";

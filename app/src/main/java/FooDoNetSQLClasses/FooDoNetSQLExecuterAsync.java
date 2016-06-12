@@ -46,6 +46,7 @@ public class FooDoNetSQLExecuterAsync extends AsyncTask<InternalRequest, Void, V
     ContentResolver contentResolver;
     InternalRequest incomingRequest;
     int newNegativeID;
+    ArrayList<Group> groupsFromDB;
 //    Map<Integer, Integer> needToLoadPicturesFor;
     Context context;
 
@@ -71,40 +72,46 @@ public class FooDoNetSQLExecuterAsync extends AsyncTask<InternalRequest, Void, V
                 publicationsFromServer = params[0].publications;
                 regUsersFromServer = params[0].registeredUsers;
 //                needToLoadPicturesFor = new HashMap<>();
-                if (publicationsFromServer == null || publicationsFromServer.size() == 0
-                        || contentResolver == null || callbackHandler == null)
+                if (contentResolver == null) {
+                    Log.e(MY_TAG, "error: contentresolver null");
                     return null;
-                Cursor cursor = contentResolver.query(FooDoNetSQLProvider.CONTENT_URI,
-                        FCPublication.GetColumnNamesArray(), null, null, null);
-                publicationsFromDB = FCPublication.GetArrayListOfPublicationsFromCursor(cursor, false);
-                cursor.close();
-                cursor = null;
-                cursor = contentResolver.query(FooDoNetSQLProvider.URI_GET_ALL_REGS,
-                        RegisteredUserForPublication.GetColumnNamesArray(), null, null, null);
-                ArrayList<RegisteredUserForPublication> regs
-                        = RegisteredUserForPublication.GetArrayListOfRegisteredForPublicationsFromCursor(cursor);
-                cursor.close();
-                resultPublications = new ArrayList<FCPublication>();
-                for (FCPublication publicationFromServer : publicationsFromServer) {
-                    resultPublications.add(publicationFromServer);
-                    FCPublication pubFromDB
-                            = FCPublication.GetPublicationFromArrayListByID(publicationsFromDB, publicationFromServer.getUniqueId());
-                    if (pubFromDB == null) {
-                        //todo: logics of pub.setIfTriedToGetPictureBefore can be improved
-                        //todo: by updating this field only after call to amazon
+                }
+                if(callbackHandler == null){
+                    Log.e(MY_TAG, "error: callbackHandler null");
+                    return null;
+                }
+                if(publicationsFromServer != null && publicationsFromServer.size() != 0) {
+                    Cursor cursor = contentResolver.query(FooDoNetSQLProvider.CONTENT_URI,
+                            FCPublication.GetColumnNamesArray(), null, null, null);
+                    publicationsFromDB = FCPublication.GetArrayListOfPublicationsFromCursor(cursor, false);
+                    cursor.close();
+                    cursor = null;
+                    cursor = contentResolver.query(FooDoNetSQLProvider.URI_GET_ALL_REGS,
+                            RegisteredUserForPublication.GetColumnNamesArray(), null, null, null);
+                    ArrayList<RegisteredUserForPublication> regs
+                            = RegisteredUserForPublication.GetArrayListOfRegisteredForPublicationsFromCursor(cursor);
+                    cursor.close();
+                    resultPublications = new ArrayList<FCPublication>();
+                    for (FCPublication publicationFromServer : publicationsFromServer) {
+                        resultPublications.add(publicationFromServer);
+                        FCPublication pubFromDB
+                                = FCPublication.GetPublicationFromArrayListByID(publicationsFromDB, publicationFromServer.getUniqueId());
+                        if (pubFromDB == null) {
+                            //todo: logics of pub.setIfTriedToGetPictureBefore can be improved
+                            //todo: by updating this field only after call to amazon
 //                        publicationFromServer.setIfTriedToGetPictureBefore(true);
-                        DeletePublicationFromDB(contentResolver, publicationFromServer);
-                        InsertPublicationToDB(contentResolver, publicationFromServer);
-//                        needToLoadPicturesFor.put(publicationFromServer.getUniqueId(), publicationFromServer.getVersion());
-                    } else {
-                        if (pubFromDB.getVersion() < publicationFromServer.getVersion()) {
-                            DeletePublicationFromDB(contentResolver, pubFromDB);
-//                            publicationFromServer.setIfTriedToGetPictureBefore(true);
+                            DeletePublicationFromDB(contentResolver, publicationFromServer);
                             InsertPublicationToDB(contentResolver, publicationFromServer);
-//                            needToLoadPicturesFor.put(publicationFromServer.getUniqueId(), publicationFromServer.getVersion());
+//                        needToLoadPicturesFor.put(publicationFromServer.getUniqueId(), publicationFromServer.getVersion());
                         } else {
-                            UpdateRegsAndReports(contentResolver, publicationFromServer);
-                            //if(pubFromDB.getImageByteArray() == null || pubFromDB.getImageByteArray().length == 0)
+                            if (pubFromDB.getVersion() < publicationFromServer.getVersion()) {
+                                DeletePublicationFromDB(contentResolver, pubFromDB);
+//                            publicationFromServer.setIfTriedToGetPictureBefore(true);
+                                InsertPublicationToDB(contentResolver, publicationFromServer);
+//                            needToLoadPicturesFor.put(publicationFromServer.getUniqueId(), publicationFromServer.getVersion());
+                            } else {
+                                UpdateRegsAndReports(contentResolver, publicationFromServer);
+                                //if(pubFromDB.getImageByteArray() == null || pubFromDB.getImageByteArray().length == 0)
                             /*File f = new File(Environment.getExternalStorageDirectory(),
                                     pubFromDB.getUniqueId() + "." + pubFromDB.getVersion() + ".jpg");
                             if(!f.exists())
@@ -115,22 +122,23 @@ public class FooDoNetSQLExecuterAsync extends AsyncTask<InternalRequest, Void, V
 //                                pubFromDB.setIfTriedToGetPictureBefore(true);
 //                                InsertPublicationToDB(contentResolver, pubFromDB);
 //                            }
-                        }
-                        publicationsFromDB.remove(pubFromDB);
-                    }
-                }
-                ArrayList<Integer> toRemoveFromDB = new ArrayList<Integer>();
-                if(context != null) {
-                    String androidID = CommonUtil.GetIMEI(context);
-                    for (FCPublication publicationFromDB : publicationsFromDB) {
-                        if (publicationFromDB.getPublisherUID().compareTo(androidID) != 0) {
-                            toRemoveFromDB.add(publicationFromDB.getUniqueId());
-                            DeletePublicationFromDB(contentResolver, publicationFromDB);
+                            }
+                            publicationsFromDB.remove(pubFromDB);
                         }
                     }
-                }
-                for (Integer i : toRemoveFromDB) {
-                    FCPublication.DeletePublicationFromCollectionByID(publicationsFromDB, i);
+                    ArrayList<Integer> toRemoveFromDB = new ArrayList<Integer>();
+                    if (context != null) {
+                        String androidID = CommonUtil.GetIMEI(context);
+                        for (FCPublication publicationFromDB : publicationsFromDB) {
+                            if (publicationFromDB.getPublisherUID().compareTo(androidID) != 0) {
+                                toRemoveFromDB.add(publicationFromDB.getUniqueId());
+                                DeletePublicationFromDB(contentResolver, publicationFromDB);
+                            }
+                        }
+                    }
+                    for (Integer i : toRemoveFromDB) {
+                        FCPublication.DeletePublicationFromCollectionByID(publicationsFromDB, i);
+                    }
                 }
                 //region groups
                 contentResolver.delete(FooDoNetSQLProvider.URI_GROUP, null, null);
@@ -141,8 +149,10 @@ public class FooDoNetSQLExecuterAsync extends AsyncTask<InternalRequest, Void, V
 
                     for(Group groupFromServer : incomingRequest.groups){
                         contentResolver.insert(FooDoNetSQLProvider.URI_GROUP, groupFromServer.GetContentValuesRow());
-                        for(GroupMember gm : groupFromServer.get_group_members())
-                            contentResolver.insert(FooDoNetSQLProvider.URI_GROUP_MEMBERS, gm.GetContentValuesRow());
+                        for(GroupMember gm : groupFromServer.get_group_members()) {
+                            if(gm.get_user_id() != CommonUtil.GetMyUserID(context))
+                                contentResolver.insert(FooDoNetSQLProvider.URI_GROUP_MEMBERS, gm.GetContentValuesRow());
+                        }
                         resultGroups.add(groupFromServer);
                     }
                 }
@@ -421,6 +431,10 @@ public class FooDoNetSQLExecuterAsync extends AsyncTask<InternalRequest, Void, V
             case InternalRequest.ACTION_PUSH_REG:
                 UpdateRegs(contentResolver, incomingRequest.PublicationID, incomingRequest.registeredUsers);
                 break;
+            case InternalRequest.ACTION_GET_GROUPS_FROM_SQL:
+                Cursor cursorGroups = contentResolver.query(FooDoNetSQLProvider.URI_GROUP, Group.GetColumnNamesArray(), null, null, null);
+                groupsFromDB = Group.GetGroupsFromCursor(cursorGroups);
+                break;
         }
         return null;
     }
@@ -536,6 +550,11 @@ public class FooDoNetSQLExecuterAsync extends AsyncTask<InternalRequest, Void, V
                 InternalRequest irNewRegisteredUser = new InternalRequest(incomingRequest.ActionCommand, true);
                 irNewRegisteredUser.publicationForSaving = incomingRequest.publicationForSaving;
                 callbackHandler.OnSQLTaskComplete(irNewRegisteredUser);
+                break;
+            case InternalRequest.ACTION_GET_GROUPS_FROM_SQL:
+                InternalRequest irGroupsFromDB = new InternalRequest(incomingRequest.ActionCommand, true);
+                irGroupsFromDB.groups = groupsFromDB;
+                callbackHandler.OnSQLTaskComplete(irGroupsFromDB);
                 break;
 /*  not needed
             case InternalRequest.ACTION_SQL_GET_NEW_NEGATIVE_ID:

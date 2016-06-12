@@ -14,20 +14,21 @@
     <!-- This needed to get IMEI -->
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
-<!--
+    <!--
     <permission
         android:name="upp.foodonet.permission.C2D_MESSAGE"
         android:protectionLevel="signature" />
--->
+    -->
+
 
     <!-- This needed for push notifications -->
     <permission
         android:name="upp.foodonet.material.permission.C2D_MESSAGE"
         android:protectionLevel="signature" />
-    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
-    <uses-permission android:name="upp.foodonet.material.permission.C2D_MESSAGE"/>
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+    <uses-permission android:name="upp.foodonet.material.permission.C2D_MESSAGE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <!-- Reading contacts -->
 
@@ -65,13 +66,15 @@
             android:name="com.google.android.gms.gcm.GcmReceiver"
             android:permission="com.google.android.c2dm.permission.SEND">
             <intent-filter>
-                <!--android:exported="true"                -->
+
+                <!-- android:exported="true" -->
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+
                 <category android:name="upp.foodonet.material" />
                 <!-- action android:name="com.google.android.c2dm.intent.REGISTRATION" / -->
             </intent-filter>
         </receiver>
-<!--
+        <!--
         <service
             android:name=".FooDoNetGcmListenerService"
             android:exported="false">
@@ -86,7 +89,7 @@
                 <action android:name="com.google.android.gms.iid.InstanceID" />
             </intent-filter>
         </service>
--->
+        -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
@@ -137,15 +140,19 @@
             android:theme="@style/AppDefault" />
         <activity
             android:name=".SelectContactsForGroupActivity"
-            android:theme="@style/AppDefault"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait"
+            android:theme="@style/AppDefault" />
         <activity
             android:name=".AddEditPublicationActivity"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
         <activity
             android:name=".MyPublicationsActivity"
-            android:theme="@style/AppDefault"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait"
+            android:theme="@style/AppDefault" />
+        <activity
+            android:name=".SelectGroupForPublicationActivity"
+            android:label="@string/title_activity_select_group_for_publication"
+            android:theme="@style/AppDefault"></activity>
     </application>
 
 </manifest>
