@@ -77,6 +77,7 @@
     <string name="validation_title_empty">Title cannot be empty</string>
     <string name="validation_title_too_long">Title is too long, maximum: {0} characters</string>
     <string name="validation_address_empty">Address required</string>
+    <string name="validation_must_choose_group">Please choose group to share with</string>
     <string name="btn_ok_add_pub">בחר</string>
     <string name="btn_cancel_add_pub">בטל</string>
 
@@ -361,6 +362,8 @@
     <string name="user_avatar_file_name">avatar.jpeg</string>
 
     <string name="title_activity_select_group_for_publication">aaa</string>
+
+    <string name="progress_saving_publication">Saving publication</string>
 
     <!-- Publications list -->
 

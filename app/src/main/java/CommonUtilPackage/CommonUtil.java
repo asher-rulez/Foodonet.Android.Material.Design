@@ -512,6 +512,7 @@ public class CommonUtil {
                 context.getResources().getDimensionPixelSize(R.dimen.address_dialog_validation_img_size));
         Drawable validationDrawable = new BitmapDrawable(validationBitmap);
         field.setCompoundDrawablesWithIntrinsicBounds(validationDrawable, null, null, null);
+        field.setCompoundDrawablePadding(10);
     }
 
     public static void RemoveValidationFromEditText(Context context, EditText field) {

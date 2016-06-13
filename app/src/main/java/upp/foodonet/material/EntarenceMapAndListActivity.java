@@ -74,6 +74,7 @@ import Adapters.IOnPublicationFromListSelected;
 import Adapters.MapMarkerInfoWindowAdapter;
 import CommonUtilPackage.CommonUtil;
 import CommonUtilPackage.ImageDictionarySyncronized;
+import CommonUtilPackage.InternalRequest;
 import DataModel.FCPublication;
 import FooDoNetSQLClasses.FooDoNetSQLHelper;
 import FooDoNetServerClasses.ImageDownloader;
@@ -98,6 +99,8 @@ public class EntarenceMapAndListActivity
     private static final int MODE_MAP = 0;
     private static final int MODE_LIST = 1;
     private int currentMode;
+
+    private static final int REQUEST_CODE_NEW_PUB = 0;
 
     //region Map variables
     SupportMapFragment mapFragment;
@@ -263,6 +266,28 @@ public class EntarenceMapAndListActivity
         }
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(data == null) return;
+        switch (resultCode){
+            case AddEditPublicationActivity.RESULT_OK:
+                int action = data.getIntExtra(AddEditPublicationActivity.DETAILS_ACTIVITY_RESULT_KEY, -1);
+                switch (action){
+                    case InternalRequest.ACTION_POST_NEW_PUBLICATION:
+                        FCPublication publication
+                                = (FCPublication) data.getExtras().get(AddEditPublicationActivity.PUBLICATION_KEY);
+                        if (publication == null) {
+                            Log.i(MY_TAG, "got no pub from AddNew");
+                            return;
+                        }
+                        progressDialog = CommonUtil.ShowProgressDialog(this, getString(R.string.progress_saving_publication));
+                        AddEditPublicationService.StartSaveNewPublication(this, publication);
+                        break;
+                }
+                break;
+        }
+    }
+
     //endregion
 
     //region CLICK LISTENERS
@@ -272,7 +297,7 @@ public class EntarenceMapAndListActivity
         switch (v.getId()) {
             case R.id.fab_map_and_list:
                 Intent addPub = new Intent(this, AddEditPublicationActivity.class);
-                startActivityForResult(addPub, 0);
+                startActivityForResult(addPub, REQUEST_CODE_NEW_PUB);
                 break;
             case R.id.btn_center_on_my_location_map:
                 if (myLocation == null)

@@ -26,6 +26,7 @@ public class SelectGroupForPublicationActivity extends AppCompatActivity impleme
 
     private static final String MY_TAG = "food_groupForPub";
     public static final String EXTRA_KEY_GROUP_ID = "group_id";
+    public static final String EXTRA_KEY_GROUP_NAME = "group_name";
 
     RecyclerView rv_groups_for_selection;
     SelectGroupForPublicationRecyclerViewAdapter adapter;
@@ -63,16 +64,17 @@ public class SelectGroupForPublicationActivity extends AppCompatActivity impleme
     }
 
     @Override
-    public void OnGroupForPublicationSelected(int groupID) {
+    public void OnGroupForPublicationSelected(int groupID, String groupName) {
         Intent intent = getIntent();
-        intent.putExtra(EXTRA_KEY_GROUP_ID, groupID);
-        setResult(1, intent);
+        //intent.putExtra(EXTRA_KEY_GROUP_ID, groupID);
+        intent.putExtra(EXTRA_KEY_GROUP_NAME, groupName);
+        setResult(groupID, intent);
         finish();
     }
 
     @Override
     public void onBackPressed() {
-        setResult(0);
+        setResult(-1);
         finish();
         //super.onBackPressed();
     }

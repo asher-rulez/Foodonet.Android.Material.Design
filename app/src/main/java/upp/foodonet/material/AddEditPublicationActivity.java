@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
@@ -155,6 +156,7 @@ public class AddEditPublicationActivity extends FragmentActivity
             publication.setLatitude(latitude);
             publication.setLongitude(longitude);
             publication.setAddress(address);
+            publication.setAudience(-1);
             isNew = true;
         } else {
             publication = (FCPublication) extras.get(PUBLICATION_KEY);
@@ -346,7 +348,8 @@ public class AddEditPublicationActivity extends FragmentActivity
 
     private boolean ValidateInputData() {
         return ValidateTitle()
-                && ValidateAddress();
+                && ValidateAddress()
+                    && ValidateGroupChoosen();
     }
 
     private boolean ValidateTitle() {
@@ -402,6 +405,15 @@ public class AddEditPublicationActivity extends FragmentActivity
             return false;
         }
         CommonUtil.SetEditTextIsValid(this, atv_address, true);
+        return true;
+    }
+
+    private boolean ValidateGroupChoosen(){
+        if(publication.getAudience() < 0){
+            CommonUtil.SetEditTextIsValid(this, et_share_with, false);
+            Toast.makeText(this, getString(R.string.validation_must_choose_group), Toast.LENGTH_SHORT).show();
+            return false;
+        }
         return true;
     }
 
@@ -538,6 +550,16 @@ public class AddEditPublicationActivity extends FragmentActivity
                 }
                 break;
             case ACTIVITY_FOR_RESULT_REQUEST_CODE_SELECT_GROUP:
+                if(resultCode < 0) return;
+                publication.setAudience(resultCode);
+                et_share_with.setText(data.getStringExtra(SelectGroupForPublicationActivity.EXTRA_KEY_GROUP_NAME));
+                Bitmap validationBitmap = CommonUtil.decodeScaledBitmapFromDrawableResource(context.getResources(),
+                        resultCode == 0 ? R.drawable.globe_icon_list : R.drawable.group_icon_list,
+                        context.getResources().getDimensionPixelSize(R.dimen.address_dialog_validation_img_size),
+                        context.getResources().getDimensionPixelSize(R.dimen.address_dialog_validation_img_size));
+                Drawable validationDrawable = new BitmapDrawable(validationBitmap);
+                et_share_with.setCompoundDrawablesWithIntrinsicBounds(validationDrawable, null, null, null);
+                et_share_with.setCompoundDrawablePadding(10);
                 startedSelectGroup = false;
                 break;
         }

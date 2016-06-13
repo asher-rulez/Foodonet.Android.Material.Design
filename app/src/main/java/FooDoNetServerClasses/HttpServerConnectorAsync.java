@@ -501,7 +501,7 @@ public class HttpServerConnectorAsync extends AsyncTask<InternalRequest, Void, S
                             try {
                                 JSONArray memberObjArray = new JSONArray(responseString);
                                 for(int i = 0; i < memberOwner.groupMembers.size(); i++) {
-                                    members.get(i).set_id(memberObjArray.getJSONObject(0).getInt("id"));
+                                    members.get(i).set_id(memberObjArray.getJSONObject(i).getInt("id"));
                                     group.add_group_member(members.get(i));
                                 }
                             } catch (JSONException e) {

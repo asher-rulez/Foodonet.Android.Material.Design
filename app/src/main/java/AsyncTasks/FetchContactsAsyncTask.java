@@ -64,12 +64,17 @@ public class FetchContactsAsyncTask extends AsyncTask<ArrayList<ContactItem>, Vo
         String DATA = ContactsContract.CommonDataKinds.Email.DATA;
 */
 
+        ArrayList<Integer> ids = new ArrayList<>();
+
         Cursor cursor = contentResolver.query(CONTENT_URI, null, null, null, null);
         // Loop for every contact in the phone
         if (cursor.getCount() > 0) {
             int counter = result.size();
             while (cursor.moveToNext()) {
                 String contact_id = cursor.getString(cursor.getColumnIndex(_ID));
+                int cont_id = Integer.parseInt(contact_id);
+                if(ids.contains(cont_id)) continue;
+                ids.add(cont_id);
                 String name = cursor.getString(cursor.getColumnIndex(DISPLAY_NAME));
                 int hasPhoneNumber = Integer.parseInt(cursor.getString(cursor.getColumnIndex(HAS_PHONE_NUMBER)));
                 if (hasPhoneNumber > 0) {
@@ -79,7 +84,7 @@ public class FetchContactsAsyncTask extends AsyncTask<ArrayList<ContactItem>, Vo
                         phoneNumber = phoneCursor.getString(phoneCursor.getColumnIndex(NUMBER));
                     }
                     phoneCursor.close();
-                    if(existingContacts.containsKey(phoneNumber)) continue;
+                    if(phoneNumber.trim().length() < 10 || existingContacts.containsKey(phoneNumber)) continue;
 /*
                     // Query and loop for every email of the contact
                     Cursor emailCursor = contentResolver.query(EmailCONTENT_URI, null, EmailCONTACT_ID + " = ?", new String[]{contact_id}, null);
@@ -89,8 +94,8 @@ public class FetchContactsAsyncTask extends AsyncTask<ArrayList<ContactItem>, Vo
                     }
                     emailCursor.close();
 */
+                    result.put(counter++, new ContactItem(name, phoneNumber));
                 }
-                result.put(counter++, new ContactItem(name, phoneNumber));
             }
         }
     }

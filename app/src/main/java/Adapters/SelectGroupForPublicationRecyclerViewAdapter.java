@@ -55,13 +55,14 @@ public class SelectGroupForPublicationRecyclerViewAdapter extends RecyclerView.A
     @Override
     public void onBindViewHolder(final SelectGroupForPublicationViewHolder holder, int position) {
         Group group = groupsList.get(position);
+        final String groupName = group.Get_name();
         holder.setGroupID(group.Get_id());
-        holder.SetTitle(group.Get_name());
+        holder.SetTitle(groupName);
         holder.SetIcon(group.Get_id() == 0 ? publicGroupIcon : privateGroupIcon);
         holder.view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                groupSelectedCallback.OnGroupForPublicationSelected(holder.getGroupID());
+                groupSelectedCallback.OnGroupForPublicationSelected(holder.getGroupID(), groupName);
             }
         });
     }
