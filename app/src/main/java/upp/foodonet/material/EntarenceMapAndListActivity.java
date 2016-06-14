@@ -79,6 +79,7 @@ import DataModel.FCPublication;
 import FooDoNetSQLClasses.FooDoNetSQLHelper;
 import FooDoNetServerClasses.ImageDownloader;
 import FooDoNetServiceUtil.FooDoNetCustomActivityConnectedToService;
+import FooDoNetServiceUtil.ServicesBroadcastReceiver;
 import UIUtil.RoundedImageView;
 import upp.foodonet.material.R;
 
@@ -924,6 +925,38 @@ public class EntarenceMapAndListActivity
     //endregion
 
     //region callback methods
+
+
+    @Override
+    public void onBroadcastReceived(Intent intent) {
+        super.onBroadcastReceived(intent);
+        int actionCode = intent.getIntExtra(ServicesBroadcastReceiver.BROADCAST_REC_EXTRA_ACTION_KEY, -1);
+        switch (actionCode) {
+//            case ServicesBroadcastReceiver.ACTION_CODE_GET_LOCATION_SUCCESS:
+//                Location location = (Location) intent.getParcelableExtra(ServicesBroadcastReceiver.BROADCAST_REC_EXTRA_LOCATION_KEY);
+//                if (location == null) {
+//                    Log.e(MY_TAG, "got null location extra from broadcast");
+//                    return;
+//                }
+//                break;
+//            case ServicesBroadcastReceiver.ACTION_CODE_GET_LOCATION_FAIL:
+//                break;
+//            case ServicesBroadcastReceiver.ACTION_CODE_SAVE_NEW_PUB_FAIL:
+//                Toast.makeText(this, getString(R.string.failed_to_save_new_pub), Toast.LENGTH_SHORT).show();
+//                CommonUtil.PostGoogleAnalyticsUIEvent(getApplicationContext(),
+//                        "my publications list", "save pub btn", "saving new pub fail");
+            case ServicesBroadcastReceiver.ACTION_CODE_SAVE_NEW_PUB_SUCCESS:
+            case ServicesBroadcastReceiver.ACTION_CODE_SAVE_NEW_PUB_SQL_SUCCESS:
+                if (progressDialog != null) {
+                    progressDialog.dismiss();
+                    progressDialog = null;
+                }
+            default:
+                if (adapter != null){
+                }
+                break;
+        }
+    }
 
     @Override
     public void OnPublicationFromListClicked(int publicationID) {

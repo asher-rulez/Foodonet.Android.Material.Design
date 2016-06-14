@@ -153,6 +153,10 @@
             android:name=".SelectGroupForPublicationActivity"
             android:label="@string/title_activity_select_group_for_publication"
             android:theme="@style/AppDefault"></activity>
+
+        <service
+            android:name=".AddEditPublicationService"
+            android:exported="false"></service>
     </application>
 
 </manifest>
