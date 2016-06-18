@@ -58,6 +58,8 @@ public class FCPublication implements Serializable, ICanWriteSelfToJSONWriter {
 
     public static final String PUBLICATION_JSON_ITEM_KEY = "publication";
 
+    public static final String PUBLICATION_JSON_SEND_PUBLISHER_USER_NAME_KEY = "publisher_user_name";
+
     public static final String PUBLICATION_NUMBER_OF_REGISTERED = "num_of_regs";
     public static final String PUBLICATION_NEW_NEGATIVE_ID = "new_neg_id";
     public static final String PUBLICATION_GROUP_NAME = "group_name";
@@ -616,7 +618,7 @@ public class FCPublication implements Serializable, ICanWriteSelfToJSONWriter {
             publication.setPublisherUserName(jo.getString(PUBLICATION_PUBLISHER_USER_NAME_KEY));
             publication.setPrice(jo.isNull(PUBLICATION_PRICE_KEY) ? null : jo.getDouble(PUBLICATION_PRICE_KEY));
             publication.setPriceDescription(jo.getString(PUBLICATION_PRICE_DESCRIPTION_KEY));
-            publication.setRating(jo.getDouble(PUBLICATION_USER_RATING_KEY));
+            //publication.setRating(jo.isNull(PUBLICATION_USER_RATING_KEY) ? null : jo.getDouble(PUBLICATION_USER_RATING_KEY));
         } catch (JSONException e) {
             e.printStackTrace();
             Log.e(MY_TAG, e.getMessage());
@@ -653,7 +655,7 @@ public class FCPublication implements Serializable, ICanWriteSelfToJSONWriter {
         publicationData.put(PUBLICATION_IS_ON_AIR_KEY, true);//getIsOnAir());
         publicationData.put(PUBLICATION_PHOTO_URL, "");//getPhotoUrl());
         publicationData.put(PUBLICATION_PUBLISHER_UUID_KEY, getPublisherUID());
-        publicationData.put(PUBLICATION_PUBLISHER_USER_NAME_KEY, getPublisherUserName());
+        publicationData.put(PUBLICATION_JSON_SEND_PUBLISHER_USER_NAME_KEY, getPublisherUserName());
         publicationData.put(PUBLICATION_PUBLISHER_ID_KEY, getPublisherID());
         publicationData.put(PUBLICATION_PRICE_KEY, getPrice());
         publicationData.put(PUBLICATION_AUDIENCE_KEY, getAudience());

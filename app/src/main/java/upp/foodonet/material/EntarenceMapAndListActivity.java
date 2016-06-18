@@ -295,6 +295,7 @@ public class EntarenceMapAndListActivity
 
     @Override
     public void onClick(View v) {
+        drawerLayout.closeDrawers();
         switch (v.getId()) {
             case R.id.fab_map_and_list:
                 Intent addPub = new Intent(this, AddEditPublicationActivity.class);
@@ -323,6 +324,7 @@ public class EntarenceMapAndListActivity
             case R.id.rl_btn_terms_and_conditions:
                 break;
         }
+
         //CoordinatorLayout.LayoutParams layoutParams = (CoordinatorLayout.LayoutParams)fab.getLayoutParams();
         //new CoordinatorLayout.LayoutParams(fab.getWidth(), fab.getHeight());//
     }

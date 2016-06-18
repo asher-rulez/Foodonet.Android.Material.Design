@@ -4,6 +4,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,17 +32,19 @@ public class MyPublicationsListRecyclerViewAdapter extends RecyclerView.Adapter<
     ArrayList<FCPublication> allPublicationsList;
     IOnPublicationFromListSelected parentListCallback;
     public Context context;
+    String publicGroupName;
 
     ImageDictionarySyncronized imageDictionary;
     ImageDownloader imageDownloader;
 
-    public MyPublicationsListRecyclerViewAdapter(Context context, ArrayList<FCPublication> allPublications, IOnPublicationFromListSelected parent) {
+    public MyPublicationsListRecyclerViewAdapter(Context context, ArrayList<FCPublication> allPublications, IOnPublicationFromListSelected parent, String defaultNameForPublicShareGroup) {
         allPublicationsList = new ArrayList<>();
         allPublicationsList.addAll(allPublications);
         parentListCallback = parent;
         this.context = context;
         imageDictionary = new ImageDictionarySyncronized();
         imageDownloader = new ImageDownloader(context, imageDictionary);
+        publicGroupName = defaultNameForPublicShareGroup;
     }
 
     public void UpdatePublicationsList(ArrayList<FCPublication> pubs){
@@ -58,7 +61,10 @@ public class MyPublicationsListRecyclerViewAdapter extends RecyclerView.Adapter<
 
     @Override
     public void onBindViewHolder(MyPublicationListItemViewHolder holder, int position) {
-        holder.SetupPublicationDetails(allPublicationsList.get(position));
+        FCPublication pubToBind = allPublicationsList.get(position);
+        if(pubToBind.get_group_name().compareToIgnoreCase("0") == 0)
+            pubToBind.set_group_name(publicGroupName);
+        holder.SetupPublicationDetails(pubToBind);
     }
 
     @Override

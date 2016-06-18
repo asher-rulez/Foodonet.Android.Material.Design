@@ -10,6 +10,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
@@ -19,6 +20,8 @@ import android.util.TypedValue;
 import android.view.View;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.Toast;
 
 
@@ -27,6 +30,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 
 import java.util.ArrayList;
 
+import Adapters.AllPublicationsListRecyclerViewAdapter;
 import Adapters.IOnPublicationFromListSelected;
 import Adapters.MyPublicationsListRecyclerViewAdapter;
 import CommonUtilPackage.CommonUtil;
@@ -79,8 +83,12 @@ public class MyPublicationsActivity
 
         SetupFilterTabButtons();
 
+        rv_my_publications_list = (RecyclerView)findViewById(R.id.rv_my_publications_list);
+        SetupRecyclerViewAndAdapter();
+
         currentFilterID = FooDoNetSQLHelper.FILTER_ID_LIST_MY_BY_ENDING_SOON;
         StartLoadingForPublicationsList();
+
     }
 
     //endregion
@@ -119,6 +127,32 @@ public class MyPublicationsActivity
     @Override
     public void onTabReselected(TabLayout.Tab tab) {
 
+    }
+
+    //endregion
+
+    //region recyclerview list of my pubs
+
+    private void SetupRecyclerViewAndAdapter(){
+        rv_my_publications_list.setLayoutManager(new LinearLayoutManager(rv_my_publications_list.getContext()));
+        adapter = new MyPublicationsListRecyclerViewAdapter(this, new ArrayList<FCPublication>(), this, getString(R.string.public_share_group_name));
+        rv_my_publications_list.setAdapter(adapter);
+//        rv_my_publications_list.addOnScrollListener(new HidingScrollListener(this) {
+//            @Override
+//            public void onMoved(int distance) {
+//                tb_search.setTranslationY(-distance);
+//            }
+//
+//            @Override
+//            public void onShow() {
+//                tb_search.animate().translationY(0).setInterpolator(new DecelerateInterpolator(2)).start();
+//            }
+//
+//            @Override
+//            public void onHide() {
+//                tb_search.animate().translationY(-mToolbarHeight).setInterpolator(new AccelerateInterpolator(2)).start();
+//            }
+//        });
     }
 
     //endregion

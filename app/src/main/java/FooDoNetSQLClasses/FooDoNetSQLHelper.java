@@ -159,6 +159,11 @@ public class FooDoNetSQLHelper extends SQLiteOpenHelper {
             + "PUBS." + FCPublication.PUBLICATION_ENDING_DATE_KEY + ", "
             + "PUBS." + FCPublication.PUBLICATION_PHOTO_URL + ", "
             + "PUBS." + FCPublication.PUBLICATION_IS_ON_AIR_KEY + ", "
+            + "PUBS." + FCPublication.PUBLICATION_ADDRESS_KEY + ", "
+            + "PUBS." + FCPublication.PUBLICATION_LATITUDE_KEY + ", "
+            + "PUBS." + FCPublication.PUBLICATION_LONGITUDE_KEY + ", "
+            + "COUNT (REGS." + RegisteredUserForPublication.REGISTERED_FOR_PUBLICATION_KEY_ID + ") "
+            + FCPublication.PUBLICATION_NUMBER_OF_REGISTERED + ", "
             + "CASE WHEN GROUPS." + Group.GROUP_NAME_KEY + " IS NULL THEN '0' ELSE GROUPS."
             + Group.GROUP_NAME_KEY + " END " + FCPublication.PUBLICATION_GROUP_NAME;
 
@@ -175,7 +180,10 @@ public class FooDoNetSQLHelper extends SQLiteOpenHelper {
             = " FROM " + FCPublicationsTable.FCPUBLICATIONS_TABLE_NAME + " PUBS "
             + " LEFT JOIN " + GroupTable.GROUP_TABLE_NAME + " GROUPS "
             + "ON PUBS." + FCPublication.PUBLICATION_AUDIENCE_KEY
-            + " = GROUPS." + Group.GROUP_ID_KEY;
+            + " = GROUPS." + Group.GROUP_ID_KEY
+            + " LEFT JOIN " + RegisteredForPublicationTable.REGISTERED_FOR_PUBLICATION_TABLE_NAME + " REGS "
+            + "ON PUBS." + FCPublication.PUBLICATION_UNIQUE_ID_KEY
+            + " = REGS." + RegisteredUserForPublication.REGISTERED_FOR_PUBLICATION_KEY_PUBLICATION_ID;
 
     private static final String RAW_FOR_LIST_GROUP
             = " GROUP BY "

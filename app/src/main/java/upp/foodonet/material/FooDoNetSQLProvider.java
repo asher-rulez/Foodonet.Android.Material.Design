@@ -281,9 +281,10 @@ public class FooDoNetSQLProvider extends ContentProvider {
                                     filterID, imei, String.valueOf(myLocation.latitude),
                                     String.valueOf(myLocation.longitude)), null);
                 }
+                String txt = FooDoNetSQLHelper.GetRawSelectPublicationsForListByFilterID(
+                        filterID, imei, stringFilter);
                 return database.getReadableDatabase()
-                        .rawQuery(FooDoNetSQLHelper.GetRawSelectPublicationsForListByFilterID(
-                                filterID, imei, stringFilter), null);
+                        .rawQuery(txt, null);
             case REGS_FOR_PUBLICATION:
                 queryBuilder.setTables(RegisteredForPublicationTable.REGISTERED_FOR_PUBLICATION_TABLE_NAME);
                 break;

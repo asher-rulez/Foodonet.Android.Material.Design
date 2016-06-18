@@ -343,6 +343,13 @@ public class AddEditPublicationActivity extends FragmentActivity
         publication.setTypeOfCollecting(FCTypeOfCollecting.ContactPublisher);
         publication.setVersion(publication.getVersion());
         publication.setIsOnAir(true);
+        publication.setPublisherUserName(CommonUtil.GetMyUserNameFromPreferences(this));
+        publication.setPublisherID(CommonUtil.GetMyUserID(this));
+        publication.setPrice(0d);
+        publication.setPriceDescription("");
+        publication.setContactInfo(CommonUtil.GetMyPhoneNumberFromPreferences(this));
+        publication.setPriceDescription("");
+
 //        publication.setIfTriedToGetPictureBefore(true);
     }
 
