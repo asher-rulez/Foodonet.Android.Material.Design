@@ -49,7 +49,8 @@ public class MyPublicationsListRecyclerViewAdapter extends RecyclerView.Adapter<
 
     public void UpdatePublicationsList(ArrayList<FCPublication> pubs){
         allPublicationsList = new ArrayList<>();
-        allPublicationsList.addAll(pubs);
+        if(pubs != null && pubs.size() > 0)
+            allPublicationsList.addAll(pubs);
         this.notifyDataSetChanged();
     }
 
