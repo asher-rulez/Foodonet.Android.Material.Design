@@ -97,7 +97,7 @@ public class FooDoNetSQLHelper extends SQLiteOpenHelper {
                         + getRawForListWhere("PUBS", FCPublication.PUBLICATION_PUBLISHER_UUID_KEY, "=", params[0], false)
                         + " AND PUBS." + FCPublication.PUBLICATION_STARTING_DATE_KEY + " < " + UNIX_TIME_NOW
                         + " AND PUBS." + FCPublication.PUBLICATION_ENDING_DATE_KEY + " > " + UNIX_TIME_NOW
-                        //+ RAW_FOR_LIST_GROUP
+                        + RAW_FOR_MY_LIST_GROUP
                         + getRawForListOrderBy("PUBS", FCPublication.PUBLICATION_ENDING_DATE_KEY, true);
             case FILTER_ID_LIST_MY_ACTIVE_ID_DESC:
                 return RAW_FOR_LIST_SELECT_MY + RAW_FOR_LIST_FROM_MY
@@ -105,7 +105,7 @@ public class FooDoNetSQLHelper extends SQLiteOpenHelper {
                         + " AND PUBS." + FCPublication.PUBLICATION_IS_ON_AIR_KEY + " = 1 "
                         + " AND PUBS." + FCPublication.PUBLICATION_STARTING_DATE_KEY + " < " + UNIX_TIME_NOW
                         + " AND PUBS." + FCPublication.PUBLICATION_ENDING_DATE_KEY + " > " + UNIX_TIME_NOW + " "
-                        //+ RAW_FOR_LIST_GROUP
+                        + RAW_FOR_MY_LIST_GROUP
                         + getRawForListOrderBy("PUBS", FCPublication.PUBLICATION_UNIQUE_ID_KEY, true);
             case FILTER_ID_LIST_MY_NOT_ACTIVE_ID_ASC:
                 return RAW_FOR_LIST_SELECT_MY + RAW_FOR_LIST_FROM_MY
@@ -113,7 +113,7 @@ public class FooDoNetSQLHelper extends SQLiteOpenHelper {
                         + " AND (PUBS." + FCPublication.PUBLICATION_IS_ON_AIR_KEY + " = 0 "
                         + " OR PUBS." + FCPublication.PUBLICATION_STARTING_DATE_KEY + " > " + UNIX_TIME_NOW
                         + " OR PUBS." + FCPublication.PUBLICATION_ENDING_DATE_KEY + " < " + UNIX_TIME_NOW + ") "
-                        //+ RAW_FOR_LIST_GROUP
+                        + RAW_FOR_MY_LIST_GROUP
                         + getRawForListOrderBy("PUBS", FCPublication.PUBLICATION_UNIQUE_ID_KEY, false);
             //endregion
             //region sidemenu
@@ -162,10 +162,26 @@ public class FooDoNetSQLHelper extends SQLiteOpenHelper {
             + "PUBS." + FCPublication.PUBLICATION_ADDRESS_KEY + ", "
             + "PUBS." + FCPublication.PUBLICATION_LATITUDE_KEY + ", "
             + "PUBS." + FCPublication.PUBLICATION_LONGITUDE_KEY + ", "
+//            + "1 " + FCPublication.PUBLICATION_NUMBER_OF_REGISTERED + ", "
+//            + "1 " + FCPublication.PUBLICATION_GROUP_NAME;
             + "COUNT (REGS." + RegisteredUserForPublication.REGISTERED_FOR_PUBLICATION_KEY_ID + ") "
             + FCPublication.PUBLICATION_NUMBER_OF_REGISTERED + ", "
             + "CASE WHEN GROUPS." + Group.GROUP_NAME_KEY + " IS NULL THEN '0' ELSE GROUPS."
             + Group.GROUP_NAME_KEY + " END " + FCPublication.PUBLICATION_GROUP_NAME;
+
+    private static final String RAW_FOR_MY_LIST_GROUP
+            = " GROUP BY "
+            + "PUBS." + FCPublication.PUBLICATION_UNIQUE_ID_KEY + ", "
+            + "PUBS." + FCPublication.PUBLICATION_TITLE_KEY + ", "
+            + "PUBS." + FCPublication.PUBLICATION_VERSION_KEY + ", "
+            + "PUBS." + FCPublication.PUBLICATION_ENDING_DATE_KEY + ", "
+            + "PUBS." + FCPublication.PUBLICATION_PHOTO_URL + ", "
+            + "PUBS." + FCPublication.PUBLICATION_IS_ON_AIR_KEY + ", "
+            + "PUBS." + FCPublication.PUBLICATION_ADDRESS_KEY + ", "
+            + "PUBS." + FCPublication.PUBLICATION_LATITUDE_KEY + ", "
+            + "PUBS." + FCPublication.PUBLICATION_LONGITUDE_KEY + ", "
+            + "GROUPS." + Group.GROUP_NAME_KEY;
+
 
     private static final String RAW_FOR_LIST_FROM_OTHERS
             = " FROM " + FCPublicationsTable.FCPUBLICATIONS_TABLE_NAME + " PUBS "

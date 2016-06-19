@@ -116,7 +116,7 @@ public class MyPublicationsActivity
                 currentFilterID = FooDoNetSQLHelper.FILTER_ID_LIST_MY_NOT_ACTIVE_ID_ASC;
                 break;
         }
-        StartLoadingForPublicationsList();
+        RestartLoadingForPublicationsList();
     }
 
     @Override
