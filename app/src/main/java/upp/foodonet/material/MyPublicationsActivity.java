@@ -77,6 +77,7 @@ public class MyPublicationsActivity
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.tb_my_list);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         fab_add_pub = (FloatingActionButton) findViewById(R.id.fab_my_list_add_new_pub);
         fab_add_pub.setOnClickListener(this);

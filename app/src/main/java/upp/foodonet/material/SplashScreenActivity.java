@@ -38,11 +38,11 @@ public class SplashScreenActivity
 
     private final String MY_TAG = "food_splashscreen";
 
-    private boolean isGoogleFacebookChecked;
-    private boolean isLoadDataServiceStarted = false;
+//    private boolean isGoogleFacebookChecked;
+//    private boolean isLoadDataServiceStarted = false;
 
     private boolean AllLoaded() {
-        return registerTaskFinished && flagWaitTaskFinished && isGoogleFacebookChecked;
+        return registerTaskFinished && flagWaitTaskFinished;
     }
 
     //controls
@@ -54,7 +54,7 @@ public class SplashScreenActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash_screen);
 
-        tv_load_status = (TextView)findViewById(R.id.tv_progress_text_splash_screen);
+        tv_load_status = (TextView) findViewById(R.id.tv_progress_text_splash_screen);
         tv_load_status.setText(R.string.progress_load);
 
         flagWaitTaskFinished = true;
@@ -62,7 +62,7 @@ public class SplashScreenActivity
         CheckIfPhoneRegisteredOnFoodonet();
     }
 
-    private void CheckIfPhoneRegisteredOnFoodonet(){
+    private void CheckIfPhoneRegisteredOnFoodonet() {
         if (CommonUtil.GetFromPreferencesIsDeviceRegistered(this)) {
             RegisterToGoogleFacebookIfNeeded();
         } else {
@@ -75,17 +75,20 @@ public class SplashScreenActivity
     }
 
     private void RegisterToGoogleFacebookIfNeeded() {
-        if (CommonUtil.GetFromPreferencesIsRegisteredToGoogleFacebook(this)) {
-            registerTaskFinished = true;
-            RepairPushNotifications();
-            startService(new Intent(this, FooDoNetService.class));
-            isGoogleFacebookChecked = true;
+//        if (CommonUtil.GetFromPreferencesIsRegisteredToGoogleFacebook(this)) {
+        registerTaskFinished = true;
+        RepairPushNotifications();
+        startService(new Intent(this, FooDoNetService.class));
+        if (CommonUtil.GetFromPreferencesIsDataLoaded(this)) {
             if (AllLoaded())
                 StartNextActivity();
         } else {
-            Intent signInIntent = new Intent(this , SignInActivity.class);
-            startActivityForResult(signInIntent, 0);
+            tv_load_status.setText(R.string.progress_first_load);
         }
+//        } else {
+//            Intent signInIntent = new Intent(this , SignInActivity.class);
+//            startActivityForResult(signInIntent, 0);
+//        }
     }
 
     private void StartNextActivity() {
@@ -98,17 +101,17 @@ public class SplashScreenActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        isGoogleFacebookChecked = true;
-        switch (resultCode){
+        //isGoogleFacebookChecked = true;
+        switch (resultCode) {
             case 1:
-                InternalRequest ir = (InternalRequest)data.getSerializableExtra(InternalRequest.INTERNAL_REQUEST_EXTRA_KEY);
-                if(ir != null){
+                InternalRequest ir = (InternalRequest) data.getSerializableExtra(InternalRequest.INTERNAL_REQUEST_EXTRA_KEY);
+                if (ir != null) {
 //                    if(ir.PhotoURL != null){
 //                        DownloadImageTask imageTask = new DownloadImageTask(ir.PhotoURL, 100, getString(R.string.image_folder_path));
 //                        imageTask.execute();
 //                    }
                     HttpServerConnectorAsync connectorAsync
-                            = new HttpServerConnectorAsync(getString(R.string.server_base_url), (IFooDoNetServerCallback)this);
+                            = new HttpServerConnectorAsync(getString(R.string.server_base_url), (IFooDoNetServerCallback) this);
                     connectorAsync.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, ir);
                     return;
                 }
@@ -158,10 +161,8 @@ public class SplashScreenActivity
 
     @Override
     public void OnServerRespondedCallback(InternalRequest response) {
-        if(response.newUserID > 0)
-            CommonUtil.SaveMyUserID(this, response.newUserID);
         startService(new Intent(this, FooDoNetService.class));
-        isLoadDataServiceStarted = true;
+        //isLoadDataServiceStarted = true;
         tv_load_status.setText(getString(R.string.progress_first_load));
     }
 

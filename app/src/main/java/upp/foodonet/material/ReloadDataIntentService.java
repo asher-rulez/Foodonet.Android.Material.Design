@@ -97,7 +97,8 @@ public class ReloadDataIntentService
                         new InternalRequest(InternalRequest.ACTION_GET_PUBLICATION_REPORTS,
                                 getResources().getString(R.string.server_get_publication_report)),
                         new InternalRequest(InternalRequest.ACTION_GET_GROUPS_BY_USER,
-                                getString(R.string.server_get_groups_by_user), CommonUtil.GetMyUserID(this)));
+                                getString(R.string.server_get_groups_by_user), CommonUtil.GetMyUserID(this))
+                                .SetIsSkipGroup(!IsRegisteredWithGoogleOrFacebook()));
                 break;
             case taskSQL:
                 Log.i(MY_TAG, "Perfoming task " + workPlan[currentIndexInWorkPlan]);
@@ -163,5 +164,10 @@ public class ReloadDataIntentService
     public void OnImageDownloaded(Map<Integer, byte[]> imagesMap) {
         Log.i(MY_TAG, "downloaded images");
         DoNextTaskFromWorkPlan();
+    }
+
+    private boolean IsRegisteredWithGoogleOrFacebook()
+    {
+        return CommonUtil.GetFromPreferencesIsRegisteredToGoogleFacebook(this);
     }
 }

@@ -1,5 +1,8 @@
 package upp.foodonet.material;
 
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
@@ -11,6 +14,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.StateListDrawable;
 import android.location.Location;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -42,6 +46,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Adapter;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -73,10 +78,13 @@ import Adapters.AllPublicationsListRecyclerViewAdapter;
 import Adapters.IOnPublicationFromListSelected;
 import Adapters.MapMarkerInfoWindowAdapter;
 import CommonUtilPackage.CommonUtil;
+import CommonUtilPackage.IPleaseRegisterDialogCallback;
 import CommonUtilPackage.ImageDictionarySyncronized;
 import CommonUtilPackage.InternalRequest;
 import DataModel.FCPublication;
 import FooDoNetSQLClasses.FooDoNetSQLHelper;
+import FooDoNetServerClasses.HttpServerConnectorAsync;
+import FooDoNetServerClasses.IFooDoNetServerCallback;
 import FooDoNetServerClasses.ImageDownloader;
 import FooDoNetServiceUtil.FooDoNetCustomActivityConnectedToService;
 import FooDoNetServiceUtil.ServicesBroadcastReceiver;
@@ -93,13 +101,19 @@ public class EntarenceMapAndListActivity
         LoaderManager.LoaderCallbacks<Cursor>,
         IOnPublicationFromListSelected,
         TabLayout.OnTabSelectedListener,
-        TextWatcher {
+        TextWatcher,
+        IPleaseRegisterDialogCallback,
+        IFooDoNetServerCallback {
 
     private static final String MY_TAG = "food_mapAndList";
 
     private static final int MODE_MAP = 0;
     private static final int MODE_LIST = 1;
     private int currentMode;
+
+    private static final int LIST_MODE_ALL = 0;
+    private static final int LIST_MODE_MY = 1;
+    private int currentListMode;
 
     private static final int REQUEST_CODE_NEW_PUB = 0;
 
@@ -137,9 +151,17 @@ public class EntarenceMapAndListActivity
     FrameLayout fl_search_and_list;
     int currentFilterID;
     Toolbar tb_search;
+    TextView tv_toolbar_label;
     EditText et_search;
     private Toolbar toolbar;
     TabLayout tl_list_filter_buttons;
+
+//    TabLayout.Tab tab_all_all;
+//    TabLayout.Tab tab_all_new;
+//    TabLayout.Tab tab_all_closest;
+//    TabLayout.Tab tab_my_all;
+//    TabLayout.Tab tab_my_active;
+//    TabLayout.Tab tab_my_ended;
 
     //endregion
 
@@ -151,6 +173,7 @@ public class EntarenceMapAndListActivity
     TextView tv_user_name;
     TextView tv_user_email;
     RelativeLayout btn_nav_menu_my_pubs;
+    TextView tv_side_menu_list_mode;
     RelativeLayout btn_nav_menu_subscriptions;
     RelativeLayout btn_nav_menu_groups;
     RelativeLayout btn_nav_menu_settings;
@@ -159,6 +182,19 @@ public class EntarenceMapAndListActivity
 
 
     //endregion
+
+    //region Registration for using features
+
+    AlertDialog dialog;
+    final int DO_AFTER_REGISTRATION_CODE_NOTHING = 10;
+    final int DO_AFTER_REGISTRATION_CODE_ADD_PUBLICATION = 11;
+    final int DO_AFTER_REGISTRATION_CODE_GROUPS = 12;
+
+    //endregion
+
+    public Activity getActivity(){
+        return this;
+    }
 
     //region Activity overrides
 
@@ -177,10 +213,15 @@ public class EntarenceMapAndListActivity
         if (fab != null) fab.setOnClickListener(this);
         fabLayoutParams = (CoordinatorLayout.LayoutParams) fab.getLayoutParams();
 
+        tv_toolbar_label = (TextView)findViewById(R.id.tv_main_activity_title);
+
         fl_search_and_list = (FrameLayout) findViewById(R.id.fl_all_publications_list);
         fl_search_and_list.setVisibility(View.GONE);
+        currentListMode = LIST_MODE_ALL;
         tl_list_filter_buttons = (TabLayout) findViewById(R.id.tl_list_filter_buttons);
-        SetupFilterTabButtons();
+        tl_list_filter_buttons.setOnTabSelectedListener(this);
+        SetTabsVisibility(currentListMode);
+        //SetupFilterTabButtons();
         tl_list_filter_buttons.setVisibility(View.GONE);
         tb_search = (Toolbar) findViewById(R.id.tb_search_pub_in_list);
         et_search = (EditText) findViewById(R.id.et_publication_list_search);
@@ -225,6 +266,7 @@ public class EntarenceMapAndListActivity
     protected void onStart() {
         super.onStart();
         SetupMode();
+        //SetTabsVisibility(currentListMode);
 /*
         switch (ll_map_and_gallery.getVisibility()) {
             case View.VISIBLE:
@@ -269,22 +311,49 @@ public class EntarenceMapAndListActivity
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(data == null) return;
-        switch (resultCode){
-            case AddEditPublicationActivity.RESULT_OK:
-                int action = data.getIntExtra(AddEditPublicationActivity.DETAILS_ACTIVITY_RESULT_KEY, -1);
-                switch (action){
-                    case InternalRequest.ACTION_POST_NEW_PUBLICATION:
-                        FCPublication publication
-                                = (FCPublication) data.getExtras().get(AddEditPublicationActivity.PUBLICATION_KEY);
-                        if (publication == null) {
-                            Log.i(MY_TAG, "got no pub from AddNew");
-                            return;
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode) {
+            case REQUEST_CODE_NEW_PUB:
+                if (data == null) return;
+                switch (resultCode) {
+                    case AddEditPublicationActivity.RESULT_OK:
+                        int action = data.getIntExtra(AddEditPublicationActivity.DETAILS_ACTIVITY_RESULT_KEY, -1);
+                        switch (action) {
+                            case InternalRequest.ACTION_POST_NEW_PUBLICATION:
+                                FCPublication publication
+                                        = (FCPublication) data.getExtras().get(AddEditPublicationActivity.PUBLICATION_KEY);
+                                if (publication == null) {
+                                    Log.i(MY_TAG, "got no pub from AddNew");
+                                    return;
+                                }
+                                progressDialog = CommonUtil.ShowProgressDialog(this, getString(R.string.progress_saving_publication));
+                                AddEditPublicationService.StartSaveNewPublication(this, publication);
+                                break;
                         }
-                        progressDialog = CommonUtil.ShowProgressDialog(this, getString(R.string.progress_saving_publication));
-                        AddEditPublicationService.StartSaveNewPublication(this, publication);
                         break;
                 }
+                break;
+            case DO_AFTER_REGISTRATION_CODE_GROUPS:
+            case DO_AFTER_REGISTRATION_CODE_ADD_PUBLICATION:
+                switch (resultCode) {
+                    case 1:
+                        InternalRequest ir = (InternalRequest) data.getSerializableExtra(InternalRequest.INTERNAL_REQUEST_EXTRA_KEY);
+                        ir.DoAfterRegistrationActionID = requestCode;
+                        if (ir != null) {
+                            HttpServerConnectorAsync connectorAsync
+                                    = new HttpServerConnectorAsync(getString(R.string.server_base_url), (IFooDoNetServerCallback) this);
+                            connectorAsync.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, ir);
+                            return;
+                        }
+                        Log.e(MY_TAG, "InternalRequest extra null");
+                        break;
+                    default:
+                        Log.i(MY_TAG, "User decided not to login with google/facebook");
+                        OnServerRespondedCallback(null);
+                        break;
+                }
+                break;
+            default:
                 break;
         }
     }
@@ -298,8 +367,14 @@ public class EntarenceMapAndListActivity
         drawerLayout.closeDrawers();
         switch (v.getId()) {
             case R.id.fab_map_and_list:
-                Intent addPub = new Intent(this, AddEditPublicationActivity.class);
-                startActivityForResult(addPub, REQUEST_CODE_NEW_PUB);
+                if (!CommonUtil.GetFromPreferencesIsRegisteredToGoogleFacebook(this))
+                    dialog = CommonUtil.ShowDialogNeedToRegister(this, DO_AFTER_REGISTRATION_CODE_ADD_PUBLICATION, this);
+                else {
+                    InternalRequest ir = new InternalRequest(InternalRequest.ACTION_POST_NEW_USER);
+                    ir.Status = InternalRequest.STATUS_OK;
+                    ir.DoAfterRegistrationActionID = DO_AFTER_REGISTRATION_CODE_ADD_PUBLICATION;
+                    OnServerRespondedCallback(ir);
+                }
                 break;
             case R.id.btn_center_on_my_location_map:
                 if (myLocation == null)
@@ -308,14 +383,34 @@ public class EntarenceMapAndListActivity
                 googleMap.animateCamera(cu);
                 break;
             case R.id.rl_btn_my_publications_list:
-                Intent intent = new Intent(getApplicationContext(), MyPublicationsActivity.class);
-                startActivity(intent);
+                switch (currentListMode) {
+                    case LIST_MODE_ALL:
+                        currentListMode = LIST_MODE_MY;
+                        tv_side_menu_list_mode.setText(R.string.all_shares_toolbar_title);
+                        currentFilterID = FooDoNetSQLHelper.FILTER_ID_LIST_MY_ACTIVE_ID_DESC;
+                        break;
+                    case LIST_MODE_MY:
+                        currentListMode = LIST_MODE_ALL;
+                        tv_side_menu_list_mode.setText(R.string.my_shares_toolbar_title);
+                        currentFilterID = FooDoNetSQLHelper.FILTER_ID_LIST_ALL_BY_CLOSEST;
+                        break;
+                }
+                SetTabsVisibility(currentListMode);
+                RestartLoadingForPublicationsList();
+//                Intent intent = new Intent(getApplicationContext(), MyPublicationsActivity.class);
+//                startActivity(intent);
                 break;
             case R.id.rl_btn_subscriptions:
                 break;
             case R.id.rl_btn_groups:
-                Intent intentGroups = new Intent(getApplicationContext(), GroupsListActivity.class);
-                startActivity(intentGroups);
+                if (!CommonUtil.GetFromPreferencesIsRegisteredToGoogleFacebook(this))
+                    dialog = CommonUtil.ShowDialogNeedToRegister(this, DO_AFTER_REGISTRATION_CODE_GROUPS, this);
+                else {
+                    InternalRequest ir = new InternalRequest(InternalRequest.ACTION_POST_NEW_USER);
+                    ir.Status = InternalRequest.STATUS_OK;
+                    ir.DoAfterRegistrationActionID = DO_AFTER_REGISTRATION_CODE_GROUPS;
+                    OnServerRespondedCallback(ir);
+                }
                 break;
             case R.id.rl_btn_settings:
                 break;
@@ -643,7 +738,7 @@ public class EntarenceMapAndListActivity
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         ArrayList<FCPublication> publications = null;
-        if (data != null && data.moveToFirst()) {
+        if (data != null) {
             publications = loader.getId() == -1
                     ? FCPublication.GetArrayListOfPublicationsForMapFromCursor(data)
                     : FCPublication.GetArrayListOfPublicationsFromCursor(data, true);
@@ -653,8 +748,19 @@ public class EntarenceMapAndListActivity
                 case -1:
                     SetGalleryAndMarkers(publications);
                     break;
+                case FooDoNetSQLHelper.FILTER_ID_LIST_ALL_BY_CLOSEST:
+                case FooDoNetSQLHelper.FILTER_ID_LIST_ALL_BY_LESS_REGS:
+                case FooDoNetSQLHelper.FILTER_ID_LIST_ALL_BY_NEWEST:
+                case FooDoNetSQLHelper.FILTER_ID_LIST_ALL_BY_TEXT_FILTER:
+                    SetPublicationsListToAdapter(publications, false);
+                    break;
+                case FooDoNetSQLHelper.FILTER_ID_LIST_MY_ACTIVE_ID_DESC:
+                case FooDoNetSQLHelper.FILTER_ID_LIST_MY_BY_ENDING_SOON:
+                case FooDoNetSQLHelper.FILTER_ID_LIST_MY_BY_TEXT_FILTER:
+                case FooDoNetSQLHelper.FILTER_ID_LIST_MY_NOT_ACTIVE_ID_ASC:
+                    SetPublicationsListToAdapter(publications, true);
+                    break;
                 default:
-                    SetPublicationsListToAdapter(publications);
                     break;
             }
         }
@@ -674,11 +780,15 @@ public class EntarenceMapAndListActivity
                         switch (ll_map_and_gallery.getVisibility()) {
                             case View.VISIBLE:
                                 currentMode = MODE_LIST;
+                                tv_toolbar_label.setText(currentListMode == LIST_MODE_ALL
+                                        ? R.string.all_shares_toolbar_title
+                                        : R.string.my_shares_toolbar_title);
                                 SetupMode();
                                 item.setIcon(ContextCompat.getDrawable(getApplicationContext(), R.drawable.map_menu_icon));
                                 break;
                             case View.GONE:
                                 currentMode = MODE_MAP;
+                                tv_toolbar_label.setText(R.string.toolbar_title_map);
                                 SetupMode();
                                 item.setIcon(ContextCompat.getDrawable(getApplicationContext(), R.drawable.list_xxh));
                                 break;
@@ -728,6 +838,8 @@ public class EntarenceMapAndListActivity
 
             @Override
             public void onDrawerOpened(View drawerView) {
+                et_search.clearFocus();
+                CommonUtil.HideSoftKeyboard(getActivity());
                 isSideMenuOpened = true;
                 super.onDrawerOpened(drawerView);
                 CommonUtil.PostGoogleAnalyticsUIEvent(getApplicationContext(), "Map and list", "Side menu", "Open menu");
@@ -763,6 +875,8 @@ public class EntarenceMapAndListActivity
         btn_nav_menu_contact_us.setOnClickListener(this);
         btn_nav_menu_terms = (RelativeLayout) findViewById(R.id.rl_btn_terms_and_conditions);
         btn_nav_menu_terms.setOnClickListener(this);
+
+        tv_side_menu_list_mode = (TextView) findViewById(R.id.tv_side_menu_list_mode);
 
 //        Menu menuNav = v.getMenu();
 //        menuNav.clear();
@@ -839,9 +953,9 @@ public class EntarenceMapAndListActivity
         });
     }
 
-    private void SetPublicationsListToAdapter(ArrayList<FCPublication> publications) {
+    private void SetPublicationsListToAdapter(ArrayList<FCPublication> publications, boolean isMine) {
         if (adapter != null) {
-            adapter.UpdatePublicationsList(publications);
+            adapter.UpdatePublicationsList(publications, isMine);
         }
     }
 
@@ -954,7 +1068,11 @@ public class EntarenceMapAndListActivity
                     progressDialog = null;
                 }
             default:
-                if (adapter != null){
+                if (adapter != null) {
+                    RestartLoadingForPublicationsList();
+                }
+                if (isMapLoaded) {
+                    RestartLoadingForMarkers();
                 }
                 break;
         }
@@ -979,26 +1097,106 @@ public class EntarenceMapAndListActivity
 
     //region Tab filter buttons
 
-    private void SetupFilterTabButtons() {
-        tl_list_filter_buttons.addTab(tl_list_filter_buttons.newTab().setText(getString(R.string.filter_closest_btn_text)), 0);
-        tl_list_filter_buttons.addTab(tl_list_filter_buttons.newTab().setText(getString(R.string.filter_new_btn_text)), 1);
-        tl_list_filter_buttons.addTab(tl_list_filter_buttons.newTab().setText(getString(R.string.filter_all_btn_text)), 2);
-        tl_list_filter_buttons.setOnTabSelectedListener(this);
+//    private void SetupFilterTabButtons() {
+//        tl_list_filter_buttons.addTab(tl_list_filter_buttons.newTab().setText(getString(R.string.filter_closest_btn_text)), 0);
+//        tl_list_filter_buttons.addTab(tl_list_filter_buttons.newTab().setText(getString(R.string.filter_new_btn_text)), 1);
+//        tl_list_filter_buttons.addTab(tl_list_filter_buttons.newTab().setText(getString(R.string.filter_all_btn_text)), 2);
+//
+//
+////        tab_all_closest = tl_list_filter_buttons.newTab().setText(getString(R.string.filter_closest_btn_text));
+////        tl_list_filter_buttons.addTab(tab_all_closest, 0);
+////        tab_all_new = tl_list_filter_buttons.newTab().setText(getString(R.string.filter_new_btn_text));
+////        tl_list_filter_buttons.addTab(tab_all_new, 1);
+////        tab_all_all = tl_list_filter_buttons.newTab().setText(getString(R.string.filter_all_btn_text));
+////        tl_list_filter_buttons.addTab(tab_all_all, 2);
+////        tab_my_all = tl_list_filter_buttons.newTab().setText(getString(R.string.filter_all_my_pubs));
+////        tl_list_filter_buttons.addTab(tab_my_all, 3);
+////        tab_my_active = tl_list_filter_buttons.newTab().setText(getString(R.string.filter_active_my_pubs));
+////        tl_list_filter_buttons.addTab(tab_my_active, 4);
+////        tab_my_ended = tl_list_filter_buttons.newTab().setText(getString(R.string.filter_ended_my_pubs));
+////        tl_list_filter_buttons.addTab(tab_my_ended, 5);
+//
+//        tl_list_filter_buttons.setOnTabSelectedListener(this);
+//    }
+
+    public void SetTabsVisibility(int listMode){
+        while (tl_list_filter_buttons.getTabCount() > 0){
+            tl_list_filter_buttons.removeTabAt(0);
+        }
+
+        switch (listMode){
+            case LIST_MODE_ALL:
+                tv_toolbar_label.setText(R.string.all_shares_toolbar_title);
+                tl_list_filter_buttons.addTab(tl_list_filter_buttons.newTab()
+                        .setText(getString(R.string.filter_closest_btn_text))
+                        .setTag(FooDoNetSQLHelper.FILTER_ID_LIST_ALL_BY_CLOSEST));
+                tl_list_filter_buttons.addTab(tl_list_filter_buttons.newTab()
+                        .setText(getString(R.string.filter_new_btn_text))
+                        .setTag(FooDoNetSQLHelper.FILTER_ID_LIST_ALL_BY_NEWEST));
+                tl_list_filter_buttons.addTab(tl_list_filter_buttons.newTab()
+                        .setText(getString(R.string.filter_all_btn_text))
+                        .setTag(FooDoNetSQLHelper.FILTER_ID_LIST_ALL_BY_LESS_REGS));
+                break;
+            case LIST_MODE_MY:
+                tv_toolbar_label.setText(R.string.my_shares_toolbar_title);
+                tl_list_filter_buttons.addTab(tl_list_filter_buttons.newTab()
+                        .setText(getString(R.string.filter_active_my_pubs))
+                        .setTag(FooDoNetSQLHelper.FILTER_ID_LIST_MY_ACTIVE_ID_DESC));
+                tl_list_filter_buttons.addTab(tl_list_filter_buttons.newTab()
+                        .setText(getString(R.string.filter_ended_my_pubs))
+                        .setTag(FooDoNetSQLHelper.FILTER_ID_LIST_MY_NOT_ACTIVE_ID_ASC));
+                tl_list_filter_buttons.addTab(tl_list_filter_buttons.newTab()
+                        .setText(getString(R.string.filter_all_my_pubs))
+                        .setTag(FooDoNetSQLHelper.FILTER_ID_LIST_MY_BY_ENDING_SOON));
+                break;
+        }
+
+
+//        tab_all_all.getCustomView().setVisibility(mode == LIST_MODE_ALL? View.VISIBLE: View.GONE);
+//        tab_all_new.getCustomView().setVisibility(mode == LIST_MODE_ALL? View.VISIBLE: View.GONE);
+//        tab_all_closest.getCustomView().setVisibility(mode == LIST_MODE_ALL? View.VISIBLE: View.GONE);
+//        tab_my_ended.getCustomView().setVisibility(mode == LIST_MODE_ALL? View.GONE: View.VISIBLE);
+//        tab_my_active.getCustomView().setVisibility(mode == LIST_MODE_ALL? View.GONE: View.VISIBLE);
+//        tab_my_all.getCustomView().setVisibility(mode == LIST_MODE_ALL? View.GONE: View.VISIBLE);
+
+//        tl_list_filter_buttons.getChildAt(0).setVisibility(mode == LIST_MODE_ALL? View.VISIBLE: View.GONE);
+//        tl_list_filter_buttons.getChildAt(1).setVisibility(mode == LIST_MODE_ALL? View.VISIBLE: View.GONE);
+//        tl_list_filter_buttons.getChildAt(2).setVisibility(mode == LIST_MODE_ALL? View.VISIBLE: View.GONE);
+//        tl_list_filter_buttons.getChildAt(3).setVisibility(mode == LIST_MODE_ALL? View.GONE: View.VISIBLE);
+//        tl_list_filter_buttons.getChildAt(4).setVisibility(mode == LIST_MODE_ALL? View.GONE: View.VISIBLE);
+//        tl_list_filter_buttons.getChildAt(5).setVisibility(mode == LIST_MODE_ALL? View.GONE: View.VISIBLE);
     }
 
     @Override
     public void onTabSelected(TabLayout.Tab tab) {
-        switch (tab.getPosition()) {
-            case 0:
-                currentFilterID = FooDoNetSQLHelper.FILTER_ID_LIST_ALL_BY_CLOSEST;
-                break;
-            case 1:
-                currentFilterID = FooDoNetSQLHelper.FILTER_ID_LIST_ALL_BY_NEWEST;
-                break;
-            case 2:
-                currentFilterID = FooDoNetSQLHelper.FILTER_ID_LIST_ALL_BY_LESS_REGS;
-                break;
+//        switch (tab.getPosition()) {
+//            case 0:
+//                currentFilterID = FooDoNetSQLHelper.FILTER_ID_LIST_ALL_BY_CLOSEST;
+//                break;
+//            case 1:
+//                currentFilterID = FooDoNetSQLHelper.FILTER_ID_LIST_ALL_BY_NEWEST;
+//                break;
+//            case 2:
+//                currentFilterID = FooDoNetSQLHelper.FILTER_ID_LIST_ALL_BY_LESS_REGS;
+//                break;
+//            case 3:
+//                currentFilterID = FooDoNetSQLHelper.FILTER_ID_LIST_MY_BY_ENDING_SOON;
+//                break;
+//            case 4:
+//                currentFilterID = FooDoNetSQLHelper.FILTER_ID_LIST_MY_ACTIVE_ID_DESC;
+//                break;
+//            case 5:
+//                currentFilterID = FooDoNetSQLHelper.FILTER_ID_LIST_MY_NOT_ACTIVE_ID_ASC;
+//                break;        }
+        if(et_search != null) {
+            et_search.clearFocus();
+            CommonUtil.HideSoftKeyboard(this);
         }
+
+        if(tab.getTag() == null || !(tab.getTag() instanceof Integer))
+            return;
+
+        currentFilterID = (int)tab.getTag();
         RestartLoadingForPublicationsList();
     }
 
@@ -1022,10 +1220,14 @@ public class EntarenceMapAndListActivity
         boolean isRestart = !TextUtils.isEmpty(et_search.getText().toString())
                 && currentFilterID == FooDoNetSQLHelper.FILTER_ID_LIST_ALL_BY_TEXT_FILTER;
         if (TextUtils.isEmpty(et_search.getText().toString())) {
-            currentFilterID = FooDoNetSQLHelper.FILTER_ID_LIST_ALL_BY_CLOSEST;
+            currentFilterID = (currentListMode == LIST_MODE_ALL)
+                    ? FooDoNetSQLHelper.FILTER_ID_LIST_ALL_BY_CLOSEST
+                    : FooDoNetSQLHelper.FILTER_ID_LIST_MY_ACTIVE_ID_DESC;
         } else {
             FooDoNetCustomActivityConnectedToService.UpdateFilterTextPreferences(this, et_search.getText().toString());
-            currentFilterID = FooDoNetSQLHelper.FILTER_ID_LIST_ALL_BY_TEXT_FILTER;
+            currentFilterID = (currentListMode == LIST_MODE_ALL)
+                    ? FooDoNetSQLHelper.FILTER_ID_LIST_ALL_BY_TEXT_FILTER
+                    : FooDoNetSQLHelper.FILTER_ID_LIST_MY_BY_TEXT_FILTER;
         }
         if (isRestart)
             RestartLoadingForPublicationsList();
@@ -1040,6 +1242,41 @@ public class EntarenceMapAndListActivity
         } else {
             //Assign your image again to the view, otherwise it will always be gone even if the text is 0 again.
             et_search.setCompoundDrawablesWithIntrinsicBounds(R.drawable.toolbar_find, 0, 0, 0);
+        }
+    }
+
+    //endregion
+
+    //region Registration and after registration
+
+    @Override
+    public void YesRegisterNow(int code) {
+        if (code == DO_AFTER_REGISTRATION_CODE_NOTHING) return;
+        Intent signInIntent = new Intent(this, SignInActivity.class);
+        startActivityForResult(signInIntent, code);
+    }
+
+    @Override
+    public void OnServerRespondedCallback(InternalRequest response) {
+        switch (response.Status) {
+            case InternalRequest.STATUS_OK:
+                if (response.newUserID > 0)
+                    CommonUtil.SaveMyUserID(this, response.newUserID);
+                switch (response.DoAfterRegistrationActionID) {
+                    case DO_AFTER_REGISTRATION_CODE_ADD_PUBLICATION:
+                        Intent addPub = new Intent(this, AddEditPublicationActivity.class);
+                        startActivityForResult(addPub, REQUEST_CODE_NEW_PUB);
+                        break;
+                    case DO_AFTER_REGISTRATION_CODE_GROUPS:
+                        Intent intentGroups = new Intent(getApplicationContext(), GroupsListActivity.class);
+                        startActivity(intentGroups);
+                        break;
+                    case DO_AFTER_REGISTRATION_CODE_NOTHING:
+                        break;
+                }
+                break;
+            case InternalRequest.STATUS_FAIL:
+                break;
         }
     }
 

@@ -42,7 +42,7 @@
                 android:layout_height="@dimen/add_pub_img_height"
                 android:layout_alignParentEnd="true"
                 android:layout_alignParentRight="true"
-                android:scaleType="fitXY"
+                android:scaleType="fitCenter"
                 android:src="@drawable/no_photo_xxh" />
 <!--
             <ImageButton

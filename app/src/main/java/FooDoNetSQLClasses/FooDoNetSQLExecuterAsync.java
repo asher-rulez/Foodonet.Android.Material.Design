@@ -47,7 +47,7 @@ public class FooDoNetSQLExecuterAsync extends AsyncTask<InternalRequest, Void, V
     InternalRequest incomingRequest;
     int newNegativeID;
     ArrayList<Group> groupsFromDB;
-//    Map<Integer, Integer> needToLoadPicturesFor;
+    //    Map<Integer, Integer> needToLoadPicturesFor;
     Context context;
 
     public FooDoNetSQLExecuterAsync(IFooDoNetSQLCallback callback, ContentResolver content) {
@@ -57,7 +57,7 @@ public class FooDoNetSQLExecuterAsync extends AsyncTask<InternalRequest, Void, V
         contentResolver = content;
     }
 
-    public void SetContext(Context context){
+    public void SetContext(Context context) {
         this.context = context;
     }
 
@@ -76,11 +76,11 @@ public class FooDoNetSQLExecuterAsync extends AsyncTask<InternalRequest, Void, V
                     Log.e(MY_TAG, "error: contentresolver null");
                     return null;
                 }
-                if(callbackHandler == null){
+                if (callbackHandler == null) {
                     Log.e(MY_TAG, "error: callbackHandler null");
                     return null;
                 }
-                if(publicationsFromServer != null && publicationsFromServer.size() != 0) {
+                if (publicationsFromServer != null && publicationsFromServer.size() != 0) {
                     Cursor cursor = contentResolver.query(FooDoNetSQLProvider.CONTENT_URI,
                             FCPublication.GetColumnNamesArray(), null, null, null);
                     publicationsFromDB = FCPublication.GetArrayListOfPublicationsFromCursor(cursor, false);
@@ -144,13 +144,13 @@ public class FooDoNetSQLExecuterAsync extends AsyncTask<InternalRequest, Void, V
                 contentResolver.delete(FooDoNetSQLProvider.URI_GROUP, null, null);
                 contentResolver.delete(FooDoNetSQLProvider.URI_GROUP_MEMBERS, null, null);
 
-                if(incomingRequest.groups != null && incomingRequest.groups.size() > 0){
+                if (incomingRequest.groups != null && incomingRequest.groups.size() > 0) {
                     resultGroups = new ArrayList<>();
 
-                    for(Group groupFromServer : incomingRequest.groups){
+                    for (Group groupFromServer : incomingRequest.groups) {
                         contentResolver.insert(FooDoNetSQLProvider.URI_GROUP, groupFromServer.GetContentValuesRow());
-                        for(GroupMember gm : groupFromServer.get_group_members()) {
-                            if(gm.get_user_id() != CommonUtil.GetMyUserID(context))
+                        for (GroupMember gm : groupFromServer.get_group_members()) {
+                            if (gm.get_user_id() != CommonUtil.GetMyUserID(context))
                                 contentResolver.insert(FooDoNetSQLProvider.URI_GROUP_MEMBERS, gm.GetContentValuesRow());
                         }
                         resultGroups.add(groupFromServer);
@@ -337,7 +337,7 @@ public class FooDoNetSQLExecuterAsync extends AsyncTask<InternalRequest, Void, V
             //endregion
             //region register/unregister to publication
             case InternalRequest.ACTION_SQL_ADD_MYSELF_TO_REGISTERED_TO_PUB:
-                if(params[0].myRegisterToPublication == null){
+                if (params[0].myRegisterToPublication == null) {
                     Log.e(MY_TAG, "no data in myRegisterToPublication");
                     break;
                 }
@@ -346,7 +346,7 @@ public class FooDoNetSQLExecuterAsync extends AsyncTask<InternalRequest, Void, V
                 Cursor negIdCursor = contentResolver
                         .query(FooDoNetSQLProvider.URI_GET_REG_FOR_PUB_NEW_NEG_ID,
                                 new String[]{RegisteredUserForPublication.REGISTERED_FOR_PUBLICATION_KEY_NEW_NEGATIVE_ID},
-                                    null, null, null);
+                                null, null, null);
                 if (negIdCursor != null && negIdCursor.moveToFirst()) {
                     newNegativeID = negIdCursor.getInt(
                             negIdCursor.getColumnIndex(RegisteredUserForPublication
@@ -359,10 +359,10 @@ public class FooDoNetSQLExecuterAsync extends AsyncTask<InternalRequest, Void, V
                 }
                 contentResolver.insert(
                         FooDoNetSQLProvider.URI_INSERT_REGISTERED_FOR_PUBLICATION,
-                            myRegistrationToPublication.GetContentValuesRow());
+                        myRegistrationToPublication.GetContentValuesRow());
                 break;
             case InternalRequest.ACTION_SQL_REMOVE_MYSELF_FROM_REGISTERED_TO_PUB:
-                if(params[0].myRegisterToPublication == null){
+                if (params[0].myRegisterToPublication == null) {
                     Log.e(MY_TAG, "no data in myRegisterToPublication");
                     break;
                 }
@@ -393,10 +393,10 @@ public class FooDoNetSQLExecuterAsync extends AsyncTask<InternalRequest, Void, V
                 Cursor cPubSame = contentResolver.query(
                         Uri.parse(FooDoNetSQLProvider.CONTENT_URI + "/" + String.valueOf(params[0].PublicationID)),
                         FCPublication.GetColumnNamesArray(), null, null, null);
-                if(cPubSame.moveToFirst()){
+                if (cPubSame.moveToFirst()) {
                     FCPublication pubWithSameID
                             = FCPublication.GetArrayListOfPublicationsFromCursor(cPubSame, false).get(0);
-                    if(pubWithSameID.getVersion() == params[0].publicationForSaving.getVersion())
+                    if (pubWithSameID.getVersion() == params[0].publicationForSaving.getVersion())
                         return null;
                 }
                 FCPublication newPubToSave = params[0].publicationForSaving;
@@ -406,9 +406,9 @@ public class FooDoNetSQLExecuterAsync extends AsyncTask<InternalRequest, Void, V
                 Cursor c = contentResolver.query(
                         Uri.parse(FooDoNetSQLProvider.CONTENT_URI + "/" + String.valueOf(params[0].PublicationID)),
                         FCPublication.GetColumnNamesArray(), null, null, null);
-                if(c.moveToFirst())
+                if (c.moveToFirst())
                     publicationsFromDB = FCPublication.GetArrayListOfPublicationsFromCursor(c, false);
-                else{
+                else {
                     Log.e(MY_TAG, "publication to delete not found in db, nothing to delete");
                     return null;
                 }
@@ -420,9 +420,9 @@ public class FooDoNetSQLExecuterAsync extends AsyncTask<InternalRequest, Void, V
                 Cursor c1 = contentResolver.query(
                         Uri.parse(FooDoNetSQLProvider.CONTENT_URI + "/" + String.valueOf(params[0].PublicationID)),
                         FCPublication.GetColumnNamesArray(), null, null, null);
-                if(c1.moveToFirst())
+                if (c1.moveToFirst())
                     publicationsFromDB = FCPublication.GetArrayListOfPublicationsFromCursor(c1, false);
-                else{
+                else {
                     Log.e(MY_TAG, "publication to add report not found in db, nothing to delete");
                     return null;
                 }

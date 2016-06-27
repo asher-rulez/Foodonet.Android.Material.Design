@@ -134,7 +134,15 @@ tools:context="com.example.asher.mapappexample.MapsActivity"-->
                 android:id="@+id/tb_map_and_list"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                android:background="?attr/colorPrimary" />
+                android:background="?attr/colorPrimary" >
+                <TextView
+                    android:id="@+id/tv_main_activity_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/all_shares_toolbar_title"
+                    android:layout_gravity="center"
+                    android:textColor="@color/white"/>
+            </android.support.v7.widget.Toolbar>
 
             <android.support.design.widget.TabLayout
                 android:id="@+id/tl_list_filter_buttons"
@@ -244,6 +252,7 @@ tools:context="com.example.asher.mapappexample.MapsActivity"-->
                     android:src="@drawable/nav_menu_my_sharings_icon" />
 
                 <TextView
+                    android:id="@+id/tv_side_menu_list_mode"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"

@@ -241,6 +241,9 @@ public class FooDoNetSQLProvider extends ContentProvider {
 
         SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
         String imei;
+
+        String rawQuery;
+
         switch (uriType) {
             case PUBLICATIONS:
                 queryBuilder.setTables(FCPublicationsTable.FCPUBLICATIONS_TABLE_NAME);// + "," + RegisteredForPublicationTable.REGISTERED_FOR_PUBLICATION_TABLE_NAME
@@ -255,14 +258,18 @@ public class FooDoNetSQLProvider extends ContentProvider {
                 break;
             case PUBLICATIONS_ALL_FOR_LIST_SORTED_ID_DESC:
                 imei = CommonUtil.GetIMEI(this.getContext());
+                rawQuery = FooDoNetSQLHelper.GetRawSelectPublicationsForListByFilterID(
+                        FooDoNetSQLHelper.FILTER_ID_LIST_ALL_BY_NEWEST, imei);
+                Log.i(MY_TAG, rawQuery);
                 return database.getReadableDatabase()
-                        .rawQuery(FooDoNetSQLHelper.GetRawSelectPublicationsForListByFilterID(
-                                FooDoNetSQLHelper.FILTER_ID_LIST_ALL_BY_NEWEST, imei), null);
+                        .rawQuery(rawQuery, null);
             case PUBLICATIONS_MY_FOR_LIST_SORTED_ID_DESC:
                 imei = CommonUtil.GetIMEI(this.getContext());
+                rawQuery = FooDoNetSQLHelper.GetRawSelectPublicationsForListByFilterID(
+                        FooDoNetSQLHelper.FILTER_ID_LIST_MY_BY_ENDING_SOON, imei);
+                Log.i(MY_TAG, rawQuery);
                 return database.getReadableDatabase()
-                        .rawQuery(FooDoNetSQLHelper.GetRawSelectPublicationsForListByFilterID(
-                                FooDoNetSQLHelper.FILTER_ID_LIST_MY_BY_ENDING_SOON, imei), null);
+                        .rawQuery(rawQuery, null);
             case PUBLICATIONS_FOR_LIST_BY_FILTER_ID:
                 String filterIDStr = uri.getLastPathSegment();
                 int filterID = Integer.parseInt(filterIDStr);
@@ -273,18 +280,18 @@ public class FooDoNetSQLProvider extends ContentProvider {
                     stringFilter = CommonUtil.GetFilterStringFromPreferences(this.getContext());
                 if (filterID == FooDoNetSQLHelper.FILTER_ID_LIST_ALL_BY_CLOSEST) {
                     LatLng myLocation = CommonUtil.GetMyLocationFromPreferences(this.getContext());
-                    String rawSelect = FooDoNetSQLHelper.GetRawSelectPublicationsForListByFilterID(
+                    rawQuery = FooDoNetSQLHelper.GetRawSelectPublicationsForListByFilterID(
                             filterID, imei, String.valueOf(myLocation.latitude),
                             String.valueOf(myLocation.longitude));
+                    Log.i(MY_TAG, rawQuery);
                     return database.getReadableDatabase()
-                            .rawQuery(FooDoNetSQLHelper.GetRawSelectPublicationsForListByFilterID(
-                                    filterID, imei, String.valueOf(myLocation.latitude),
-                                    String.valueOf(myLocation.longitude)), null);
+                            .rawQuery(rawQuery, null);
                 }
-                String txt = FooDoNetSQLHelper.GetRawSelectPublicationsForListByFilterID(
+                rawQuery = FooDoNetSQLHelper.GetRawSelectPublicationsForListByFilterID(
                         filterID, imei, stringFilter);
+                Log.i(MY_TAG, rawQuery);
                 return database.getReadableDatabase()
-                        .rawQuery(txt, null);
+                        .rawQuery(rawQuery, null);
             case REGS_FOR_PUBLICATION:
                 queryBuilder.setTables(RegisteredForPublicationTable.REGISTERED_FOR_PUBLICATION_TABLE_NAME);
                 break;
