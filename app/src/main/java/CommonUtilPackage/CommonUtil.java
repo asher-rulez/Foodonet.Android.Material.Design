@@ -676,6 +676,11 @@ public class CommonUtil {
         return size;
     }
 
+    public static void HideSoftKeyboard(Activity activity) {
+        InputMethodManager inputMethodManager = (InputMethodManager)  activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
+        inputMethodManager.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(), 0);
+    }
+
     public static AlertDialog ShowDialogNeedToRegister(final Context context, final int doAfterRegistrationCode, final IPleaseRegisterDialogCallback callback){
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle(context.getString(R.string.dialog_title_please_register));
@@ -698,10 +703,5 @@ public class CommonUtil {
         AlertDialog dialog = builder.create();
         dialog.show();
         return dialog;
-    }
-
-    public static void HideSoftKeyboard(Activity activity) {
-        InputMethodManager inputMethodManager = (InputMethodManager)  activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
-        inputMethodManager.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(), 0);
     }
 }

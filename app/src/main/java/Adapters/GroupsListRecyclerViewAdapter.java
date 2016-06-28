@@ -17,11 +17,15 @@ import upp.foodonet.material.R;
 public class GroupsListRecyclerViewAdapter extends RecyclerView.Adapter<GroupsListRecyclerViewAdapter.GroupsListViewHolder> {
     private ArrayList<Group> groupsList;
     private IOnGroupSelecterFromListListener groupSelectedListener;
+    private int userID;
+    private String admin_subtitle;
 
-    public GroupsListRecyclerViewAdapter(ArrayList<Group> groups, IOnGroupSelecterFromListListener listener) {
+    public GroupsListRecyclerViewAdapter(ArrayList<Group> groups, int userID, String admin_subtitle, IOnGroupSelecterFromListListener listener) {
         groupsList = new ArrayList<>();
         groupsList.addAll(groups);
         groupSelectedListener = listener;
+        this.userID = userID;
+        this.admin_subtitle = admin_subtitle;
     }
 
     public void UpdateGroupsList(ArrayList<Group> groups){
@@ -42,6 +46,7 @@ public class GroupsListRecyclerViewAdapter extends RecyclerView.Adapter<GroupsLi
         holder.setGroupID(group.Get_id());
         holder.setGroupMembersCount(group.get_members_count());
         holder.setGroupTitle(group.Get_name());
+        if(group.Get_admin_id() == userID) holder.setGroupIsAdmin(admin_subtitle);
         holder.view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -58,14 +63,20 @@ public class GroupsListRecyclerViewAdapter extends RecyclerView.Adapter<GroupsLi
     public class GroupsListViewHolder extends RecyclerView.ViewHolder {
         private TextView groupTitle;
         private TextView groupMembersCount;
+        private TextView groupIsAdmin;
         private int groupID;
         public View view;
+
+        public void setGroupIsAdmin(String isAdmin) {
+            this.groupIsAdmin.setText(isAdmin);
+        }
 
         public GroupsListViewHolder(View itemView) {
             super(itemView);
             view = itemView;
             groupTitle = (TextView) view.findViewById(R.id.tv_groups_list_item_title);
             groupMembersCount = (TextView) view.findViewById(R.id.tv_groups_list_item_members_count);
+            groupIsAdmin = (TextView)view.findViewById(R.id.tv_is_admin);
         }
 
         public void setGroupTitle(String title) {

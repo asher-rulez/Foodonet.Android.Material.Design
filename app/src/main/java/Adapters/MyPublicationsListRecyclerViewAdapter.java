@@ -1,3 +1,4 @@
+/*
 package Adapters;
 
 import android.content.Context;
@@ -22,9 +23,11 @@ import FooDoNetServerClasses.ImageDownloader;
 import UIUtil.RoundedImageView;
 import upp.foodonet.material.R;
 
+*/
 /**
  * Created by Asher on 31-May-16.
- */
+ *//*
+
 public class MyPublicationsListRecyclerViewAdapter extends RecyclerView.Adapter<MyPublicationsListRecyclerViewAdapter.MyPublicationListItemViewHolder> {
 
     private static final String MY_TAG = "food_myPubsAdapter";
@@ -129,3 +132,4 @@ public class MyPublicationsListRecyclerViewAdapter extends RecyclerView.Adapter<
         }
     }
 }
+*/

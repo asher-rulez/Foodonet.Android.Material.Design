@@ -3,6 +3,7 @@ package upp.foodonet.material;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Application;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
@@ -44,10 +45,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Adapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
@@ -78,6 +81,7 @@ import Adapters.AllPublicationsListRecyclerViewAdapter;
 import Adapters.IOnPublicationFromListSelected;
 import Adapters.MapMarkerInfoWindowAdapter;
 import CommonUtilPackage.CommonUtil;
+import CommonUtilPackage.INewGroupNameEnter;
 import CommonUtilPackage.IPleaseRegisterDialogCallback;
 import CommonUtilPackage.ImageDictionarySyncronized;
 import CommonUtilPackage.InternalRequest;
@@ -192,7 +196,7 @@ public class EntarenceMapAndListActivity
 
     //endregion
 
-    public Activity getActivity(){
+    public Activity getActivity() {
         return this;
     }
 
@@ -213,7 +217,7 @@ public class EntarenceMapAndListActivity
         if (fab != null) fab.setOnClickListener(this);
         fabLayoutParams = (CoordinatorLayout.LayoutParams) fab.getLayoutParams();
 
-        tv_toolbar_label = (TextView)findViewById(R.id.tv_main_activity_title);
+        tv_toolbar_label = (TextView) findViewById(R.id.tv_main_activity_title);
 
         fl_search_and_list = (FrameLayout) findViewById(R.id.fl_all_publications_list);
         fl_search_and_list.setVisibility(View.GONE);
@@ -1119,12 +1123,12 @@ public class EntarenceMapAndListActivity
 //        tl_list_filter_buttons.setOnTabSelectedListener(this);
 //    }
 
-    public void SetTabsVisibility(int listMode){
-        while (tl_list_filter_buttons.getTabCount() > 0){
+    public void SetTabsVisibility(int listMode) {
+        while (tl_list_filter_buttons.getTabCount() > 0) {
             tl_list_filter_buttons.removeTabAt(0);
         }
 
-        switch (listMode){
+        switch (listMode) {
             case LIST_MODE_ALL:
                 tv_toolbar_label.setText(R.string.all_shares_toolbar_title);
                 tl_list_filter_buttons.addTab(tl_list_filter_buttons.newTab()
@@ -1188,15 +1192,15 @@ public class EntarenceMapAndListActivity
 //            case 5:
 //                currentFilterID = FooDoNetSQLHelper.FILTER_ID_LIST_MY_NOT_ACTIVE_ID_ASC;
 //                break;        }
-        if(et_search != null) {
+        if (et_search != null) {
             et_search.clearFocus();
             CommonUtil.HideSoftKeyboard(this);
         }
 
-        if(tab.getTag() == null || !(tab.getTag() instanceof Integer))
+        if (tab.getTag() == null || !(tab.getTag() instanceof Integer))
             return;
 
-        currentFilterID = (int)tab.getTag();
+        currentFilterID = (int) tab.getTag();
         RestartLoadingForPublicationsList();
     }
 
@@ -1281,6 +1285,7 @@ public class EntarenceMapAndListActivity
     }
 
     //endregion
+
 /*
     class FrameSwitchFABBehavior extends CoordinatorLayout.Behavior<FloatingActionButton>{
         Context context;

@@ -352,6 +352,11 @@
     <string name="saving_group">Saving group</string>
     <string name="loading_group">Loading group</string>
 
+    <string name="new_group_dialog_title">Enter new group name:</string>
+    <string name="new_group_dialog_create_button">Create</string>
+
+    <string name="group_admin_subtitle">Admin</string>
+
     <!-- Common -->
 
     <string name="confirmAction">Sure?</string>
