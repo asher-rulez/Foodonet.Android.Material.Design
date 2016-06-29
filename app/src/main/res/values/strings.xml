@@ -357,6 +357,10 @@
 
     <string name="group_admin_subtitle">Admin</string>
 
+    <string name="button_text_leave">Leave</string>
+    <string name="button_text_group">group</string>
+
+
     <!-- Common -->
 
     <string name="confirmAction">Sure?</string>

@@ -10,6 +10,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.media.MediaMetadataCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -101,7 +102,7 @@ public class GroupsListActivity
     @Override
     public void OnGroupSelected(int groupID) {
         pd_loadingGroup = CommonUtil.ShowProgressDialog(this, getString(R.string.loading_group));
-        ExistingGroupGetter groupGetter = new ExistingGroupGetter();
+        ExistingGroupGetter groupGetter = new ExistingGroupGetter(this);
         groupGetter.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, groupID);
     }
 
@@ -211,8 +212,11 @@ public class GroupsListActivity
 
     private class ExistingGroupGetter extends AsyncTask<Integer, Void, Void>{
         Group group;
+        Context context;
 
-        public ExistingGroupGetter(){}
+        public ExistingGroupGetter(Context ctx){
+            context = ctx;
+        }
 
         @Override
         protected Void doInBackground(Integer... params) {
@@ -222,7 +226,12 @@ public class GroupsListActivity
             ArrayList<GroupMember> members = GroupMember.GetGroupMembersFromCursor(getContentResolver()
                     .query(Uri.parse(FooDoNetSQLProvider.URI_GROUP_MEMBERS_BY_GROUP + "/" + params[0]),
                             GroupMember.GetColumnNamesArray(), null, null, null));
-            group.set_group_members(members);
+            ArrayList<GroupMember> result = new ArrayList<>();
+            int myUserID = CommonUtil.GetMyUserID(context);
+            for(GroupMember member: members)
+                if(member.get_user_id() != myUserID)
+                    result.add(member);
+            group.set_group_members(result);
 
             return null;
         }

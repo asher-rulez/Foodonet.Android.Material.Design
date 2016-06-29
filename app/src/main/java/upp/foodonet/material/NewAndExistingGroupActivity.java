@@ -24,6 +24,7 @@ import android.view.View;
 import android.widget.Adapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -35,6 +36,7 @@ import AsyncTasks.FetchContactsAsyncTask;
 import AsyncTasks.IFetchContactsParent;
 import CommonUtilPackage.CommonUtil;
 import CommonUtilPackage.ContactItem;
+import CommonUtilPackage.IGroupMemberRemoved;
 import CommonUtilPackage.InternalRequest;
 import DataModel.Group;
 import DataModel.GroupMember;
@@ -45,7 +47,7 @@ public class NewAndExistingGroupActivity
         extends AppCompatActivity
         implements View.OnClickListener,
         IFetchContactsParent,
-        IFooDoNetServerCallback {
+        IFooDoNetServerCallback, IGroupMemberRemoved {
 
     private static final String MY_TAG = "food_editGroup";
     public static final String extra_key_contacts = "contacts";
@@ -59,6 +61,7 @@ public class NewAndExistingGroupActivity
     ProgressDialog pd_loadingContacts;
     RecyclerView rv_contacts_in_group;
     FloatingActionButton fab_saveGroup;
+    FrameLayout fl_btn_leaveGroup;
     ProgressDialog pb_savingGroup;
 
     ContactsInGroupRecyclerViewAdapter adapter;
@@ -77,7 +80,7 @@ public class NewAndExistingGroupActivity
         btn_addMembers = (Button) findViewById(R.id.btn_group_add_member);
         btn_addMembers.setOnClickListener(this);
         fab_saveGroup = (FloatingActionButton) findViewById(R.id.fab_save_group);
-        fab_saveGroup.setOnClickListener(this);
+        fl_btn_leaveGroup = (FrameLayout)findViewById(R.id.fl_button_leave_group);
         //fab_saveGroup.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.fab_inactive_gray)));
         tv_groupName = (TextView)findViewById(R.id.tv_group_name_title);
 
@@ -87,9 +90,15 @@ public class NewAndExistingGroupActivity
         if (IsNewGroup) {
             groupID = 0;
             tv_groupName.setText(getIntent().getStringExtra(GroupsListActivity.GROUP_NAME_EXTRA_KEY));
+            fab_saveGroup.setVisibility(View.VISIBLE);
+            fl_btn_leaveGroup.setVisibility(View.GONE);
+            fab_saveGroup.setOnClickListener(this);
         } else {
             existingGroup = (Group)intent.getSerializableExtra(extra_key_existing_group);
             tv_groupName.setText(existingGroup.Get_name());
+            fl_btn_leaveGroup.setVisibility(View.VISIBLE);
+            fab_saveGroup.setVisibility(View.GONE);
+            fl_btn_leaveGroup.setOnClickListener(this);
         }
 
         groupContacts = new ArrayList<>();
@@ -99,11 +108,11 @@ public class NewAndExistingGroupActivity
 
     private void SetRecyclerView() {
         rv_contacts_in_group.setLayoutManager(new LinearLayoutManager(rv_contacts_in_group.getContext()));
-        adapter = new ContactsInGroupRecyclerViewAdapter();
+        adapter = new ContactsInGroupRecyclerViewAdapter(this);
         if(!IsNewGroup){
             ArrayList<ContactItem> contactItems = new ArrayList<>();
             for(GroupMember member : existingGroup.get_group_members())
-                contactItems.add(new ContactItem(member.get_name(), member.get_phone_number()));
+                contactItems.add(new ContactItem(member.get_name(), member.get_phone_number(), member));
             adapter.setContacts(contactItems);
         }
         rv_contacts_in_group.setAdapter(adapter);
@@ -177,6 +186,11 @@ public class NewAndExistingGroupActivity
                 if (pb_savingGroup != null) pb_savingGroup.dismiss();
                 break;
         }
+    }
+
+    @Override
+    public void OnGroupMemberRemoved(GroupMember groupMember) {
+
     }
 
     /*
