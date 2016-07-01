@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -34,6 +35,8 @@ public class AllPublicationsListRecyclerViewAdapter extends RecyclerView.Adapter
     ImageDictionarySyncronized imageDictionary;
     ImageDownloader imageDownloader;
 
+    boolean isCurrentListMine;
+
     public AllPublicationsListRecyclerViewAdapter(Context context, ArrayList<FCPublication> allPublications, IOnPublicationFromListSelected parent) {
         allPublicationsList = new ArrayList<>();
         allPublicationsList.addAll(allPublications);
@@ -43,10 +46,11 @@ public class AllPublicationsListRecyclerViewAdapter extends RecyclerView.Adapter
         imageDownloader = new ImageDownloader(context, imageDictionary);
     }
 
-    public void UpdatePublicationsList(ArrayList<FCPublication> pubs){
+    public void UpdatePublicationsList(ArrayList<FCPublication> pubs, boolean isMine){
         allPublicationsList = new ArrayList<>();
         if(pubs != null && pubs.size() > 0)
             allPublicationsList.addAll(pubs);
+        isCurrentListMine = isMine;
         this.notifyDataSetChanged();
     }
 
@@ -58,7 +62,7 @@ public class AllPublicationsListRecyclerViewAdapter extends RecyclerView.Adapter
 
     @Override
     public void onBindViewHolder(PublicationListItemViewHolder holder, int position) {
-        holder.SetupPublicationDetails(allPublicationsList.get(position));
+        holder.SetupPublicationDetails(allPublicationsList.get(position), isCurrentListMine);
     }
 
     @Override
@@ -71,34 +75,51 @@ public class AllPublicationsListRecyclerViewAdapter extends RecyclerView.Adapter
 
         RoundedImageView publicationImage;
         ImageView groupTypeIcon;
-        TextView tv_title;
+        TextView tv_title_all;
+        TextView tv_title_my;
         TextView tv_address;
         TextView tv_number_of_users;
         TextView tv_time_left;
+        TextView group_name;
 
         int publicationID;
 
         public PublicationListItemViewHolder(View itemView, IOnPublicationFromListSelected callback) {
             super(itemView);
             this.callback = callback;
+
             publicationImage = (RoundedImageView) itemView.findViewById(R.id.riv_publication_item_image);
             groupTypeIcon = (ImageView) itemView.findViewById(R.id.iv_publication_item_group_icon);
-            tv_title = (TextView) itemView.findViewById(R.id.tv_publication_item_title);
+
+            tv_title_all = (TextView) itemView.findViewById(R.id.tv_publication_item_title);
+            group_name = (TextView) itemView.findViewById(R.id.tv_my_pub_group_name);
+
+            tv_title_my = (TextView) itemView.findViewById(R.id.tv_my_pub_item_title);
             tv_address = (TextView) itemView.findViewById(R.id.tv_publication_item_address);
+
             tv_number_of_users = (TextView) itemView.findViewById(R.id.tv_publication_item_users_registered_number);
             tv_time_left = (TextView) itemView.findViewById(R.id.tv_publication_item_time_left);
             itemView.setOnClickListener(this);
         }
 
-        public void SetupPublicationDetails(FCPublication publication) {
+        public void SetupPublicationDetails(FCPublication publication, boolean isMine) {
             publicationID = publication.getUniqueId();
-            tv_title.setText(publication.getTitle());
-            tv_number_of_users.setText(
-                    context.getString(R.string.users_joined_format_for_list)
-                            .replace("{0}", String.valueOf(publication.getNumberOfRegistered())));
+
+            tv_title_all.setText(publication.getTitle());
+            tv_title_all.setVisibility(isMine?View.GONE:View.VISIBLE);
+            group_name.setText(publication.get_group_name());
+            group_name.setVisibility(isMine?View.VISIBLE:View.GONE);
+
             tv_address.setText(context.getString(R.string.address_format_for_list).replace("{0}",
                     publication.getAddress()).replace("{1}", CommonUtil.GetDistanceStringFromCurrentLocation(
                     new LatLng(publication.getLatitude(), publication.getLongitude()), context)));
+            tv_address.setVisibility(isMine?View.GONE:View.VISIBLE);
+            tv_title_my.setText(publication.getTitle());
+            tv_title_my.setVisibility(isMine?View.VISIBLE:View.GONE);
+
+            tv_number_of_users.setText(
+                    context.getString(R.string.users_joined_format_for_list)
+                            .replace("{0}", String.valueOf(publication.getNumberOfRegistered())));
             tv_time_left.setText("00:00");
             SetPublicationImage(publication, publicationImage);
             //tv_time_left.setText(CommonUtil.); commonUtil.gettimeleftforpublication

@@ -1,6 +1,8 @@
 package upp.foodonet.material;
 
+import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -12,13 +14,19 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
+import android.view.Window;
+import android.widget.Button;
+import android.widget.EditText;
 
 import java.util.ArrayList;
 
 import Adapters.GroupsListRecyclerViewAdapter;
 import Adapters.IOnGroupSelecterFromListListener;
 import CommonUtilPackage.CommonUtil;
+import CommonUtilPackage.INewGroupNameEnter;
 import DataModel.Group;
 import DataModel.GroupMember;
 import FooDoNetServiceUtil.FooDoNetCustomActivityConnectedToService;
@@ -27,9 +35,13 @@ import FooDoNetServiceUtil.ServicesBroadcastReceiver;
 public class GroupsListActivity
         extends FooDoNetCustomActivityConnectedToService
         implements  View.OnClickListener,
-                    IOnGroupSelecterFromListListener {
+                    IOnGroupSelecterFromListListener,
+                    INewGroupNameEnter {
 
     private static final String MY_TAG = "food_groupsList";
+
+    public static final String GROUP_NAME_EXTRA_KEY = "group_name";
+
     public static final int requestCodeNewGroup = 0;
     public static final int requestCodeExistingGroup = 1;
 
@@ -63,7 +75,7 @@ public class GroupsListActivity
     private void setupRecyclerView(){
         rv_groups_list.setLayoutManager(new LinearLayoutManager(rv_groups_list.getContext()));
         ArrayList<Group> groupsList = LoadGroups();
-        groupsListAdapter = new GroupsListRecyclerViewAdapter(groupsList, this);
+        groupsListAdapter = new GroupsListRecyclerViewAdapter(groupsList, CommonUtil.GetMyUserID(this), getString(R.string.group_admin_subtitle), this);
         rv_groups_list.setAdapter(groupsListAdapter);
     }
 
@@ -76,8 +88,7 @@ public class GroupsListActivity
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.fab_groups:
-                Intent newGroupIntent = new Intent(this, NewAndExistingGroupActivity.class);
-                startActivityForResult(newGroupIntent, requestCodeNewGroup);
+                ShowDialogEnterNewGroupName(this, this);
                 break;
         }
     }
@@ -122,6 +133,62 @@ public class GroupsListActivity
         }
     }
 */
+
+    //region Create group
+
+    public void ShowDialogEnterNewGroupName(final Context context, final INewGroupNameEnter callback) {
+        final Dialog dialog = new Dialog(this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.enter_new_group_name_dialog);
+        final EditText et_group_name = (EditText) dialog.findViewById(R.id.et_new_group_name);
+        final Button btn_group_name_ok = (Button) dialog.findViewById(R.id.btn_new_group_ok);
+        Button btn_group_name_cancel = (Button) dialog.findViewById(R.id.btn_new_group_cancel);
+
+        btn_group_name_ok.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (et_group_name != null && et_group_name.getText().toString().length() > 0) {
+                    callback.OnNewGroupNameSelected(et_group_name.getText().toString());
+                    dialog.dismiss();
+                }
+            }
+        });
+        btn_group_name_ok.setEnabled(false);
+
+        btn_group_name_cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.dismiss();
+            }
+        });
+
+        et_group_name.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                btn_group_name_ok.setEnabled(editable.length() > 0);
+            }
+        });
+
+        dialog.show();
+    }
+
+    @Override
+    public void OnNewGroupNameSelected(String newGroupName) {
+        Intent newGroupIntent = new Intent(this, NewAndExistingGroupActivity.class);
+        newGroupIntent.putExtra(GROUP_NAME_EXTRA_KEY, newGroupName);
+        startActivityForResult(newGroupIntent, requestCodeNewGroup);
+    }
+
+    //endregion
+
 
     @Override
     public void onBroadcastReceived(Intent intent){

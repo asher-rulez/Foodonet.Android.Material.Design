@@ -146,10 +146,6 @@
             android:name=".AddEditPublicationActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".MyPublicationsActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppDefault" />
-        <activity
             android:name=".SelectGroupForPublicationActivity"
             android:label="@string/title_activity_select_group_for_publication"
             android:theme="@style/AppDefault"></activity>

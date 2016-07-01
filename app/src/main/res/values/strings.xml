@@ -331,6 +331,10 @@
     <string name="sign_in_with_title">Sign in with</string>
     <string name="title_activity_main">MainActivity</string>
     <string name="title_activity_register_phone">RegisterPhoneActivity</string>
+    <string name="dialog_title_please_register">Please register</string>
+    <string name="dialog_message_please_register">Only registered users can use this feature</string>
+    <string name="dialog_button_register_now">Register now</string>
+    <string name="dialog_button_no_thanks">No, thanks</string>
 
     <!-- Register phone number -->
 
@@ -347,6 +351,11 @@
     <string name="loading_contacts">Loading contacts</string>
     <string name="saving_group">Saving group</string>
     <string name="loading_group">Loading group</string>
+
+    <string name="new_group_dialog_title">Enter new group name:</string>
+    <string name="new_group_dialog_create_button">Create</string>
+
+    <string name="group_admin_subtitle">Admin</string>
 
     <!-- Common -->
 
@@ -373,16 +382,19 @@
     <!-- Map and list -->
 
     <string name="filter_closest_btn_text">Closest</string>
-    <string name="filter_new_btn_text">New</string>
-    <string name="filter_all_btn_text">All</string>
+    <string name="filter_new_btn_text">Recent</string>
+    <string name="filter_all_btn_text">Active</string>
     <string name="title_activity_my_publications">MyPublicationsActivity</string>
+    <string name="all_shares_toolbar_title">All shares</string>
+    <string name="toolbar_title_map">Sharings on map</string>
 
     <!-- My publications list -->
 
-    <string name="filter_all_my_pubs">All</string>
-    <string name="filter_active_my_pubs">Active</string>
-    <string name="filter_ended_my_pubs">Ended</string>
+    <string name="filter_all_my_pubs">Ends</string>
+    <string name="filter_active_my_pubs">On Air</string>
+    <string name="filter_ended_my_pubs">Off Air</string>
     <string name="new_pub_waiting_for_save_on_server">Saving publications to server, please wait</string>
+    <string name="my_shares_toolbar_title">My shares</string>
 
     <!-- Navigation side menu -->
 

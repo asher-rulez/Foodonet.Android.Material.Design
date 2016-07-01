@@ -85,6 +85,8 @@ public class HttpServerConnectorAsync extends AsyncTask<InternalRequest, Void, S
 
     private boolean isSuccess = false;
 
+    private int doAfterRegistrationActionID;
+
     public HttpServerConnectorAsync(String baseUrl, IFooDoNetServerCallback callbackListener) {
         this.baseUrl = baseUrl;
         this.callbackListener = callbackListener;
@@ -202,30 +204,32 @@ public class HttpServerConnectorAsync extends AsyncTask<InternalRequest, Void, S
                     publications = tmpConnectReportsToPublications(publications, pubReports);
                 }
                 responseString = "";
-                isSuccess = false;
                 //endregion reports
                 //region groups
-                MakeServerRequest(REQUEST_METHOD_GET,
-                        params[3].ServerSubPath.replace("{0}",
-                                String.valueOf(params[3].newUserID)), null, true);//"96"
-                if(!isSuccess){
-                    Log.e(MY_TAG, "cant get groups by userID");
-                } else {
-                    if(!TextUtils.isEmpty(responseString)){
-                        try {
-                            JSONArray jsonArray = new JSONArray(responseString);
-                            for(int i = 0; i < jsonArray.length(); i++){
-                                JSONObject jsonObject = jsonArray.getJSONObject(i);
-                                Group group = Group.ParseSingleGroupFromJSON(jsonObject);
-                                if(resultGroups == null)
-                                    resultGroups = new ArrayList<>();
-                                resultGroups.add(group);
+                if(!params[3].IsSkipGroup) {
+                    isSuccess = false;
+                    MakeServerRequest(REQUEST_METHOD_GET,
+                            params[3].ServerSubPath.replace("{0}",
+                                    String.valueOf(params[3].newUserID)), null, true);//"96"
+                    if (!isSuccess) {
+                        Log.e(MY_TAG, "cant get groups by userID");
+                    } else {
+                        if (!TextUtils.isEmpty(responseString)) {
+                            try {
+                                JSONArray jsonArray = new JSONArray(responseString);
+                                for (int i = 0; i < jsonArray.length(); i++) {
+                                    JSONObject jsonObject = jsonArray.getJSONObject(i);
+                                    Group group = Group.ParseSingleGroupFromJSON(jsonObject);
+                                    if (resultGroups == null)
+                                        resultGroups = new ArrayList<>();
+                                    resultGroups.add(group);
+                                }
+                            } catch (JSONException e) {
+                                e.printStackTrace();
                             }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
                         }
-                    }
 
+                    }
                 }
                 //endregion groups
 
@@ -442,6 +446,7 @@ public class HttpServerConnectorAsync extends AsyncTask<InternalRequest, Void, S
             //endregion
             //region POST USER
             case InternalRequest.ACTION_POST_NEW_USER:
+                doAfterRegistrationActionID = params[0].DoAfterRegistrationActionID;
                 UserRegistrationAddEdit registration = new UserRegistrationAddEdit();
                 registration.IsLoggedIn = true;
                 registration.SocialNetworkType = params[0].SocialNetworkType;
@@ -573,7 +578,7 @@ public class HttpServerConnectorAsync extends AsyncTask<InternalRequest, Void, S
                 wr.close();
             }
             int connectionResponse = connection.getResponseCode();
-
+            Log.i(MY_TAG, "http action " + String.valueOf(Action_Command_ID) + " response: " + String.valueOf(connectionResponse));
             switch (connectionResponse) {
                 case HttpURLConnection.HTTP_OK:
                 case HttpURLConnection.HTTP_CREATED:
@@ -700,6 +705,7 @@ public class HttpServerConnectorAsync extends AsyncTask<InternalRequest, Void, S
                 Log.i(MY_TAG, "post new user complete: " + (isSuccess ? "ok" : "fail"));
                 InternalRequest irNewUser = new InternalRequest(Action_Command_ID, isSuccess);
                 irNewUser.newUserID = newUserID;
+                irNewUser.DoAfterRegistrationActionID = doAfterRegistrationActionID;
                 callbackListener.OnServerRespondedCallback(irNewUser);
                 break;
             case InternalRequest.ACTION_POST_NEW_GROUP:

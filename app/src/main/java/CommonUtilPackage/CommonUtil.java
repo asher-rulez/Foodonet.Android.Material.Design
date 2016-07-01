@@ -1,8 +1,11 @@
 package CommonUtilPackage;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.database.Cursor;
@@ -44,6 +47,7 @@ import java.util.Map;
 
 import android.provider.Settings.Secure;
 import android.view.Display;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
 //import org.apache.http.HttpEntity;
@@ -53,6 +57,7 @@ import android.widget.EditText;
 
 import DataModel.FCPublication;
 import upp.foodonet.material.R;
+import upp.foodonet.material.SignInActivity;
 
 /**
  * Created by Asher on 01.09.2015.
@@ -178,7 +183,7 @@ public class CommonUtil {
         }
     }
 
-    public static String GetDistanceStringFromCurrentLocation(LatLng point1, Context context){
+    public static String GetDistanceStringFromCurrentLocation(LatLng point1, Context context) {
         LatLng currentLocation = GetMyLocationFromPreferences(context);
         return GetDistanceString(currentLocation, point1, context);
     }
@@ -472,7 +477,7 @@ public class CommonUtil {
     public static String GetSocialAccountNameFromPreferences(Context context) {
         SharedPreferences sp
                 = context.getSharedPreferences(context.getString(R.string.shared_preferences_google_facebook_data_token),
-                                                Context.MODE_PRIVATE);
+                Context.MODE_PRIVATE);
         return sp.getString(context.getString(R.string.shared_preferences_social_account_name_key), "");
     }
 
@@ -480,6 +485,11 @@ public class CommonUtil {
         SharedPreferences sp = context.getSharedPreferences(
                 context.getString(R.string.shared_preferences_google_facebook_data_token), Context.MODE_PRIVATE);
         return sp.getBoolean(context.getString(R.string.shared_preferences_is_registered_to_google_facebook_key), false);
+    }
+
+    public static boolean GetFromPreferencesIsRegisteredWithPhoneNumber(Context context) {
+        return GetMyPhoneNumberFromPreferences(context).length() != 0;
+
     }
 
     public static boolean RemoveImageByPublication(FCPublication publication, Context context) {
@@ -666,4 +676,32 @@ public class CommonUtil {
         return size;
     }
 
+    public static void HideSoftKeyboard(Activity activity) {
+        InputMethodManager inputMethodManager = (InputMethodManager)  activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
+        inputMethodManager.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(), 0);
+    }
+
+    public static AlertDialog ShowDialogNeedToRegister(final Context context, final int doAfterRegistrationCode, final IPleaseRegisterDialogCallback callback){
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle(context.getString(R.string.dialog_title_please_register));
+        builder.setMessage(context.getString(R.string.dialog_message_please_register));
+        String positiveText = context.getString(R.string.dialog_button_register_now);
+        builder.setPositiveButton(positiveText, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                callback.YesRegisterNow(doAfterRegistrationCode);
+                dialogInterface.dismiss();
+            }
+        });
+        String negativeText = context.getString(R.string.dialog_button_no_thanks);
+        builder.setNegativeButton(negativeText, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+            }
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();
+        return dialog;
+    }
 }

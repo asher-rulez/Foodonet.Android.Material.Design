@@ -131,7 +131,7 @@ public class Group implements ICanWriteSelfToJSONWriter, Serializable {
     }
 
     public static String[] GetColumnNamesForListArray(){
-        return new String[]{ GROUP_ID_KEY, GROUP_NAME_KEY, GROUP_MEMBERS_COUNT_KEY };
+        return new String[]{ GROUP_ID_KEY, GROUP_ADMIN_ID_KEY , GROUP_NAME_KEY, GROUP_MEMBERS_COUNT_KEY };
     }
 
     public ContentValues GetContentValuesRow() {
@@ -164,6 +164,7 @@ public class Group implements ICanWriteSelfToJSONWriter, Serializable {
                 g.Set_id(cursor.getInt(cursor.getColumnIndex(GROUP_ID_KEY)));
                 g.Set_name(cursor.getString(cursor.getColumnIndex(GROUP_NAME_KEY)));
                 g.set_members_count(cursor.getInt(cursor.getColumnIndex(GROUP_MEMBERS_COUNT_KEY)));
+                g.Set_admin_id(cursor.getInt(cursor.getColumnIndex(GROUP_ADMIN_ID_KEY)));
                 result.add(g);
             } while (cursor.moveToNext());
         }

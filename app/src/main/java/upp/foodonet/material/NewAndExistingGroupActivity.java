@@ -45,7 +45,6 @@ public class NewAndExistingGroupActivity
         extends AppCompatActivity
         implements View.OnClickListener,
         IFetchContactsParent,
-        TextWatcher,
         IFooDoNetServerCallback {
 
     private static final String MY_TAG = "food_editGroup";
@@ -55,7 +54,7 @@ public class NewAndExistingGroupActivity
 
     int groupID;
 
-    EditText et_groupTitle;
+    TextView tv_groupName;
     Button btn_addMembers;
     ProgressDialog pd_loadingContacts;
     RecyclerView rv_contacts_in_group;
@@ -79,21 +78,18 @@ public class NewAndExistingGroupActivity
         btn_addMembers.setOnClickListener(this);
         fab_saveGroup = (FloatingActionButton) findViewById(R.id.fab_save_group);
         fab_saveGroup.setOnClickListener(this);
-        fab_saveGroup.setEnabled(false);
-        fab_saveGroup.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.fab_inactive_gray)));
-        et_groupTitle = (EditText) findViewById(R.id.et_groupName);
-        et_groupTitle.addTextChangedListener(this);
+        //fab_saveGroup.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.fab_inactive_gray)));
+        tv_groupName = (TextView)findViewById(R.id.tv_group_name_title);
 
         Intent intent = getIntent();
         IsNewGroup = intent.getBooleanExtra(extra_key_is_new_group, true);
 
         if (IsNewGroup) {
             groupID = 0;
+            tv_groupName.setText(getIntent().getStringExtra(GroupsListActivity.GROUP_NAME_EXTRA_KEY));
         } else {
             existingGroup = (Group)intent.getSerializableExtra(extra_key_existing_group);
-            et_groupTitle.setText(existingGroup.Get_name());
-            et_groupTitle.setEnabled(false);
-
+            tv_groupName.setText(existingGroup.Get_name());
         }
 
         groupContacts = new ArrayList<>();
@@ -124,7 +120,7 @@ public class NewAndExistingGroupActivity
             case R.id.fab_save_group:
                 pb_savingGroup = CommonUtil.ShowProgressDialog(this, getString(R.string.saving_group));
                 HttpServerConnectorAsync connector = new HttpServerConnectorAsync(getString(R.string.server_base_url), (IFooDoNetServerCallback) this);
-                Group g = new Group(et_groupTitle.getText().toString(), CommonUtil.GetMyUserID(this));
+                Group g = new Group(tv_groupName.getText().toString(), CommonUtil.GetMyUserID(this));
                 GroupMember owner = new GroupMember(0, CommonUtil.GetMyUserID(this), 0, true,
                         CommonUtil.GetMyPhoneNumberFromPreferences(this),
                         CommonUtil.GetSocialAccountNameFromPreferences(this));
@@ -160,24 +156,6 @@ public class NewAndExistingGroupActivity
         for (ContactItem item : groupContacts)
             result.add(new GroupMember(0, 0, groupID, false, item.getPhoneNumber(), item.getName()));
         return result;
-    }
-
-    @Override
-    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-    }
-
-    @Override
-    public void onTextChanged(CharSequence s, int start, int before, int count) {
-        fab_saveGroup.setEnabled(s.length() > 0);
-        fab_saveGroup.setBackgroundTintList(s.length() > 0
-                ? ColorStateList.valueOf(getResources().getColor(R.color.plus_button_red))
-                : ColorStateList.valueOf(getResources().getColor(R.color.fab_inactive_gray)));
-    }
-
-    @Override
-    public void afterTextChanged(Editable s) {
-
     }
 
     @Override

@@ -90,6 +90,8 @@ public class InternalRequest implements Serializable {
     public String imei;
     public String resultString;
 
+    public boolean IsSkipGroup;
+
     // for registering/editing user
     public String SocialNetworkID;
     public String SocialNetworkType;
@@ -106,6 +108,8 @@ public class InternalRequest implements Serializable {
     public GroupMember groupOwner;
     public ArrayList<GroupMember> groupMembersToAdd;
     public String MembersServerSubPath;
+
+    public int DoAfterRegistrationActionID;
 
     public InternalRequest(int actionCommand, JSONObject obj, String sub_path) {
         ActionCommand = actionCommand;
@@ -212,4 +216,8 @@ public class InternalRequest implements Serializable {
         this.group = group;
     }
 
+    public InternalRequest SetIsSkipGroup(boolean isSkipGroup){
+        this.IsSkipGroup = isSkipGroup;
+        return this;
+    }
 }
