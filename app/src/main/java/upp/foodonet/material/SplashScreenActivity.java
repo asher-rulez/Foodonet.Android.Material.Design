@@ -2,8 +2,10 @@ package upp.foodonet.material;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Environment;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -49,6 +51,8 @@ public class SplashScreenActivity
     TextView tv_load_status;
 
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -78,11 +82,14 @@ public class SplashScreenActivity
         if (CommonUtil.GetFromPreferencesIsRegisteredToGoogleFacebook(this)) {
             registerTaskFinished = true;
             RepairPushNotifications();
+            Log.d(MY_TAG,"dani");
             startService(new Intent(this, FooDoNetService.class));
             isGoogleFacebookChecked = true;
             if (AllLoaded())
+                Log.d(MY_TAG,"dani1");
                 StartNextActivity();
         } else {
+            Log.d(MY_TAG,"dani2");
             Intent signInIntent = new Intent(this , SignInActivity.class);
             startActivityForResult(signInIntent, 0);
         }
@@ -160,6 +167,7 @@ public class SplashScreenActivity
     public void OnServerRespondedCallback(InternalRequest response) {
         if(response.newUserID > 0)
             CommonUtil.SaveMyUserID(this, response.newUserID);
+        Log.d(MY_TAG,"dani is checking");
         startService(new Intent(this, FooDoNetService.class));
         isLoadDataServiceStarted = true;
         tv_load_status.setText(getString(R.string.progress_first_load));

@@ -1,15 +1,19 @@
 package FooDoNetServiceUtil;
 
+import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.PersistableBundle;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -22,6 +26,7 @@ import com.google.android.gms.maps.model.LatLng;
 import CommonUtilPackage.GetMyLocationAsync;
 import FooDoNetServerClasses.ConnectionDetector;
 //import com.nikoxes.foodonetwmd.FooDoNetService;
+//import upp.foodonet.material.Manifest;
 import upp.foodonet.material.R;
 
 /**
@@ -45,12 +50,16 @@ public abstract class FooDoNetCustomActivityConnectedToService
     protected boolean isGoogleServiceAvailable = false;
 
     private final String MY_TAG = "food_abstract_fActivity";
-
+    private final int LOCATION_REQUEST_CODE = 101;
     //public IFooDoNetServiceCallback serviceCallback = this;
 
     @Override
     public void onCreate(Bundle savedInstanceState, PersistableBundle persistentState) {
         super.onCreate(savedInstanceState, persistentState);
+        if (checkRuntimeLocationPermission()) {
+            Log.d(MY_TAG, "dani");
+            requestRuntimeLocationPermission();
+        }
         //boundedService = getIntent().getExtras().getParcelable("service");
     }
 
@@ -105,25 +114,47 @@ public abstract class FooDoNetCustomActivityConnectedToService
         isGoogleServiceAvailable = CheckPlayServices();
         if (!isGoogleServiceAvailable)
             OnGooglePlayServicesCheckError();
+
+
         super.onResume();
     }
 
-/*
-    private ServiceConnection mConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            FooDoNetService.FooDoNetCustomServiceBinder mBinder = (FooDoNetService.FooDoNetCustomServiceBinder) service;
-            fooDoNetService = mBinder.getService();
-            fooDoNetService.StartScheduler(serviceCallback);
-            isBoundedToService = true;
-        }
+    /*
+        private ServiceConnection mConnection = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                FooDoNetService.FooDoNetCustomServiceBinder mBinder = (FooDoNetService.FooDoNetCustomServiceBinder) service;
+                fooDoNetService = mBinder.getService();
+                fooDoNetService.StartScheduler(serviceCallback);
+                isBoundedToService = true;
+            }
 
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            isBoundedToService = false;
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+                isBoundedToService = false;
+            }
+        };
+    */
+    private boolean checkRuntimeLocationPermission() {
+        return ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED;
+    }
+
+    protected void requestRuntimeLocationPermission() {
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_REQUEST_CODE);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case LOCATION_REQUEST_CODE:
+                if (grantResults.length == 0 || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                    Log.d(MY_TAG, "Permission  denied by user");
+                } else {
+                    Log.d(MY_TAG, "Permission to granted by user");
+                }
         }
-    };
-*/
+    }
 
     protected boolean CheckPlayServices() {
         Log.i(MY_TAG, "checking isGooglePlayServicesAvailable...");
@@ -145,10 +176,10 @@ public abstract class FooDoNetCustomActivityConnectedToService
         return cd.isConnectingToInternet();
     }
 
-    protected boolean CheckInternetForAction(String action){
-        if(!isInternetAvailable){
+    protected boolean CheckInternetForAction(String action) {
+        if (!isInternetAvailable) {
             isInternetAvailable = CheckInternetConnection();
-            if(!isInternetAvailable){
+            if (!isInternetAvailable) {
                 Toast.makeText(this,
                         getString(R.string.error_cant_perform_this_action_without_internet).replace("{0}",
                                 action), Toast.LENGTH_LONG).show();
@@ -171,9 +202,9 @@ public abstract class FooDoNetCustomActivityConnectedToService
         int actionCode = intent.getIntExtra(ServicesBroadcastReceiver.BROADCAST_REC_EXTRA_ACTION_KEY, -1);
         switch (actionCode) {
             case ServicesBroadcastReceiver.ACTION_CODE_GET_LOCATION_SUCCESS:
-                Location location = (Location)intent.getParcelableExtra(ServicesBroadcastReceiver.BROADCAST_REC_EXTRA_LOCATION_KEY);
+                Location location = (Location) intent.getParcelableExtra(ServicesBroadcastReceiver.BROADCAST_REC_EXTRA_LOCATION_KEY);
                 OnGotMyLocationCallback(location);
-                if(location != null)
+                if (location != null)
                     UpdateMyLocationPreferences(new LatLng(location.getLatitude(), location.getLongitude()));
                 break;
         }
@@ -183,7 +214,8 @@ public abstract class FooDoNetCustomActivityConnectedToService
 
     public abstract void OnInternetNotConnected();
 
-    public void OnGotMyLocationCallback(Location location) {}
+    public void OnGotMyLocationCallback(Location location) {
+    }
 
     /*
         protected ServiceConnection mConnection = new ServiceConnection() {
@@ -221,7 +253,7 @@ public abstract class FooDoNetCustomActivityConnectedToService
     }
 */
 
-   // final Messenger callbackMessenger = new Messenger(new IncomingHandler());
+    // final Messenger callbackMessenger = new Messenger(new IncomingHandler());
 
 
     protected void StartGetMyLocation() {
@@ -230,18 +262,18 @@ public abstract class FooDoNetCustomActivityConnectedToService
         locationAsync.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
-    protected void UpdateMyLocationPreferences(LatLng myLocation){
-        if(myLocation == null){
+    protected void UpdateMyLocationPreferences(LatLng myLocation) {
+        if (myLocation == null) {
             Log.e(MY_TAG, "got null myLocation (updateMyLocationPreferences)");
             return;
         }
         SharedPreferences sp = getSharedPreferences(getString(R.string.shared_preferences_my_location_key), MODE_PRIVATE);
         SharedPreferences.Editor editor = sp.edit();
-        if(sp.contains(getString(R.string.shared_preferences_my_latitude_key))){
+        if (sp.contains(getString(R.string.shared_preferences_my_latitude_key))) {
             editor.remove(getString(R.string.shared_preferences_my_latitude_key));
             editor.commit();
         }
-        if(sp.contains(getString(R.string.shared_preferences_my_longitude_key))){
+        if (sp.contains(getString(R.string.shared_preferences_my_longitude_key))) {
             editor.remove(getString(R.string.shared_preferences_my_longitude_key));
             editor.commit();
         }
@@ -250,14 +282,14 @@ public abstract class FooDoNetCustomActivityConnectedToService
         editor.commit();
     }
 
-    protected void UpdateFilterTextPreferences(String filterText){
+    protected void UpdateFilterTextPreferences(String filterText) {
         UpdateFilterTextPreferences(this, filterText);
     }
 
-    public static void UpdateFilterTextPreferences(Context ctx, String filterText){
+    public static void UpdateFilterTextPreferences(Context ctx, String filterText) {
         SharedPreferences sp = ctx.getSharedPreferences(ctx.getString(R.string.shared_preferences_text_filter_key), MODE_PRIVATE);
         SharedPreferences.Editor editor = sp.edit();
-        if (sp.contains(ctx.getString(R.string.shared_preferences_text_filter_text_key))){
+        if (sp.contains(ctx.getString(R.string.shared_preferences_text_filter_text_key))) {
             editor.remove(ctx.getString(R.string.shared_preferences_text_filter_text_key));
             editor.commit();
         }
