@@ -97,6 +97,14 @@ public class GroupsListActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode){
+            case 1:
+                if(groupsListAdapter != null){
+                    ArrayList<Group> groupsList = LoadGroups();
+                    groupsListAdapter.UpdateGroupsList(groupsList);
+                }
+                break;
+        }
     }
 
     @Override

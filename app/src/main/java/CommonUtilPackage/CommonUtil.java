@@ -451,18 +451,18 @@ public class CommonUtil {
     }
 
     public static void PutCommonPreferencesIsRegisteredGoogleFacebook(Context context, GoogleSignInAccount account) {
-        PutCommonPreferencesSocialAccountData(context, "google", account.getDisplayName(), account.getIdToken());
+        PutCommonPreferencesSocialAccountData(context, "google", account.getDisplayName(), account.getIdToken(), account.getId());
         SaveMyUserNameToPreferences(context, account.getDisplayName());
         SaveMyEmailToPreferences(context, account.getEmail());
     }
 
     public static void PutCommonPreferencesIsRegisteredGoogleFacebook(Context context, Profile account) {
-        PutCommonPreferencesSocialAccountData(context, "facebook", account.getName(), account.getId());
+        PutCommonPreferencesSocialAccountData(context, "facebook", account.getName(), account.getId(), account.getId());
         SaveMyUserNameToPreferences(context, account.getName());
         SaveMyEmailToPreferences(context, "");
     }
 
-    private static void PutCommonPreferencesSocialAccountData(Context context, String socialAccountType, String socialAccountName, String socialAccountToken) {
+    private static void PutCommonPreferencesSocialAccountData(Context context, String socialAccountType, String socialAccountName, String socialAccountToken, String socialAccountID) {
         SharedPreferences sp = context.getSharedPreferences(
                 context.getString(R.string.shared_preferences_google_facebook_data_token), Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sp.edit();
@@ -470,8 +470,34 @@ public class CommonUtil {
         editor.putString(context.getString(R.string.shared_preferences_social_account_type_key), socialAccountType);
         editor.putString(context.getString(R.string.shared_preferences_social_account_name_key), socialAccountName);
         editor.putString(context.getString(R.string.shared_preferences_social_account_token_key), socialAccountToken);
+        editor.putString(context.getString(R.string.shared_preferences_social_account_id), socialAccountID);
         editor.commit();
         Log.i(MY_TAG, "Registered to " + socialAccountType + ", name: " + socialAccountName);
+    }
+
+    public static void ClearPreferencesSocialAccountDataForLogout(Context context){
+        SharedPreferences sp = context.getSharedPreferences(
+                context.getString(R.string.shared_preferences_google_facebook_data_token), Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sp.edit();
+        editor.putBoolean(context.getString(R.string.shared_preferences_is_registered_to_google_facebook_key), false);
+        editor.putString(context.getString(R.string.shared_preferences_social_account_type_key), null);
+        editor.putString(context.getString(R.string.shared_preferences_social_account_name_key), null);
+        editor.putString(context.getString(R.string.shared_preferences_social_account_token_key), null);
+        editor.putString(context.getString(R.string.shared_preferences_social_account_id), null);
+        editor.commit();
+        Log.i(MY_TAG, "Cleared registration data for logout");
+    }
+
+    public static String GetSocialAccountTypeFromPreferences(Context context) {
+        SharedPreferences sp = context.getSharedPreferences(
+                context.getString(R.string.shared_preferences_google_facebook_data_token), Context.MODE_PRIVATE);
+        return sp.getString(context.getString(R.string.shared_preferences_social_account_type_key), "");
+    }
+
+    public static String GetSocialAccountIDFromPreferences(Context context){
+        SharedPreferences sp = context.getSharedPreferences(
+                context.getString(R.string.shared_preferences_google_facebook_data_token), Context.MODE_PRIVATE);
+        return sp.getString(context.getString(R.string.shared_preferences_social_account_id), "");
     }
 
     public static String GetSocialAccountNameFromPreferences(Context context) {
@@ -639,10 +665,10 @@ public class CommonUtil {
         return sp.getString(context.getString(R.string.shared_preferences_user_data_user_name), "");
     }
 
-    public static boolean SaveMyUserNameToPreferences(Context context, String phoneNum) {
+    public static boolean SaveMyUserNameToPreferences(Context context, String userName) {
         SharedPreferences sp = context.getSharedPreferences(context.getString(R.string.shared_preferences_user_data_token), Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sp.edit();
-        editor.putString(context.getString(R.string.shared_preferences_user_data_user_name), phoneNum);
+        editor.putString(context.getString(R.string.shared_preferences_user_data_user_name), userName);
         return editor.commit();
     }
 

@@ -62,7 +62,7 @@ public class NewAndExistingGroupActivity
     RecyclerView rv_contacts_in_group;
     FloatingActionButton fab_saveGroup;
     FrameLayout fl_btn_leaveGroup;
-    ProgressDialog pb_savingGroup;
+    ProgressDialog pb_progress;
 
     ContactsInGroupRecyclerViewAdapter adapter;
 
@@ -127,7 +127,7 @@ public class NewAndExistingGroupActivity
                 contactsAsyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, groupContacts);
                 break;
             case R.id.fab_save_group:
-                pb_savingGroup = CommonUtil.ShowProgressDialog(this, getString(R.string.saving_group));
+                pb_progress = CommonUtil.ShowProgressDialog(this, getString(R.string.saving_group));
                 HttpServerConnectorAsync connector = new HttpServerConnectorAsync(getString(R.string.server_base_url), (IFooDoNetServerCallback) this);
                 Group g = new Group(tv_groupName.getText().toString(), CommonUtil.GetMyUserID(this));
                 GroupMember owner = new GroupMember(0, CommonUtil.GetMyUserID(this), 0, true,
@@ -139,6 +139,23 @@ public class NewAndExistingGroupActivity
                 ir.MembersServerSubPath = getString(R.string.server_post_add_members_to_group);
                 connector.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, ir);
                 break;
+            case R.id.fl_button_leave_group:
+                int memberIDSelf = -1;
+                int myUserID = CommonUtil.GetMyUserID(this);
+                for(GroupMember member : existingGroup.get_group_members())
+                    if(member.get_user_id() == myUserID)
+                        memberIDSelf = member.get_id();
+                if(memberIDSelf != -1){
+                    pb_progress = CommonUtil.ShowProgressDialog(this, getString(R.string.progress_leave_group));
+                    HttpServerConnectorAsync connector1 = new HttpServerConnectorAsync(getString(R.string.server_post_add_members_to_group), (IFooDoNetServerCallback)this);
+                    InternalRequest irLeaveGroup = new InternalRequest(InternalRequest.ACTION_DELETE_LEAVE_GROUP);
+                    irLeaveGroup.GroupMemberToDeleteID = memberIDSelf;
+                    connector1.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, irLeaveGroup);
+                }
+                else {
+                    Log.e(MY_TAG, "can't find group member self in this group");
+                    return;
+                }
         }
     }
 
@@ -183,14 +200,39 @@ public class NewAndExistingGroupActivity
                         Log.e(MY_TAG, "failed to save group");
                         break;
                 }
-                if (pb_savingGroup != null) pb_savingGroup.dismiss();
+                if (pb_progress != null) pb_progress.dismiss();
+                break;
+            case InternalRequest.ACTION_DELETE_GROUP_MEMBER:
+                switch (response.Status){
+                    case InternalRequest.STATUS_OK:
+                        int rowDeleted = getContentResolver().delete(Uri.parse(FooDoNetSQLProvider.URI_GROUP_MEMBERS + "/" + String.valueOf(response.GroupMemberToDeleteID)), null, null);
+                        Log.i(MY_TAG, "Delete group member from DB: " + (rowDeleted == 1 ? "success": "fail"));
+                        break;
+                }
+                if(pb_progress != null) pb_progress.dismiss();
+                break;
+            case InternalRequest.ACTION_DELETE_LEAVE_GROUP:
+                switch (response.Status){
+                    case InternalRequest.STATUS_OK:
+                        int rowsDeleted = getContentResolver().delete(Uri.parse(FooDoNetSQLProvider.URI_GROUP + "/" + String.valueOf(existingGroup.Get_id())), null, null);
+                        Log.i(MY_TAG, "Leaving group: " + (rowsDeleted > 0 ? "success": "fail"));
+                        if(rowsDeleted > 0) finish();
+                        break;
+                }
+                if(pb_progress != null) pb_progress.dismiss();
                 break;
         }
     }
 
     @Override
     public void OnGroupMemberRemoved(GroupMember groupMember) {
-
+        pb_progress = CommonUtil.ShowProgressDialog(this, getString(R.string.progress_delete_member));
+        HttpServerConnectorAsync connector
+                = new HttpServerConnectorAsync(getResources().getString(R.string.server_base_url), (IFooDoNetServerCallback)this);
+        InternalRequest irDeleteMember = new InternalRequest(InternalRequest.ACTION_DELETE_GROUP_MEMBER);
+        irDeleteMember.ServerSubPath =  getString(R.string.server_post_add_members_to_group);
+        irDeleteMember.GroupMemberToDeleteID = groupMember.get_id();
+        connector.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, irDeleteMember);
     }
 
     /*

@@ -59,10 +59,12 @@ public class InternalRequest implements Serializable {
     public static final int ACTION_PUSH_REPORT_FOR_PUB = 27;
     public static final int ACTION_PUSH_REG = 28;
     public static final int ACTION_POST_NEW_USER = 29;
-    public static final int ACTION_POST_EDIT_USER = 30;
+    public static final int ACTION_PUT_EDIT_USER = 30;
     public static final int ACTION_POST_NEW_GROUP = 31;
     public static final int ACTION_GET_GROUPS_BY_USER = 32;
     public static final int ACTION_GET_GROUPS_FROM_SQL = 33;
+    public static final int ACTION_DELETE_GROUP_MEMBER = 34;
+    public static final int ACTION_DELETE_LEAVE_GROUP = 35;
     public static final int ACTION_POST_FEEDBACK = 99;
 
 
@@ -108,6 +110,8 @@ public class InternalRequest implements Serializable {
     public GroupMember groupOwner;
     public ArrayList<GroupMember> groupMembersToAdd;
     public String MembersServerSubPath;
+
+    public int GroupMemberToDeleteID;
 
     public int DoAfterRegistrationActionID;
 

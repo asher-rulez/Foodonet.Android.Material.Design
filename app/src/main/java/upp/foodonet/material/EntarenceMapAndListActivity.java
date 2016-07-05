@@ -417,6 +417,8 @@ public class EntarenceMapAndListActivity
                 }
                 break;
             case R.id.rl_btn_settings:
+                Intent intentSettings = new Intent(this, SettingsSelectActivity.class);
+                startActivity(intentSettings);
                 break;
             case R.id.rl_btn_contact_us:
                 break;

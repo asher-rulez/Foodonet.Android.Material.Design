@@ -116,10 +116,12 @@
 
         <activity
             android:name=".SignInActivity"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:theme="@style/AppDefault"/>
         <activity
             android:name=".RegisterPhoneActivity"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:theme="@style/AppDefault"/>
         <activity
             android:name="com.facebook.FacebookActivity"
             android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
@@ -133,7 +135,8 @@
 
         <activity
             android:name=".GroupsListActivity"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:theme="@style/AppDefault"/>
         <activity
             android:name=".NewAndExistingGroupActivity"
             android:screenOrientation="portrait"
@@ -144,15 +147,25 @@
             android:theme="@style/AppDefault" />
         <activity
             android:name=".AddEditPublicationActivity"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:theme="@style/AppDefault"/>
         <activity
             android:name=".SelectGroupForPublicationActivity"
-            android:label="@string/title_activity_select_group_for_publication"
-            android:theme="@style/AppDefault"></activity>
+            android:screenOrientation="portrait"
+            android:theme="@style/AppDefault" />
 
         <service
             android:name=".AddEditPublicationService"
-            android:exported="false"></service>
+            android:exported="false" />
+
+        <activity
+            android:name=".SettingsSelectActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppDefault"/>
+        <activity
+            android:name=".ProfileViewAndEditActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppDefault"/>
     </application>
 
 </manifest>

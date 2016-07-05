@@ -360,6 +360,8 @@
     <string name="button_text_leave">Leave</string>
     <string name="button_text_group">group</string>
 
+    <string name="progress_delete_member">Removing group member</string>
+    <string name="progress_leave_group">Leaving group</string>
 
     <!-- Common -->
 
@@ -413,5 +415,23 @@
 
     <string name="public_share_group_name">Public</string>
     <string name="loading_groups">Loading groups</string>
+    <string name="title_activity_settings_select">SettingsSelectActivity</string>
+
+    <!-- Settings -->
+
+    <string name="profile_settings_button_text">Profile settings</string>
+    <string name="notification_settings_button_text">Notifications</string>
+    <string name="logout_button_text">Log out</string>
+    <string name="title_activity_profile_view_and_edit">profile_view_and_edit</string>
+
+    <!-- Profile -->
+
+    <string name="profile_header_label">Profile</string>
+    <string name="profile_settings_header_label">Profile settings</string>
+    <string name="edit_button_text">Edit</string>
+    <string name="update_button_text">Save changes</string>
+    <string name="profile_edit_user_name_hint">Edit name</string>
+    <string name="profile_edit_phone_hint">Edit phone number</string>
+    <string name="progress_saving_profile">Saving profile</string>
 
 </resources>
