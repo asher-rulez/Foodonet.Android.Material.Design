@@ -4,11 +4,17 @@
 
     <!-- Connection strings - PRODUCTION -->
     <!-- <string name="amazon_base_url_for_images">https://s3.amazonaws.com/foodcollector</string> -->
+    <!-- <string name="amazon_url_for_user_avatar">https://s3.amazonaws.com/foodonerusers</string> -->
+    <!--<string name="amazon_sub_path_publication_images">foodcollector</string>-->
+    <!--<string name="amazon_sub_path_user_images">foodonerusers</string>-->
     <!-- <string name="server_base_url">https://fd-server.herokuapp.com</string> -->
     <!-- ========================== -->
 
     <!-- Connection strings - DEV -->
     <string name="amazon_base_url_for_images">https://s3.amazonaws.com/foodcollectordev</string>
+    <string name="amazon_url_for_user_avatar">https://s3.amazonaws.com/foodonetusersdev</string>
+    <string name="amazon_sub_path_publication_images">foodcollectordev</string>
+    <string name="amazon_sub_path_user_images">foodonetusersdev</string>
     <string name="server_base_url">https://prv-fd-server.herokuapp.com</string>
     <!-- ========================== -->
 
