@@ -1,8 +1,16 @@
 package upp.foodonet.material;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -15,14 +23,26 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+import CommonUtilPackage.AmazonImageUploader;
 import CommonUtilPackage.CommonUtil;
+import CommonUtilPackage.IAmazonFinishedCallback;
 import CommonUtilPackage.InternalRequest;
 import FooDoNetServerClasses.HttpServerConnectorAsync;
 import FooDoNetServerClasses.IFooDoNetServerCallback;
 import FooDoNetServiceUtil.FooDoNetCustomActivityConnectedToService;
 import UIUtil.RoundedImageView;
 
-public class ProfileViewAndEditActivity extends FooDoNetCustomActivityConnectedToService implements View.OnClickListener, IFooDoNetServerCallback {
+public class ProfileViewAndEditActivity
+        extends FooDoNetCustomActivityConnectedToService
+        implements View.OnClickListener,
+                    IFooDoNetServerCallback,
+                    IAmazonFinishedCallback {
 
     RoundedImageView riv_user_avatar;
     EditText et_user_name;
@@ -31,13 +51,23 @@ public class ProfileViewAndEditActivity extends FooDoNetCustomActivityConnectedT
 
     boolean isEditModeOn;
     boolean userAvatarEdited;
+    boolean isNewImageShot;
     String prevName;
     boolean isNameEdited;
+
+    boolean nameAndPhoneUpdateFinished;
+    boolean avatarUpdateFinished;
 
     String prevPhone;
     boolean isPhoneEdited;
 
     ProgressDialog progressDialog;
+
+    byte[] imageBytes;
+    String imageFilePath;
+
+    public static final int REQUEST_CAMERA = 1;
+    public static final int SELECT_FILE = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -124,6 +154,7 @@ public class ProfileViewAndEditActivity extends FooDoNetCustomActivityConnectedT
             case R.id.riv_user_profile_image:
                 if(!isEditModeOn)
                     return;
+                selectImage();
                 //todo selecting new avatar or making photo
                 break;
             case R.id.btn_update_profile:
@@ -140,7 +171,17 @@ public class ProfileViewAndEditActivity extends FooDoNetCustomActivityConnectedT
                 }
                 progressDialog = CommonUtil.ShowProgressDialog(this, getString(R.string.progress_saving_profile));
                 //todo: check what was updated, cause image is updated apart from profile on server
-                SendUpdatedProfileDetails();
+                avatarUpdateFinished = false;
+                nameAndPhoneUpdateFinished = false;
+                if(userAvatarEdited){
+                    AmazonImageUploader uploader = new AmazonImageUploader(this, this);
+                    File imgFile = new File(Environment.getExternalStorageDirectory() + getString(R.string.image_folder_path),
+                            imageFilePath);
+                    uploader.UploadUserAvatarToAmazon(imgFile);
+                } else { avatarUpdateFinished = true; }
+                if(isNameEdited || isPhoneEdited)
+                    SendUpdatedProfileDetails();
+                else { nameAndPhoneUpdateFinished = true; }
                 break;
         }
     }
@@ -197,11 +238,9 @@ public class ProfileViewAndEditActivity extends FooDoNetCustomActivityConnectedT
                 et_phone_number.setKeyListener(null);
                 CommonUtil.RemoveValidationFromEditText(this, et_phone_number);
 
-                btn_edit_save_profile.setText(getString(R.string.edit_button_text));
-                btn_edit_save_profile.setEnabled(true);
+                nameAndPhoneUpdateFinished = true;
+                ContinueIfFinishedUpdates();
 
-                //save image
-                isEditModeOn = false;
                 break;
             case InternalRequest.STATUS_FAIL:
                 Toast.makeText(this, "failed to update profile", Toast.LENGTH_SHORT).show();
@@ -235,5 +274,116 @@ public class ProfileViewAndEditActivity extends FooDoNetCustomActivityConnectedT
         }
         CommonUtil.SetEditTextIsValid(this, et_user_name, true);
         return true;
+    }
+
+    private void selectImage() {
+        final CharSequence[] items = {"Take Photo", "Choose from Library", "Cancel"};
+        AlertDialog.Builder builder = new AlertDialog.Builder(ProfileViewAndEditActivity.this);
+        builder.setTitle("Add Photo!");
+        builder.setItems(items, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int item) {
+                if (items[item].equals("Take Photo")) {
+                    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                    startActivityForResult(intent, REQUEST_CAMERA);
+                } else if (items[item].equals("Choose from Library")) {
+                    Intent intent = new Intent(
+                            Intent.ACTION_PICK,
+                            android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                    intent.setType("image/*");
+                    startActivityForResult(Intent.createChooser(intent, "Select File"), SELECT_FILE);
+                } else if (items[item].equals("Cancel")) {
+                    dialog.dismiss();
+                }
+            }
+        });
+        builder.show();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case REQUEST_CAMERA:
+            case SELECT_FILE:
+                if (resultCode == RESULT_OK) {
+                    isNewImageShot = false;
+                    userAvatarEdited = true;
+                    if (requestCode == REQUEST_CAMERA) {
+                        isNewImageShot = true;
+                        Bitmap thumbnail = (Bitmap) data.getExtras().get("data");
+                        thumbnail = CommonUtil.CompressBitmapByMaxSize(thumbnail,
+                                getResources().getInteger(R.integer.max_image_width_height));
+                        imageBytes = CommonUtil.BitmapToBytes(thumbnail); // todo: do I need this?
+                        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+                        thumbnail.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+                        File destination = new File(Environment.getExternalStorageDirectory()
+                                + getResources().getString(R.string.image_folder_path),
+                                System.currentTimeMillis() + getString(R.string.file_name_part_just_shot) + ".jpg");
+                        FileOutputStream fo;
+                        try {
+                            destination.createNewFile();
+                            fo = new FileOutputStream(destination);
+                            fo.write(bytes.toByteArray());
+                            fo.close();
+                            imageFilePath = destination.getAbsolutePath();
+                        } catch (FileNotFoundException e) {
+                            e.printStackTrace();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        riv_user_avatar.setImageBitmap(thumbnail);
+                    } else if (requestCode == SELECT_FILE) {
+                        Uri selectedImageUri = data.getData();
+                        String[] projection = {MediaStore.MediaColumns.DATA};
+                        Cursor cursor = managedQuery(selectedImageUri, projection, null, null,
+                                null);
+                        if (cursor == null)
+                            throw new NullPointerException("can't get picture cursor, critical error");
+                        int column_index = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
+                        cursor.moveToFirst();
+                        imageFilePath = cursor.getString(column_index);
+                        Bitmap bm = CommonUtil.decodeScaledBitmapFromSdCard(imageFilePath, 200, 200);
+                        riv_user_avatar.setImageBitmap(bm);
+                        imageBytes = CommonUtil.BitmapToBytes(bm);
+                    }
+                }
+                if (resultCode == RESULT_CANCELED) {
+
+                }
+                break;
+        }
+    }
+
+    @Override
+    public void NotifyToBListenerAboutEvent(int eventCode) {
+        avatarUpdateFinished = true;
+        File sourceFile = new File(imageFilePath);
+        File destinationFile = new File(Environment.getExternalStorageDirectory()
+                + getResources().getString(R.string.image_folder_path), getString(R.string.user_avatar_file_name));
+        try {
+            CommonUtil.CopyFile(sourceFile, destinationFile);
+            if(isNewImageShot){
+                sourceFile.delete();
+                isNewImageShot = false;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        ContinueIfFinishedUpdates();
+    }
+
+    private void ContinueIfFinishedUpdates(){
+        if(!nameAndPhoneUpdateFinished || !avatarUpdateFinished)
+            return;
+
+        btn_edit_save_profile.setText(getString(R.string.edit_button_text));
+        btn_edit_save_profile.setEnabled(true);
+
+
+        //save image
+        isEditModeOn = false;
+
+
     }
 }

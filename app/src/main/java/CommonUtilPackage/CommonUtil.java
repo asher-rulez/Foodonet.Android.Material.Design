@@ -730,4 +730,13 @@ public class CommonUtil {
         dialog.show();
         return dialog;
     }
+
+    public static byte[] BitmapToBytes(Bitmap bitmap){
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        //todo: error null pointer could be thrown here, check if reproducable
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+        byte[] byteArray = stream.toByteArray();
+        return byteArray;
+    }
+
 }

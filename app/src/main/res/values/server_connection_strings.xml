@@ -18,6 +18,7 @@
     <string name="server_base_url">https://prv-fd-server.herokuapp.com</string>
     <!-- ========================== -->
 
+    <string name="amazon_user_avatar_image_name">fduser{0}.jpg</string>
 
     <string name="server_add_new_publication_path">/publications.json</string>
     <string name="server_edit_publication_path">/publications/{0}.json</string>

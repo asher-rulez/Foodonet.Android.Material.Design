@@ -24,6 +24,11 @@ import upp.foodonet.material.R;
 public class AmazonImageUploader {
     private static final String MY_TAG = "food_amazonUploader";
 
+    private static final int MODE_PUBLICATION = 1;
+    private static final int MODE_AVATAR = 2;
+
+    private int currentMode;
+
     private CognitoCachingCredentialsProvider credentialsProvider;
 
     private IAmazonFinishedCallback callback;
@@ -36,20 +41,23 @@ public class AmazonImageUploader {
 
 
     public void UploadPublicationImageToAmazon(File imgFile, boolean isEdit) {
+        currentMode = MODE_PUBLICATION;
         RegisterAWSS3();
         File imageToSave = imgFile;
         String imageName = imgFile.getName();
         uploadPhotoForPublication(imageToSave, imageName, isEdit, context.getString(R.string.amazon_sub_path_publication_images));
     }
 
-    public void UploadUserAvatarToAmazon(File imgFile, boolean isEdit){
+    public void UploadUserAvatarToAmazon(File imgFile){
+        String imageName = context.getString(R.string.amazon_user_avatar_image_name)
+                .replace("{0}", String.valueOf(CommonUtil.GetMyUserID(context)));
+        currentMode = MODE_AVATAR;
         RegisterAWSS3();
         File imageToSave = imgFile;
-        String imageName = imgFile.getName();
-        uploadPhotoForPublication(imageToSave, imageName, isEdit, context.getString(R.string.amazon_sub_path_user_images));
+        uploadPhotoForPublication(imageToSave, imageName, false, context.getString(R.string.amazon_sub_path_user_images));
     }
 
-    public void RegisterAWSS3() {
+    private void RegisterAWSS3() {
         // initialize a credentials provider object with your Activity’s context and
         // the values from your identity pool
         credentialsProvider = new CognitoCachingCredentialsProvider(
@@ -90,11 +98,20 @@ public class AmazonImageUploader {
             public void onProgressChanged(int id, long bytesCurrent, long bytesTotal) {
                 int percentage = (int) (bytesCurrent / bytesTotal * 100);
                 //Display percentage transfered to user
-                Log.d(MY_TAG,"AMAZON PROGRESS OF UPLOAD PICTURE IS ---> " + percentage);
-                if (percentage >= 99)
-                    callback.NotifyToBListenerAboutEvent(isEdit
-                            ? ServicesBroadcastReceiver.ACTION_CODE_SAVE_EDITED_PUB_SUCCESS
-                            : ServicesBroadcastReceiver.ACTION_CODE_SAVE_NEW_PUB_SUCCESS);
+                Log.d(MY_TAG, "AMAZON PROGRESS OF UPLOAD PICTURE IS ---> " + percentage);
+                if (percentage >= 99) {
+                    switch (currentMode){
+                        case MODE_AVATAR:
+                            callback.NotifyToBListenerAboutEvent(
+                                    ServicesBroadcastReceiver.ACTION_CODE_SAVE_NEW_PUB_SUCCESS);
+                            break;
+                        case MODE_PUBLICATION:
+                            callback.NotifyToBListenerAboutEvent(isEdit
+                                    ? ServicesBroadcastReceiver.ACTION_CODE_SAVE_EDITED_PUB_SUCCESS
+                                    : ServicesBroadcastReceiver.ACTION_CODE_SAVE_NEW_PUB_SUCCESS);
+                            break;
+                    }
+                }
             }
 
             @Override
