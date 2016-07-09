@@ -173,4 +173,7 @@
 
     <!-- ============== -->
 
+    <!-- Notifications -->
+    <integer name="notifications_settings_default_radius">60</integer>
+
 </resources>

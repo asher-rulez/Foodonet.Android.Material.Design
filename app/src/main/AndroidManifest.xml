@@ -120,11 +120,11 @@
         <activity
             android:name=".SignInActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/AppDefault"/>
+            android:theme="@style/AppDefault" />
         <activity
             android:name=".RegisterPhoneActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/AppDefault"/>
+            android:theme="@style/AppDefault" />
         <activity
             android:name="com.facebook.FacebookActivity"
             android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
@@ -139,7 +139,7 @@
         <activity
             android:name=".GroupsListActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/AppDefault"/>
+            android:theme="@style/AppDefault" />
         <activity
             android:name=".NewAndExistingGroupActivity"
             android:screenOrientation="portrait"
@@ -151,7 +151,7 @@
         <activity
             android:name=".AddEditPublicationActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/AppDefault"/>
+            android:theme="@style/AppDefault" />
         <activity
             android:name=".SelectGroupForPublicationActivity"
             android:screenOrientation="portrait"
@@ -164,11 +164,15 @@
         <activity
             android:name=".SettingsSelectActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/AppDefault"/>
+            android:theme="@style/AppDefault" />
         <activity
             android:name=".ProfileViewAndEditActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/AppDefault"/>
+            android:theme="@style/AppDefault" />
+        <activity
+            android:name=".NotificationSettings"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppDefault" />
     </application>
 
 </manifest>

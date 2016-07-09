@@ -171,16 +171,19 @@ public class ProfileViewAndEditActivity
                 }
                 progressDialog = CommonUtil.ShowProgressDialog(this, getString(R.string.progress_saving_profile));
                 //todo: check what was updated, cause image is updated apart from profile on server
-                avatarUpdateFinished = false;
-                nameAndPhoneUpdateFinished = false;
+                avatarUpdateFinished = true;
+                nameAndPhoneUpdateFinished = true;
                 if(userAvatarEdited){
+                    avatarUpdateFinished = false;
                     AmazonImageUploader uploader = new AmazonImageUploader(this, this);
-                    File imgFile = new File(Environment.getExternalStorageDirectory() + getString(R.string.image_folder_path),
+                    File imgFile = new File(//Environment.getExternalStorageDirectory() + getString(R.string.image_folder_path),
                             imageFilePath);
                     uploader.UploadUserAvatarToAmazon(imgFile);
                 } else { avatarUpdateFinished = true; }
-                if(isNameEdited || isPhoneEdited)
+                if(isNameEdited || isPhoneEdited) {
+                    nameAndPhoneUpdateFinished = false;
                     SendUpdatedProfileDetails();
+                }
                 else { nameAndPhoneUpdateFinished = true; }
                 break;
         }
@@ -193,6 +196,11 @@ public class ProfileViewAndEditActivity
 
     public void setPhoneEdited(boolean phoneEdited) {
         isPhoneEdited = phoneEdited;
+        EnableSaveButtonIfEditedAndValid();
+    }
+
+    public void setUserAvatarEdited(){
+        userAvatarEdited = true;
         EnableSaveButtonIfEditedAndValid();
     }
 
@@ -246,8 +254,6 @@ public class ProfileViewAndEditActivity
                 Toast.makeText(this, "failed to update profile", Toast.LENGTH_SHORT).show();
                 break;
         }
-        if(progressDialog != null)
-            progressDialog.dismiss();
     }
 
     //todo add callback from avatar update, checks if profile was updated and finished and returns screen to readonly state
@@ -307,7 +313,7 @@ public class ProfileViewAndEditActivity
             case SELECT_FILE:
                 if (resultCode == RESULT_OK) {
                     isNewImageShot = false;
-                    userAvatarEdited = true;
+                    setUserAvatarEdited();
                     if (requestCode == REQUEST_CAMERA) {
                         isNewImageShot = true;
                         Bitmap thumbnail = (Bitmap) data.getExtras().get("data");
@@ -380,10 +386,8 @@ public class ProfileViewAndEditActivity
         btn_edit_save_profile.setText(getString(R.string.edit_button_text));
         btn_edit_save_profile.setEnabled(true);
 
-
-        //save image
         isEditModeOn = false;
-
-
+        if(progressDialog != null)
+            progressDialog.dismiss();
     }
 }

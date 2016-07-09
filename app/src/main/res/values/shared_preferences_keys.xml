@@ -29,4 +29,10 @@
     <string name="shared_preferences_user_data_user_name">user_name</string>
     <string name="shared_preferences_user_data_email">email</string>
 
+    <!-- Notifications settings -->
+
+    <string name="notif_settings_sp_key">notif_settings</string>
+    <string name="notif_settings_radius_key">notif_radius</string>
+    <string name="notif_settings_is_on_key">notif_is_on</string>
+
 </resources>

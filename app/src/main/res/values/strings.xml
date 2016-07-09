@@ -433,5 +433,11 @@
     <string name="profile_edit_user_name_hint">Edit name</string>
     <string name="profile_edit_phone_hint">Edit phone number</string>
     <string name="progress_saving_profile">Saving profile</string>
+    <string name="title_activity_notification_settings">NotificationSettings</string>
+    
+    <!-- Notifications settings -->
+    
+    <string name="notifications_settings_set_distance">Set the distance</string>
+    <string name="notifications_settings_radius">Notifications Radius:</string>
 
 </resources>

@@ -117,6 +117,7 @@ public class AmazonImageUploader {
             @Override
             public void onError(int id, Exception ex) {
                 // do something
+                ex.printStackTrace();
                 Log.d(MY_TAG, "OOOOPPPSSSS - UPLOAD DIDN'T WORK WELL ---> " + ex.getMessage());
             }
 

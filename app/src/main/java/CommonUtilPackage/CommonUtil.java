@@ -739,4 +739,43 @@ public class CommonUtil {
         return byteArray;
     }
 
+    public static int GetNotificationsSettingsRadius(Context context){
+        SharedPreferences sp = context.getSharedPreferences(context.getString(R.string.notif_settings_sp_key), Context.MODE_PRIVATE);
+        int result = sp.getInt(context.getString(R.string.notif_settings_radius_key), context.getResources().getInteger(R.integer.notifications_settings_default_radius));
+        if(result == context.getResources().getInteger(R.integer.notifications_settings_default_radius)){
+            SharedPreferences.Editor editor = sp.edit();
+            editor.putInt(context.getString(R.string.notif_settings_radius_key), context.getResources().getInteger(R.integer.notifications_settings_default_radius));
+            editor.commit();
+        }
+        return result;
+    }
+
+    public static void SetNotificationsSettingsRadius(Context context, int radius){
+        SharedPreferences sp = context.getSharedPreferences(context.getString(R.string.notif_settings_sp_key), Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sp.edit();
+        editor.putInt(context.getString(R.string.notif_settings_radius_key), radius);
+        editor.commit();
+    }
+
+    public static void SetDefaultNotificationsSettingsRadius(Context context){
+        SetNotificationsSettingsRadius(context, context.getResources().getInteger(R.integer.notifications_settings_default_radius));
+    }
+
+    public static boolean GetNotificationsSettingsIsOn(Context context){
+        SharedPreferences sp = context.getSharedPreferences(context.getString(R.string.notif_settings_sp_key), Context.MODE_PRIVATE);
+        boolean result = sp.getBoolean(context.getString(R.string.notif_settings_is_on_key), true);
+        if(result){
+            SharedPreferences.Editor editor = sp.edit();
+            editor.putBoolean(context.getString(R.string.notif_settings_is_on_key), true);
+            editor.commit();
+        }
+        return result;
+    }
+
+    public static void SetNotificationsSettingsIsOn(Context context, boolean isOn){
+        SharedPreferences sp = context.getSharedPreferences(context.getString(R.string.notif_settings_sp_key), Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sp.edit();
+        editor.putBoolean(context.getString(R.string.notif_settings_is_on_key), isOn);
+        editor.commit();
+    }
 }

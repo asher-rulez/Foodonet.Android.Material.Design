@@ -30,6 +30,9 @@ public class SettingsSelectActivity
         btn_profile_settings = (Button)findViewById(R.id.btn_profile_settings);
         btn_profile_settings.setOnClickListener(this);
 
+        btn_settings_notifications = (Button)findViewById(R.id.btn_notifications_settings);
+        btn_settings_notifications.setOnClickListener(this);
+
 
 //        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
 //        fab.setOnClickListener(new View.OnClickListener() {
@@ -48,6 +51,10 @@ public class SettingsSelectActivity
             case R.id.btn_profile_settings:
                 Intent intent = new Intent(this, ProfileViewAndEditActivity.class);
                 startActivity(intent);
+                break;
+            case R.id.btn_notifications_settings:
+                Intent intentNo = new Intent(this, NotificationSettings.class);
+                startActivity(intentNo);
                 break;
         }
     }
