@@ -349,14 +349,14 @@ public class AddEditPublicationActivity extends FragmentActivity
         publication.setPriceDescription("");
         publication.setContactInfo(CommonUtil.GetMyPhoneNumberFromPreferences(this));
         publication.setPriceDescription("");
-
+        publication.setPublisherID(CommonUtil.GetMyUserID(this));
 //        publication.setIfTriedToGetPictureBefore(true);
     }
 
     private boolean ValidateInputData() {
         return ValidateTitle()
                 && ValidateAddress()
-                    && ValidateGroupChoosen();
+                && ValidateGroupChoosen();
     }
 
     private boolean ValidateTitle() {
@@ -370,7 +370,7 @@ public class AddEditPublicationActivity extends FragmentActivity
         if (et_publication_title.getText().toString().length() >= 10000) {//HARDCODE!!!
             CommonUtil.SetEditTextIsValid(this, et_publication_title, false);
             Toast.makeText(this, getString(
-                            R.string.validation_title_too_long).replace("{0}", String.valueOf(10000)),
+                    R.string.validation_title_too_long).replace("{0}", String.valueOf(10000)),
                     Toast.LENGTH_LONG).show();
             return false;
         }
@@ -415,8 +415,8 @@ public class AddEditPublicationActivity extends FragmentActivity
         return true;
     }
 
-    private boolean ValidateGroupChoosen(){
-        if(publication.getAudience() < 0){
+    private boolean ValidateGroupChoosen() {
+        if (publication.getAudience() < 0) {
             CommonUtil.SetEditTextIsValid(this, et_share_with, false);
             Toast.makeText(this, getString(R.string.validation_must_choose_group), Toast.LENGTH_SHORT).show();
             return false;
@@ -557,7 +557,7 @@ public class AddEditPublicationActivity extends FragmentActivity
                 }
                 break;
             case ACTIVITY_FOR_RESULT_REQUEST_CODE_SELECT_GROUP:
-                if(resultCode < 0) return;
+                if (resultCode < 0) return;
                 publication.setAudience(resultCode);
                 et_share_with.setText(data.getStringExtra(SelectGroupForPublicationActivity.EXTRA_KEY_GROUP_NAME));
                 Bitmap validationBitmap = CommonUtil.decodeScaledBitmapFromDrawableResource(context.getResources(),

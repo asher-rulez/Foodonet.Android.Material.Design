@@ -90,7 +90,9 @@ import CommonUtilPackage.IPleaseRegisterDialogCallback;
 import CommonUtilPackage.ImageDictionarySyncronized;
 import CommonUtilPackage.InternalRequest;
 import DataModel.FCPublication;
+import FooDoNetSQLClasses.FooDoNetSQLExecuterAsync;
 import FooDoNetSQLClasses.FooDoNetSQLHelper;
+import FooDoNetSQLClasses.IFooDoNetSQLCallback;
 import FooDoNetServerClasses.HttpServerConnectorAsync;
 import FooDoNetServerClasses.IFooDoNetServerCallback;
 import FooDoNetServerClasses.ImageDownloader;
@@ -111,7 +113,7 @@ public class EntarenceMapAndListActivity
         TabLayout.OnTabSelectedListener,
         TextWatcher,
         IPleaseRegisterDialogCallback,
-        IFooDoNetServerCallback, IAmazonFinishedCallback {
+        IFooDoNetServerCallback, IAmazonFinishedCallback, IFooDoNetSQLCallback {
 
     private static final String MY_TAG = "food_mapAndList";
 
@@ -403,6 +405,8 @@ public class EntarenceMapAndListActivity
                         currentFilterID = FooDoNetSQLHelper.FILTER_ID_LIST_ALL_BY_CLOSEST;
                         break;
                 }
+                if(adapter != null)
+                    adapter.UpdatePublicationsList(new ArrayList<FCPublication>(), currentListMode == LIST_MODE_MY);
                 SetTabsVisibility(currentListMode);
                 RestartLoadingForPublicationsList();
 //                Intent intent = new Intent(getApplicationContext(), MyPublicationsActivity.class);
@@ -974,6 +978,25 @@ public class EntarenceMapAndListActivity
 
     }
 
+    @Override
+    public void OnSQLTaskComplete(InternalRequest request) {
+        switch (request.ActionCommand){
+            case InternalRequest.ACTION_SQL_GET_SINGLE_PUBLICATION_BY_ID:
+                FCPublication loadedPublication = request.publicationForDetails;
+                Intent intent = new Intent(this, ExistingPublicationActivity.class);
+                intent.putExtra(ExistingPublicationActivity.PUBLICATION_EXTRA_KEY, loadedPublication);
+                startActivityForResult(intent, 1);
+                if(progressDialog != null){
+                    progressDialog.dismiss();
+                    progressDialog = null;
+                }
+                break;
+            default:
+                Log.w(MY_TAG, "unexpected sql async task result!");
+                break;
+        }
+    }
+
     public abstract class HidingScrollListener extends RecyclerView.OnScrollListener {
         private static final float HIDE_THRESHOLD = 10;
         private static final float SHOW_THRESHOLD = 70;
@@ -1095,7 +1118,11 @@ public class EntarenceMapAndListActivity
 
     @Override
     public void OnPublicationFromListClicked(int publicationID) {
-
+        progressDialog = CommonUtil.ShowProgressDialog(this, getString(R.string.progress_loading_publication));
+        FooDoNetSQLExecuterAsync sqlGetPubAsync = new FooDoNetSQLExecuterAsync(this, getContentResolver());
+        InternalRequest ir = new InternalRequest(InternalRequest.ACTION_SQL_GET_SINGLE_PUBLICATION_BY_ID);
+        ir.PublicationID = publicationID;
+        sqlGetPubAsync.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, ir);
     }
 
     @Override

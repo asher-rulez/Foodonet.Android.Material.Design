@@ -300,6 +300,12 @@ public class FCPublication implements Serializable, ICanWriteSelfToJSONWriter {
         this.isOnAir = isOnAir;
     }
 
+    public boolean IsActivePublication(){
+        return getIsOnAir()
+                && ((new Date()).compareTo(getStartingDate()) >= 0)
+                && ((new Date()).compareTo(getEndingDate()) <= 0);
+    }
+
     private Boolean didModifyCoords;
 
     public Boolean getDidModifyCoords() {
@@ -555,6 +561,7 @@ public class FCPublication implements Serializable, ICanWriteSelfToJSONWriter {
                     publication.setEndingDate(cursor.getLong(cursor.getColumnIndex(PUBLICATION_ENDING_DATE_KEY)));
                     publication.setContactInfo(cursor.getString(cursor.getColumnIndex(PUBLICATION_CONTACT_INFO_KEY)));
                     publication.setIsOnAir(cursor.getInt(cursor.getColumnIndex(PUBLICATION_IS_ON_AIR_KEY)) == 1);
+                    publication.setPublisherID(cursor.getInt(cursor.getColumnIndex(PUBLICATION_PUBLISHER_ID_KEY)));
                     //publication.setIfTriedToGetPictureBefore(cursor.getInt(cursor.getColumnIndex(PUBLICATION_TRIED_TO_LOAD_IMAGE)));
                 }
                 result.add(publication);

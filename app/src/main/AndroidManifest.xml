@@ -37,7 +37,7 @@
     <!-- Application -->
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/app_logo_for_icon"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppDefault">
@@ -173,6 +173,9 @@
             android:name=".NotificationSettings"
             android:screenOrientation="portrait"
             android:theme="@style/AppDefault" />
+        <activity
+            android:name=".ExistingPublicationActivity"
+            android:screenOrientation="portrait"></activity>
     </application>
 
 </manifest>

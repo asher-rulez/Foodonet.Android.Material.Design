@@ -393,14 +393,12 @@
     <string name="title_activity_my_publications">MyPublicationsActivity</string>
     <string name="all_shares_toolbar_title">All shares</string>
     <string name="toolbar_title_map">Sharings on map</string>
-
-    <!-- My publications list -->
-
     <string name="filter_all_my_pubs">Ends</string>
     <string name="filter_active_my_pubs">On Air</string>
     <string name="filter_ended_my_pubs">Off Air</string>
     <string name="new_pub_waiting_for_save_on_server">Saving publications to server, please wait</string>
     <string name="my_shares_toolbar_title">My shares</string>
+    <string name="progress_loading_publication">Loading publication</string>
 
     <!-- Navigation side menu -->
 
@@ -434,10 +432,20 @@
     <string name="profile_edit_phone_hint">Edit phone number</string>
     <string name="progress_saving_profile">Saving profile</string>
     <string name="title_activity_notification_settings">NotificationSettings</string>
-    
+
     <!-- Notifications settings -->
-    
+
     <string name="notifications_settings_set_distance">Set the distance</string>
     <string name="notifications_settings_radius">Notifications Radius:</string>
+    <string name="title_activity_existing_publication">Share details</string>
+
+    <!-- Existing publication -->
+
+    <string name="share_details_activity_title">Share details</string>
+    <string name="menu_item_edit">Edit</string>
+    <string name="menu_item_stop_event">Stop Event</string>
+    <string name="menu_item_restart_event">Restart Event</string>
+    <string name="menu_item_delete">Delete</string>
+    <string name="menu_item_report">Report</string>
 
 </resources>

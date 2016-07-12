@@ -332,6 +332,16 @@ public class FooDoNetSQLExecuterAsync extends AsyncTask<InternalRequest, Void, V
                 cReports.close();
                 if (reports != null && reports.size() > 0)
                     resultPublication.setPublicationReports(reports);
+
+                if(resultPublication.getAudience() != 0){
+                    Uri groupUri = Uri.parse(FooDoNetSQLProvider.URI_GROUP + "/" + resultPublication.getAudience());
+                    Cursor groupCursor = contentResolver.query(groupUri, Group.GetColumnNamesArray(), null, null, null);
+                    ArrayList<Group> groupArray = Group.GetGroupsFromCursor(groupCursor);
+                    Group group = groupArray.get(0);
+                    resultPublication.set_group_name(group.Get_name());
+                    groupCursor.close();
+                }
+
                 publicationDetailsByID = resultPublication;
                 break;
             //endregion

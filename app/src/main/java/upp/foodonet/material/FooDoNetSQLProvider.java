@@ -395,8 +395,8 @@ public class FooDoNetSQLProvider extends ContentProvider {
             default:
                 throw new IllegalArgumentException("Unknown URI: " + uri);
         }
-        if (id == -1)
-            Log.e(MY_TAG, "failed inserting: " + uri);
+//        if (id == -1)
+//            Log.e(MY_TAG, "failed inserting: " + uri);
         getContext().getContentResolver().notifyChange(uri, null);
         return Uri.parse(BASE_PATH + "/" + id);
     }

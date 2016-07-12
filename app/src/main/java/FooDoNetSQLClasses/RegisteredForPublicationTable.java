@@ -22,6 +22,12 @@ public class RegisteredForPublicationTable {
         sb.append(" integer not null, ");
         sb.append(RegisteredUserForPublication.REGISTERED_FOR_PUBLICATION_KEY_PUBLICATION_VERSION);
         sb.append(" integer not null, ");
+        sb.append(RegisteredUserForPublication.REGISTERED_FOR_PUBLICATION_KEY_USER_ID);
+        sb.append(" integer not null, ");
+        sb.append(RegisteredUserForPublication.REGISTERED_FOR_PUBLICATION_KEY_USER_NAME);
+        sb.append(" text not null, ");
+        sb.append(RegisteredUserForPublication.REGISTERED_FOR_PUBLICATION_KEY_USER_CONTACT_INFO);
+        sb.append(" text not null, ");
         sb.append(RegisteredUserForPublication.REGISTERED_FOR_PUBLICATION_KEY_DATE);
         sb.append(" long not null, ");
         sb.append(RegisteredUserForPublication.REGISTERED_FOR_PUBLICATION_KEY_DEVICE_UUID);
