@@ -447,5 +447,20 @@
     <string name="menu_item_restart_event">Restart Event</string>
     <string name="menu_item_delete">Delete</string>
     <string name="menu_item_report">Report</string>
+    <string name="time_left_format_less_one_day">{0}h {1}m</string>
+    <string name="time_left_format_more_than_day">{0}d {1}h</string>
+    <string name="time_left_ended">Ended</string>
+    <string name="user_rating_format">{0}.{1}</string>
+    <string name="publication_details_price">Price:</string>
+    <string name="publication_details_price_free">Free</string>
+    <string name="publication_details_price_format">{0} ₪</string>
+    <string name="publication_details_no_reports">No reports</string>
+    <string name="publication_details_reports">Reports:</string>
+    <string name="report_format">{0} (reported {1} ago)</string>
+
+    <string name="report_has_more">Has more to pickup</string>
+    <string name="report_took_all">Took all</string>
+    <string name="report_nothing_found">Found nothing there</string>
+    <string name="report_error">Report error</string>
 
 </resources>

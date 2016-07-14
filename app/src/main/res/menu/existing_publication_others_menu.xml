@@ -4,9 +4,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="upp.foodonet.material.ExistingPublicationActivity">
     <item
+        android:id="@+id/menu_action_report"
         android:title="@string/menu_item_report"
         android:orderInCategory="1"
-        app:showAsAction="always"
+        app:showAsAction="withText"
         />
 
 </menu>

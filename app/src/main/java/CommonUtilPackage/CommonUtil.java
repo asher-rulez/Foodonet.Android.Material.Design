@@ -475,7 +475,7 @@ public class CommonUtil {
         Log.i(MY_TAG, "Registered to " + socialAccountType + ", name: " + socialAccountName);
     }
 
-    public static void ClearPreferencesSocialAccountDataForLogout(Context context){
+    public static void ClearPreferencesSocialAccountDataForLogout(Context context) {
         SharedPreferences sp = context.getSharedPreferences(
                 context.getString(R.string.shared_preferences_google_facebook_data_token), Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sp.edit();
@@ -494,7 +494,7 @@ public class CommonUtil {
         return sp.getString(context.getString(R.string.shared_preferences_social_account_type_key), "");
     }
 
-    public static String GetSocialAccountIDFromPreferences(Context context){
+    public static String GetSocialAccountIDFromPreferences(Context context) {
         SharedPreferences sp = context.getSharedPreferences(
                 context.getString(R.string.shared_preferences_google_facebook_data_token), Context.MODE_PRIVATE);
         return sp.getString(context.getString(R.string.shared_preferences_social_account_id), "");
@@ -590,23 +590,21 @@ public class CommonUtil {
             result = CommonUtil.CompressImageByteArrayByMaxSize(result, maxImageWidthHeight);
             Log.i(MY_TAG, "Compressed image to " + (int) Math.round(result.length / 1024) + " kb");
 
-            File photo = new File(Environment.getExternalStorageDirectory() + imageFolderPath, fileName);
-
-            if (photo.exists()) {
-                photo.delete();
+            if (imageFolderPath != null) {
+                File photo = new File(Environment.getExternalStorageDirectory() + imageFolderPath, fileName);
+                if (photo.exists()) {
+                    photo.delete();
+                }
+                try {
+                    FileOutputStream fos = new FileOutputStream(photo.getPath());
+                    fos.write(result);
+                    fos.close();
+                } catch (IOException e) {
+                    Log.e(MY_TAG, "cant save image");
+                }
+                Log.i(MY_TAG, "succeeded load and image " + photo.getPath());
             }
 
-            try {
-                FileOutputStream fos = new FileOutputStream(photo.getPath());
-
-                fos.write(result);
-                fos.close();
-            } catch (IOException e) {
-                Log.e(MY_TAG, "cant save image");
-            }
-            //resultImages.put(id, result);
-            Log.i(MY_TAG, "succeeded load and image " + photo.getPath());
-            //return BitmapFactory.decodeByteArray(result, 0, result.length);
             Bitmap b = BitmapFactory.decodeByteArray(result, 0, result.length);
             return b;
         } catch (MalformedURLException e) {
@@ -623,7 +621,6 @@ public class CommonUtil {
         }
         return null;
     }
-
 
     public static boolean CheckIfStringsDiffer(String string1, String string2) {
         if (string1 == null && string2 != null) return true;
@@ -703,11 +700,11 @@ public class CommonUtil {
     }
 
     public static void HideSoftKeyboard(Activity activity) {
-        InputMethodManager inputMethodManager = (InputMethodManager)  activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
+        InputMethodManager inputMethodManager = (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
         inputMethodManager.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(), 0);
     }
 
-    public static AlertDialog ShowDialogNeedToRegister(final Context context, final int doAfterRegistrationCode, final IPleaseRegisterDialogCallback callback){
+    public static AlertDialog ShowDialogNeedToRegister(final Context context, final int doAfterRegistrationCode, final IPleaseRegisterDialogCallback callback) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle(context.getString(R.string.dialog_title_please_register));
         builder.setMessage(context.getString(R.string.dialog_message_please_register));
@@ -731,7 +728,7 @@ public class CommonUtil {
         return dialog;
     }
 
-    public static byte[] BitmapToBytes(Bitmap bitmap){
+    public static byte[] BitmapToBytes(Bitmap bitmap) {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         //todo: error null pointer could be thrown here, check if reproducable
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
@@ -739,10 +736,10 @@ public class CommonUtil {
         return byteArray;
     }
 
-    public static int GetNotificationsSettingsRadius(Context context){
+    public static int GetNotificationsSettingsRadius(Context context) {
         SharedPreferences sp = context.getSharedPreferences(context.getString(R.string.notif_settings_sp_key), Context.MODE_PRIVATE);
         int result = sp.getInt(context.getString(R.string.notif_settings_radius_key), context.getResources().getInteger(R.integer.notifications_settings_default_radius));
-        if(result == context.getResources().getInteger(R.integer.notifications_settings_default_radius)){
+        if (result == context.getResources().getInteger(R.integer.notifications_settings_default_radius)) {
             SharedPreferences.Editor editor = sp.edit();
             editor.putInt(context.getString(R.string.notif_settings_radius_key), context.getResources().getInteger(R.integer.notifications_settings_default_radius));
             editor.commit();
@@ -750,21 +747,21 @@ public class CommonUtil {
         return result;
     }
 
-    public static void SetNotificationsSettingsRadius(Context context, int radius){
+    public static void SetNotificationsSettingsRadius(Context context, int radius) {
         SharedPreferences sp = context.getSharedPreferences(context.getString(R.string.notif_settings_sp_key), Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sp.edit();
         editor.putInt(context.getString(R.string.notif_settings_radius_key), radius);
         editor.commit();
     }
 
-    public static void SetDefaultNotificationsSettingsRadius(Context context){
+    public static void SetDefaultNotificationsSettingsRadius(Context context) {
         SetNotificationsSettingsRadius(context, context.getResources().getInteger(R.integer.notifications_settings_default_radius));
     }
 
-    public static boolean GetNotificationsSettingsIsOn(Context context){
+    public static boolean GetNotificationsSettingsIsOn(Context context) {
         SharedPreferences sp = context.getSharedPreferences(context.getString(R.string.notif_settings_sp_key), Context.MODE_PRIVATE);
         boolean result = sp.getBoolean(context.getString(R.string.notif_settings_is_on_key), true);
-        if(result){
+        if (result) {
             SharedPreferences.Editor editor = sp.edit();
             editor.putBoolean(context.getString(R.string.notif_settings_is_on_key), true);
             editor.commit();
@@ -772,10 +769,25 @@ public class CommonUtil {
         return result;
     }
 
-    public static void SetNotificationsSettingsIsOn(Context context, boolean isOn){
+    public static void SetNotificationsSettingsIsOn(Context context, boolean isOn) {
         SharedPreferences sp = context.getSharedPreferences(context.getString(R.string.notif_settings_sp_key), Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sp.edit();
         editor.putBoolean(context.getString(R.string.notif_settings_is_on_key), isOn);
         editor.commit();
     }
+
+    public static String GetTimeLeftString(Context context, Date start, Date end){
+        long timeSpanInSeconds = (end.getTime() - start.getTime())/1000;
+        long secondsLeft = (timeSpanInSeconds >= 60 ? timeSpanInSeconds % 60 : timeSpanInSeconds);
+        long timeSpanInMinutes = timeSpanInSeconds / 60;
+        long minutesLeft = (timeSpanInMinutes >= 60 ? timeSpanInMinutes % 60 : timeSpanInMinutes);
+        long timeSpanInHours = timeSpanInMinutes / 60;
+        long hoursLeft = (timeSpanInHours >= 24 ? timeSpanInHours % 24 : timeSpanInHours);
+        long timeSpanInDays = timeSpanInHours / 24;
+        return timeSpanInDays >= 1
+                ? context.getString(R.string.time_left_format_more_than_day).replace("{0}", String.valueOf(timeSpanInDays)).replace("{1}", String.valueOf(hoursLeft))
+                : context.getString(R.string.time_left_format_less_one_day).replace("{0}", String.valueOf(timeSpanInHours)).replace("{1}", String.valueOf(minutesLeft));
+    }
+
+
 }

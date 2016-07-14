@@ -1,6 +1,7 @@
 package upp.foodonet.material;
 
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -8,16 +9,23 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.hardware.fingerprint.FingerprintManagerCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.Date;
+
 import CommonUtilPackage.CommonUtil;
 import DataModel.FCPublication;
+import DataModel.PublicationReport;
 import DataModel.RegisteredUserForPublication;
+import FooDoNetServerClasses.ImageDownloader;
+import UIUtil.RoundedImageView;
 
 public class ExistingPublicationActivity extends AppCompatActivity implements Toolbar.OnMenuItemClickListener {
 
@@ -38,6 +46,23 @@ public class ExistingPublicationActivity extends AppCompatActivity implements To
     TextView tv_group_name;
     TextView tv_time_left;
     TextView tv_users_joined;
+
+    ImageView iv_publication_image;
+    TextView tv_title;
+    TextView tv_subtitle;
+
+    RoundedImageView riv_user_avatar;
+    TextView tv_address;
+    ImageView iv_rating_star;
+    TextView tv_user_rating;
+    TextView tv_user_name;
+
+    TextView tv_price;
+
+    TextView tv_reports_title;
+    LinearLayout ll_reports;
+
+    ImageDownloader imageDownloader;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +92,26 @@ public class ExistingPublicationActivity extends AppCompatActivity implements To
 
         InitToolBar();
         InitTopInfoBar();
+        SetPublicationImage();
+
+        tv_title = (TextView)findViewById(R.id.tv_pub_det_title);
+        tv_title.setText(currentPublication.getTitle());
+        tv_subtitle = (TextView)findViewById(R.id.tv_pub_det_subtitle);
+        if(TextUtils.isEmpty(currentPublication.getSubtitle()))
+            tv_subtitle.setVisibility(View.GONE);
+        else
+            tv_subtitle.setText(currentPublication.getSubtitle());
+
+        InitUserData();
+
+        tv_price = (TextView)findViewById(R.id.tv_pub_det_price);
+        if(currentPublication.getPrice() == null || currentPublication.getPrice() == 0)
+            tv_price.setText(getString(R.string.publication_details_price_free));
+        else tv_price.setText(getString(R.string.publication_details_price_format)
+                .replace("{0}", String.valueOf(currentPublication.getPrice())));
+
+        SetReports();
+
 /*
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -129,6 +174,91 @@ public class ExistingPublicationActivity extends AppCompatActivity implements To
         } else {
             iv_group_icon.setImageDrawable(getResources().getDrawable(R.drawable.group_pub_det_icon));
             tv_group_name.setText(currentPublication.get_group_name());
+        }
+
+        if(currentPublication.IsActivePublication())
+            tv_time_left.setText(GetTimeLertTillPublicationEnds());
+        else tv_time_left.setText(getString(R.string.time_left_ended));
+
+        tv_users_joined.setText(getString(R.string.users_joined_format_for_list)
+                .replace("{0}", String.valueOf(
+                        currentPublication.getRegisteredForThisPublication() == null
+                                ? 0 : currentPublication.getRegisteredForThisPublication().size())));
+    }
+
+    private void SetPublicationImage() {
+        iv_publication_image = (ImageView)findViewById(R.id.iv_pub_det_image);
+        final int id = currentPublication.getUniqueId();
+        final int version = currentPublication.getVersion();
+        imageDownloader = new ImageDownloader(this, null);
+        imageDownloader.Download(id, version, iv_publication_image);
+    }
+
+    private String GetTimeLertTillPublicationEnds(){
+        return CommonUtil.GetTimeLeftString(this, new Date(), currentPublication.getEndingDate());
+    }
+
+    private void InitUserData(){
+        riv_user_avatar = (RoundedImageView)findViewById(R.id.riv_pub_det_user_avatar);
+        imageDownloader.DownloadUserAvatar(
+                getString(R.string.amazon_user_avatar_image_name).replace("{0}",
+                String.valueOf(currentPublication.getPublisherID())), riv_user_avatar);
+
+        tv_address = (TextView)findViewById(R.id.tv_pub_det_address);
+        tv_address.setText(currentPublication.getAddress());
+
+        iv_rating_star = (ImageView)findViewById(R.id.iv_pub_det_rating_star);
+        iv_rating_star.setImageDrawable(getRatingStarByUserRating(currentPublication.getRating()));
+
+        tv_user_rating = (TextView)findViewById(R.id.tv_pub_det_user_rating);
+        tv_user_rating.setText(getString(R.string.user_rating_format)
+                .replace("{0}", String.valueOf((int)(currentPublication.getRating()/1)))
+                .replace("{1}", String.valueOf((int)(currentPublication.getRating()%1))));
+
+        tv_user_name = (TextView)findViewById(R.id.tv_pub_det_user_name);
+        tv_user_name.setText(currentPublication.getPublisherUserName());
+    }
+
+    private Drawable getRatingStarByUserRating(double rating){
+        if(rating<=0)
+            return getResources().getDrawable(R.drawable.rating_star_no_rating);
+        if(rating<=2)
+            return getResources().getDrawable(R.drawable.rating_star_bad);
+        if(rating<=4)
+            return getResources().getDrawable(R.drawable.rating_star_half);
+        return getResources().getDrawable(R.drawable.rating_star_good);
+    }
+
+    private void SetReports(){
+        tv_reports_title = (TextView)findViewById(R.id.tv_pub_det_reports_title);
+        if(currentPublication.getPublicationReports() == null
+           || currentPublication.getPublicationReports().size() == 0){
+            tv_reports_title.setText(getString(R.string.publication_details_no_reports));
+            return;
+        }else {
+            tv_reports_title.setText(getString(R.string.publication_details_reports));
+        }
+        ll_reports = (LinearLayout)findViewById(R.id.ll_pub_det_reports);
+        for(PublicationReport report : currentPublication.getPublicationReports()){
+            View reportView = getLayoutInflater().inflate(R.layout.publication_details_report_item, null);
+            TextView tv_report_title = (TextView)reportView.findViewById(R.id.tv_report_details);
+            tv_report_title.setText(getString(R.string.report_format)
+                    .replace("{0}", GetReportStringByCode(report.getReport()))
+                    .replace("{1}", CommonUtil.GetTimeLeftString(this, report.getDate_reported(), new Date())));
+            ll_reports.addView(reportView);
+        }
+    }
+
+    private String GetReportStringByCode(int reportCode){
+        switch (reportCode){
+            case 1:
+                return getString(R.string.report_has_more);
+            case 3:
+                return getString(R.string.report_took_all);
+            case 5:
+                return getString(R.string.report_nothing_found);
+            default:
+                return getString(R.string.report_error);
         }
     }
 }

@@ -30,10 +30,12 @@ public class PublicationReport implements Serializable, ICanWriteSelfToJSONWrite
     public static final String PUBLICATION_REPORT_FIELD_KEY_DEVICE_UID = "active_device_dev_uuid";
     public static final String PUBLICATION_REPORT_FIELD_KEY_REPORT_USER_NAME = "report_user_name";
     public static final String PUBLICATION_REPORT_FIELD_KEY_REPORT_CONTACT_INFO = "report_contact_info";
+    public static final String PUBLICATION_REPORT_FIELD_KEY_REPORT_USER_ID = "reporter_user_id";
+    public static final String PUBLICATION_REPORT_FIELD_KEY_REPORT_RATING = "rating";
 
     public static final String PUBLICATION_REPORT_FIELD_KEY_NEG_ID = "neg_id";
 
-    public PublicationReport(int id, int pub_id, int pub_version, int report, Date date, String dev_UID){
+    public PublicationReport(int id, int pub_id, int pub_version, int report, Date date, String dev_UID) {
         setId(id);
         setPublication_id(pub_id);
         setPublication_version(pub_version);
@@ -42,63 +44,116 @@ public class PublicationReport implements Serializable, ICanWriteSelfToJSONWrite
         setDevice_uuid(dev_UID);
     }
 
-    public PublicationReport(){}
+    public PublicationReport() {
+    }
 
     private int id;
-    public int getId(){
+
+    public int getId() {
         return id;
     }
-    public void setId(int val){
+
+    public void setId(int val) {
         id = val;
     }
 
     private int publication_id;
-    public int getPublication_id(){
+
+    public int getPublication_id() {
         return publication_id;
     }
-    public void setPublication_id(int val){
+
+    public void setPublication_id(int val) {
         publication_id = val;
     }
 
     private int publication_version;
-    public int getPublication_version(){return publication_version;}
-    public void setPublication_version(int val){
+
+    public int getPublication_version() {
+        return publication_version;
+    }
+
+    public void setPublication_version(int val) {
         publication_version = val;
     }
 
     private Date date_reported;
-    public Date getDate_reported(){return date_reported;}
-    public long getDate_reported_unix_time(){return date_reported.getTime()/1000;}
-    public void setDate_reported(Date val){
+
+    public Date getDate_reported() {
+        return date_reported;
+    }
+
+    public long getDate_reported_unix_time() {
+        return date_reported.getTime() / 1000;
+    }
+
+    public void setDate_reported(Date val) {
         date_reported = val;
     }
-    public void setDate_reported(long val){
+
+    public void setDate_reported(long val) {
         date_reported = new Date(val * 1000);
     }
 
     private String device_uuid;
-    public String getDevice_uuid(){
+
+    public String getDevice_uuid() {
         return device_uuid;
     }
-    public void setDevice_uuid(String val){
+
+    public void setDevice_uuid(String val) {
         device_uuid = val;
     }
 
     private int report;
-    public int getReport(){
+
+    public int getReport() {
         return report;
     }
-    public void setReport(int val){
+
+    public void setReport(int val) {
         report = val;
     }
 
     private String report_user_name;
-    public String getReportUserName() {return report_user_name;}
-    public void setReportUserName(String value) {report_user_name = value;}
+
+    public String getReportUserName() {
+        return report_user_name;
+    }
+
+    public void setReportUserName(String value) {
+        report_user_name = value;
+    }
 
     private String report_contact_info;
-    public String getReportContactInfo() {return report_contact_info;}
-    public void setReportContactInfo(String value){report_contact_info = value;}
+
+    public String getReportContactInfo() {
+        return report_contact_info;
+    }
+
+    public void setReportContactInfo(String value) {
+        report_contact_info = value;
+    }
+
+    private int rating;
+
+    public int getRating() {
+        return rating;
+    }
+
+    public void setRating(int r) {
+        rating = r;
+    }
+
+    private int report_userID;
+
+    public int getReport_userID() {
+        return report_userID;
+    }
+
+    public void setReport_userID(int user_id) {
+        report_userID = user_id;
+    }
 
     public static String[] GetColumnNamesArray() {
         return
@@ -110,7 +165,9 @@ public class PublicationReport implements Serializable, ICanWriteSelfToJSONWrite
                         PUBLICATION_REPORT_FIELD_KEY_REPORT,
                         PUBLICATION_REPORT_FIELD_KEY_DEVICE_UID,
                         PUBLICATION_REPORT_FIELD_KEY_REPORT_USER_NAME,
-                        PUBLICATION_REPORT_FIELD_KEY_REPORT_CONTACT_INFO
+                        PUBLICATION_REPORT_FIELD_KEY_REPORT_CONTACT_INFO,
+                        PUBLICATION_REPORT_FIELD_KEY_REPORT_RATING,
+                        PUBLICATION_REPORT_FIELD_KEY_REPORT_USER_ID
                 };
     }
 
@@ -128,6 +185,8 @@ public class PublicationReport implements Serializable, ICanWriteSelfToJSONWrite
                 pr.setReport(cursor.getInt(cursor.getColumnIndex(PUBLICATION_REPORT_FIELD_KEY_REPORT)));
                 pr.setReportUserName(cursor.getString(cursor.getColumnIndex(PUBLICATION_REPORT_FIELD_KEY_REPORT_USER_NAME)));
                 pr.setReportContactInfo(cursor.getString(cursor.getColumnIndex(PUBLICATION_REPORT_FIELD_KEY_REPORT_CONTACT_INFO)));
+                pr.setRating(cursor.getInt(cursor.getColumnIndex(PUBLICATION_REPORT_FIELD_KEY_REPORT_RATING)));
+                pr.setReport_userID(cursor.getInt(cursor.getColumnIndex(PUBLICATION_REPORT_FIELD_KEY_REPORT_USER_ID)));
                 result.add(pr);
             } while (cursor.moveToNext());
         }
@@ -160,6 +219,9 @@ public class PublicationReport implements Serializable, ICanWriteSelfToJSONWrite
             pr.setReport(jo.getInt(PUBLICATION_REPORT_FIELD_KEY_REPORT));
             pr.setReportUserName(jo.getString(PUBLICATION_REPORT_FIELD_KEY_REPORT_USER_NAME));
             pr.setReportContactInfo(jo.getString(PUBLICATION_REPORT_FIELD_KEY_REPORT_CONTACT_INFO));
+            pr.setRating(jo.getInt(PUBLICATION_REPORT_FIELD_KEY_REPORT_RATING));
+            if(!jo.isNull(PUBLICATION_REPORT_FIELD_KEY_REPORT_USER_ID))
+                pr.setReport_userID(jo.getInt(PUBLICATION_REPORT_FIELD_KEY_REPORT_USER_ID));
         } catch (JSONException e) {
             e.printStackTrace();
             Log.e(MY_TAG, e.getMessage());
@@ -178,6 +240,8 @@ public class PublicationReport implements Serializable, ICanWriteSelfToJSONWrite
         cv.put(PUBLICATION_REPORT_FIELD_KEY_REPORT, getReport());
         cv.put(PUBLICATION_REPORT_FIELD_KEY_REPORT_USER_NAME, getReportUserName());
         cv.put(PUBLICATION_REPORT_FIELD_KEY_REPORT_CONTACT_INFO, getReportContactInfo());
+        cv.put(PUBLICATION_REPORT_FIELD_KEY_REPORT_RATING, getRating());
+        cv.put(PUBLICATION_REPORT_FIELD_KEY_REPORT_USER_ID, getReport_userID());
         return cv;
     }
 
@@ -191,6 +255,8 @@ public class PublicationReport implements Serializable, ICanWriteSelfToJSONWrite
         deviceData.put("publication_version", getPublication_version());
         deviceData.put(PUBLICATION_REPORT_FIELD_KEY_REPORT_USER_NAME, getReportUserName());
         deviceData.put(PUBLICATION_REPORT_FIELD_KEY_REPORT_CONTACT_INFO, getReportContactInfo());
+        deviceData.put(PUBLICATION_REPORT_FIELD_KEY_REPORT_RATING, getRating());
+        deviceData.put(PUBLICATION_REPORT_FIELD_KEY_REPORT_USER_ID, getReport_userID());
         Map<String, Object> dataToSend = new HashMap<String, Object>();
         dataToSend.put("publication_report", deviceData);
 
