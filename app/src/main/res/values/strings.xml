@@ -463,4 +463,9 @@
     <string name="report_nothing_found">Found nothing there</string>
     <string name="report_error">Report error</string>
 
+    <string name="post_on_facebook_action">post on facebook</string>
+    <string name="post_on_tweeter_action">post on tweeter</string>
+    <string name="no_registered_user_for_sms_or_call">No users registered</string>
+    <string name="select_reg_user_title">Select user:</string>
+
 </resources>
