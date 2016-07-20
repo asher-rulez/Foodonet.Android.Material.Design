@@ -54,7 +54,7 @@ public class ImageDownloader {
         BitmapDownloaderTask task = new BitmapDownloaderTask(imageView, fileName, context.getString(R.string.amazon_url_for_user_avatar));
         DownloadedDrawable downloadedDrawable = new DownloadedDrawable(task, defaultBitmap, context.getResources());
         imageView.setImageDrawable(downloadedDrawable);
-        task.execute();
+        task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     private void ForceDownload(int id, String fileName, String imageFolderPath, String imageRepositoryBaseUrl, ImageView imageView) {

@@ -166,7 +166,8 @@ public class RegisteredUserForPublication implements Serializable, ICanWriteSelf
             rufp.setDevice_registered_uuid(jo.getString(REGISTERED_FOR_PUBLICATION_KEY_DEVICE_UUID));
             rufp.setCollectorName(jo.getString(REGISTERED_FOR_PUBLICATION_KEY_USER_NAME));
             rufp.setCollectorphone(jo.getString(REGISTERED_FOR_PUBLICATION_KEY_USER_CONTACT_INFO));
-            rufp.setUserID(jo.getInt(REGISTERED_FOR_PUBLICATION_KEY_USER_ID));
+            if(!jo.isNull(REGISTERED_FOR_PUBLICATION_KEY_USER_ID))
+                rufp.setUserID(jo.getInt(REGISTERED_FOR_PUBLICATION_KEY_USER_ID));
         } catch (JSONException e) {
             e.printStackTrace();
             Log.e(MY_TAG, e.getMessage());

@@ -11,12 +11,14 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.LocationManager;
 //import android.net.http.AndroidHttpClient;
+import android.media.ExifInterface;
 import android.os.Environment;
 import android.util.Log;
 
@@ -29,6 +31,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -205,6 +208,7 @@ public class CommonUtil {
             FileInputStream fis = new FileInputStream(photo.getPath());
             byte[] imageBytes = IOUtils.toByteArray(fis);
             Bitmap bImage = CommonUtil.decodeScaledBitmapFromByteArray(imageBytes, width, heigth);
+            bImage = PreRotateBitmapFromFile(bImage, photo);
             result = new BitmapDrawable(bImage);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -574,7 +578,7 @@ public class CommonUtil {
     }
 
     public static Bitmap LoadAndSavePicture(InputStream is, String url, int maxImageWidthHeight, String imageFolderPath, String fileName) {
-        InputStream inputStream = is;
+        InputStream input = is;
         try {
             HttpURLConnection connection = null;
             URL urlurl = new URL(url);
@@ -583,18 +587,27 @@ public class CommonUtil {
             connection.setReadTimeout(5000);
             connection.setConnectTimeout(1000);
             connection.setUseCaches(false);
-            inputStream = connection.getInputStream();
+            input = new BufferedInputStream(connection.getInputStream());
 
-            //is = new java.net.URL(url).openStream();
-            byte[] result = IOUtils.toByteArray(inputStream);
-            result = CommonUtil.CompressImageByteArrayByMaxSize(result, maxImageWidthHeight);
-            Log.i(MY_TAG, "Compressed image to " + (int) Math.round(result.length / 1024) + " kb");
-
-            if (imageFolderPath != null) {
+            if(imageFolderPath != null) {
                 File photo = new File(Environment.getExternalStorageDirectory() + imageFolderPath, fileName);
                 if (photo.exists()) {
                     photo.delete();
                 }
+                photo.createNewFile();
+                OutputStream output = new FileOutputStream(photo.getAbsolutePath());
+                byte data[] = new byte[1024];
+                int count;
+                while ((count = input.read(data)) != -1) {
+                    output.write(data, 0, count);
+                }
+                output.flush();
+                output.close();
+                input.close();
+
+
+/*
+            if (imageFolderPath != null) {
                 try {
                     FileOutputStream fos = new FileOutputStream(photo.getPath());
                     fos.write(result);
@@ -604,22 +617,64 @@ public class CommonUtil {
                 }
                 Log.i(MY_TAG, "succeeded load and image " + photo.getPath());
             }
-
-            Bitmap b = BitmapFactory.decodeByteArray(result, 0, result.length);
-            return b;
+*/
+                Bitmap bitmap = decodeScaledBitmapFromSdCard(photo.getAbsolutePath(), 1000, 1000);
+                bitmap = PreRotateBitmapFromFile(bitmap, photo);
+                return bitmap;
+            } else {
+                byte[] result = IOUtils.toByteArray(input);
+                result = CommonUtil.CompressImageByteArrayByMaxSize(result, maxImageWidthHeight);
+                Log.i(MY_TAG, "Compressed image to " + (int) Math.round(result.length / 1024) + " kb");
+                Bitmap b = BitmapFactory.decodeByteArray(result, 0, result.length);
+                return b;
+            }
         } catch (MalformedURLException e) {
             e.printStackTrace();
         } catch (IOException e) {
-            //e.printStackTrace();
+            e.printStackTrace();
             Log.e(MY_TAG, "cant load image for: " + fileName);
         } finally {
-            if (inputStream != null) try {
-                inputStream.close();
+            if (input != null) try {
+                input.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
         return null;
+    }
+
+    private static Bitmap PreRotateBitmapFromFile(Bitmap bitmap, File photoFile){
+        Bitmap result = null;
+        try {
+            ExifInterface ei = new ExifInterface(photoFile.getAbsolutePath());
+            int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+            Matrix mtx = new Matrix();
+            int w = bitmap.getWidth();
+            int h = bitmap.getHeight();
+            switch (orientation) {
+                case ExifInterface.ORIENTATION_ROTATE_90:
+                    //rotate CCW
+                    mtx.preRotate(90);
+                    result = Bitmap.createBitmap(bitmap, 0, 0, w, h, mtx, true);
+                    break;
+
+                case ExifInterface.ORIENTATION_ROTATE_270:
+                    //rotate CW
+                    mtx.preRotate(-90);
+                    result = Bitmap.createBitmap(bitmap, 0, 0, w, h, mtx, true);
+                    break;
+
+                //CONSIDER OTHER CASES HERE....
+
+                default:
+                    result = bitmap;
+                    break;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    return result;
     }
 
     public static boolean CheckIfStringsDiffer(String string1, String string2) {

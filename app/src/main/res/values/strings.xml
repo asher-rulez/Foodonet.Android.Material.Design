@@ -467,5 +467,18 @@
     <string name="post_on_tweeter_action">post on tweeter</string>
     <string name="no_registered_user_for_sms_or_call">No users registered</string>
     <string name="select_reg_user_title">Select user:</string>
+    <string name="action_registering_for_publication">Registering to publication</string>
+    <string name="action_unregistering_from_publication">Unregistering from publication</string>
+    <string name="pub_det_uimessage_failed_register_to_pub">Failed to register to publication</string>
+    <string name="pub_det_uimessage_failed_unregister_from_pub">Failed to unregister from publication</string>
+
+    <string name="progress_creating_account">Creating account</string>
+
+    <string name="report_big_distance">You\'re more than 2km away from place, are you sure you want to leave report?</string>
+
+    <string name="report_dialog_title_format">You arrived to {0}</string>
+    <string name="report_dialog_please_rate_it">Please rate it:</string>
+    <string name="progress_leaving_report">Leaving report</string>
+
 
 </resources>

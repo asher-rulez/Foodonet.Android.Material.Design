@@ -380,8 +380,8 @@ public class FooDoNetSQLExecuterAsync extends AsyncTask<InternalRequest, Void, V
                 String removeWhereString =
                         " " + RegisteredUserForPublication.REGISTERED_FOR_PUBLICATION_KEY_PUBLICATION_ID + " = "
                                 + String.valueOf(myRegistrationToCancel.getPublication_id()) + " AND "
-                                + RegisteredUserForPublication.REGISTERED_FOR_PUBLICATION_KEY_DEVICE_UUID + " = '"
-                                + myRegistrationToCancel.getDevice_registered_uuid() + "'";
+                                + RegisteredUserForPublication.REGISTERED_FOR_PUBLICATION_KEY_USER_ID + " = '"
+                                + myRegistrationToCancel.getUserID() + "'";
                 int rowsDeleted = contentResolver.delete(FooDoNetSQLProvider.URI_REMOVE_MYSELF_FROM_REGS_FOR_PUBLICATION,
                         removeWhereString, null);
                 Log.i(MY_TAG, "removed " + rowsDeleted + " rows - unregister");

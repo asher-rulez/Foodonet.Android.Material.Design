@@ -1300,6 +1300,7 @@ public class EntarenceMapAndListActivity
 
     @Override
     public void OnServerRespondedCallback(InternalRequest response) {
+        if(response == null) return;
         switch (response.Status) {
             case InternalRequest.STATUS_OK:
                 if (response.newUserID > 0) {

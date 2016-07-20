@@ -1,14 +1,21 @@
 package upp.foodonet.material;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.ColorStateList;
+import android.database.Cursor;
 import android.graphics.drawable.Drawable;
+import android.location.Location;
+import android.media.Rating;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.design.widget.FloatingActionButton;
@@ -29,32 +36,46 @@ import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
+import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.maps.model.LatLng;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import Adapters.IRegisteredUserSelectedCallback;
 import Adapters.RegisteredUsersForCallOrSmsRecyclerViewAdapter;
+import CommonUtilPackage.AmazonImageUploader;
 import CommonUtilPackage.CommonUtil;
+import CommonUtilPackage.IAmazonFinishedCallback;
+import CommonUtilPackage.IPleaseRegisterDialogCallback;
+import CommonUtilPackage.InternalRequest;
 import DataModel.FCPublication;
 import DataModel.PublicationReport;
 import DataModel.RegisteredUserForPublication;
 import FooDoNetServerClasses.ConnectionDetector;
+import FooDoNetServerClasses.HttpServerConnectorAsync;
+import FooDoNetServerClasses.IFooDoNetServerCallback;
 import FooDoNetServerClasses.ImageDownloader;
 import FooDoNetServiceUtil.FooDoNetCustomActivityConnectedToService;
+import FooDoNetServiceUtil.ServicesBroadcastReceiver;
 import UIUtil.RoundedImageView;
 
 public class ExistingPublicationActivity
         extends FooDoNetCustomActivityConnectedToService
         implements Toolbar.OnMenuItemClickListener,
                     View.OnClickListener,
-                    IRegisteredUserSelectedCallback {
+                    IRegisteredUserSelectedCallback,
+                    IPleaseRegisterDialogCallback,
+                    IFooDoNetServerCallback, IAmazonFinishedCallback {
 
     private static final String MY_TAG = "food_existPub";
 
@@ -120,6 +141,8 @@ public class ExistingPublicationActivity
     protected boolean isInternetAvailable = false;
     protected boolean isGoogleServiceAvailable = false;
 
+    AlertDialog dialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -139,7 +162,7 @@ public class ExistingPublicationActivity
         amIRegisteredToThisPublication = false;
         if (existing_publication_mode == MODE_OTHERS_PUBLICATION && currentPublication.getRegisteredForThisPublication() != null) {
             for (RegisteredUserForPublication reg : currentPublication.getRegisteredForThisPublication()) {
-                if (reg.getUserID() == CommonUtil.GetMyUserID(this)) {
+                if (reg.getDevice_registered_uuid().compareToIgnoreCase(CommonUtil.GetIMEI(this)) == 0) {
                     amIRegisteredToThisPublication = true;
                     break;
                 }
@@ -183,13 +206,22 @@ public class ExistingPublicationActivity
 
     @Override
     protected void onResume() {
+        super.onResume();
         isInternetAvailable = CheckInternetConnection();
         if (!isInternetAvailable)
             OnInternetNotConnected();
         isGoogleServiceAvailable = CheckPlayServices();
         if (!isGoogleServiceAvailable)
             OnGooglePlayServicesCheckError();
-        super.onResume();
+        if (progressDialog != null && progressDialog.isShowing()) {
+            SharedPreferences sp = getSharedPreferences(getString(R.string.shared_preferences_pending_broadcast), MODE_PRIVATE);
+            if (!sp.contains(getString(R.string.shared_preferences_pending_broadcast_value)))
+                Log.e(MY_TAG, "progress bar showing, but no pending broadcast");
+            Intent intent = new Intent();
+            intent.putExtra(ServicesBroadcastReceiver.BROADCAST_REC_EXTRA_ACTION_KEY,
+                    sp.getInt(getString(R.string.shared_preferences_pending_broadcast_value), -1));
+            onBroadcastReceived(intent);
+        }
     }
 
     private void InitToolBar() {
@@ -225,7 +257,7 @@ public class ExistingPublicationActivity
         } else if (item.getTitle().toString().compareToIgnoreCase(getString(R.string.menu_item_restart_event)) == 0) {
 
         } else if (item.getTitle().toString().compareToIgnoreCase(getString(R.string.menu_item_report)) == 0) {
-
+            CheckIfMyLocationAvailableAndAskReportConfirmation();
         }
         return true;
     }
@@ -307,14 +339,32 @@ public class ExistingPublicationActivity
             tv_reports_title.setText(getString(R.string.publication_details_reports));
         }
         ll_reports = (LinearLayout) findViewById(R.id.ll_pub_det_reports);
-        for (PublicationReport report : currentPublication.getPublicationReports()) {
-            View reportView = getLayoutInflater().inflate(R.layout.publication_details_report_item, null);
-            TextView tv_report_title = (TextView) reportView.findViewById(R.id.tv_report_details);
-            tv_report_title.setText(getString(R.string.report_format)
-                    .replace("{0}", GetReportStringByCode(report.getReport()))
-                    .replace("{1}", CommonUtil.GetTimeLeftString(this, report.getDate_reported(), new Date())));
-            ll_reports.addView(reportView);
+        for (PublicationReport report : currentPublication.getPublicationReports())
+            AddReportToPanel(report);
+    }
+
+    private void ResetReports(){
+        Cursor cursor = getContentResolver().query(
+                Uri.parse(FooDoNetSQLProvider.URI_GET_ALL_REPORTS_BY_PUB_ID + "/" + currentPublication.getUniqueId()),
+                PublicationReport.GetColumnNamesArray(), null, null, null);
+        ArrayList<PublicationReport> reports = PublicationReport.GetArrayListOfPublicationReportsFromCursor(cursor);
+        if (reports != null && reports.size() > 0) {
+            currentPublication.getPublicationReports().clear();
+            currentPublication.setPublicationReports(reports);
+            ll_reports.removeAllViews();
+            for(PublicationReport report : currentPublication.getPublicationReports())
+                AddReportToPanel(report);
         }
+
+    }
+
+    private void AddReportToPanel(PublicationReport report){
+        View reportView = getLayoutInflater().inflate(R.layout.publication_details_report_item, null);
+        TextView tv_report_title = (TextView) reportView.findViewById(R.id.tv_report_details);
+        tv_report_title.setText(getString(R.string.report_format)
+                .replace("{0}", GetReportStringByCode(report.getReport()))
+                .replace("{1}", CommonUtil.GetTimeLeftString(this, report.getDate_reported(), new Date())));
+        ll_reports.addView(reportView);
     }
 
     private String GetReportStringByCode(int reportCode) {
@@ -409,12 +459,10 @@ public class ExistingPublicationActivity
                 ShowSelectUserDialog();
                 break;
             case R.id.fab_pub_det_register_unregister:
-                if(!amIRegisteredToThisPublication) {
-                    PopButtonsAfterRegistration();
-                    amIRegisteredToThisPublication = true;
-                } else {
-                    CollapseButtonsAfterUnregister();
-                    amIRegisteredToThisPublication = false;
+                if (!CommonUtil.GetFromPreferencesIsRegisteredToGoogleFacebook(this))
+                    dialog = CommonUtil.ShowDialogNeedToRegister(this, 0, this);
+                else {
+                    RegisterUnregister();
                 }
                 break;
             case R.id.fab_pub_det_sms:
@@ -437,6 +485,95 @@ public class ExistingPublicationActivity
         }
     }
 
+    @Override
+    public void YesRegisterNow(int code) {
+        progressDialog = CommonUtil.ShowProgressDialog(this, getString(R.string.progress_creating_account));
+        Intent signInIntent = new Intent(this, SignInActivity.class);
+        startActivityForResult(signInIntent, code);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (resultCode) {
+            case 1:
+                InternalRequest ir = (InternalRequest) data.getSerializableExtra(InternalRequest.INTERNAL_REQUEST_EXTRA_KEY);
+                ir.DoAfterRegistrationActionID = requestCode;
+                if (ir != null) {
+                    HttpServerConnectorAsync connectorAsync
+                            = new HttpServerConnectorAsync(getString(R.string.server_base_url), (IFooDoNetServerCallback) this);
+                    connectorAsync.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, ir);
+                    return;
+                }
+                Log.e(MY_TAG, "InternalRequest extra null");
+                break;
+            default:
+                Log.i(MY_TAG, "User decided not to login with google/facebook");
+                OnServerRespondedCallback(null);
+                break;
+        }
+    }
+
+    @Override
+    public void OnServerRespondedCallback(InternalRequest response) {
+        if(progressDialog != null)
+            progressDialog.dismiss();
+        progressDialog = null;
+        if(response == null)
+            return;
+        switch (response.Status) {
+            case InternalRequest.STATUS_OK:
+                if (response.newUserID > 0) {
+                    CommonUtil.SaveMyUserID(this, response.newUserID);
+                    File avatarFile = new File(Environment.getExternalStorageDirectory()
+                            + getResources().getString(R.string.image_folder_path), getString(R.string.user_avatar_file_name));
+                    if(avatarFile.exists()){
+                        AmazonImageUploader uploader = new AmazonImageUploader(this, this);
+                        uploader.UploadUserAvatarToAmazon(avatarFile);
+                    }
+                }
+                RegisterUnregister();
+                break;
+            case InternalRequest.STATUS_FAIL:
+                break;
+        }
+    }
+
+    @Override
+    public void NotifyToBListenerAboutEvent(int eventCode) { }
+
+    private void RegisterUnregister(){
+        if (!CheckInternetForAction(amIRegisteredToThisPublication
+                ? getString(R.string.action_unregistering_from_publication)
+                : getString(R.string.action_registering_for_publication)))
+            return;
+        if (!amIRegisteredToThisPublication) {
+            progressDialog
+                    = CommonUtil.ShowProgressDialog(this, getString(R.string.action_registering_for_publication));
+            RegisteredUserForPublication newRegistrationForPub
+                    = new RegisteredUserForPublication();
+            newRegistrationForPub.setDate_registered(new Date());
+            newRegistrationForPub.setDevice_registered_uuid(CommonUtil.GetIMEI(this));
+            newRegistrationForPub.setPublication_id(currentPublication.getUniqueId());
+            newRegistrationForPub.setPublication_version(currentPublication.getVersion());
+            newRegistrationForPub.setCollectorName(CommonUtil.GetMyUserNameFromPreferences(this));
+            newRegistrationForPub.setCollectorphone(CommonUtil.GetMyPhoneNumberFromPreferences(this));
+            newRegistrationForPub.setUserID(CommonUtil.GetMyUserID(this));
+            RegisterUnregisterReportService.startActionRegisterToPub(this, newRegistrationForPub);
+        } else {
+            progressDialog = CommonUtil.ShowProgressDialog(this, getString(R.string.action_unregistering_from_publication));
+            RegisteredUserForPublication unreg = new RegisteredUserForPublication();
+            unreg.setDate_registered(new Date());
+            unreg.setDevice_registered_uuid(CommonUtil.GetIMEI(this));
+            unreg.setPublication_id(currentPublication.getUniqueId());
+            unreg.setPublication_version(currentPublication.getVersion());
+            unreg.setUserID(CommonUtil.GetMyUserID(this));
+            unreg.setCollectorName("");
+            unreg.setCollectorphone("");
+            RegisterUnregisterReportService.startActionUnRegisterFromPub(this, unreg);
+        }
+    }
+
     private void PopButtonsAfterRegistration(){
         Animation expandIn = AnimationUtils.loadAnimation(this, R.anim.anim_fab_pop_appear);
         fab_sms_owner.setVisibility(View.VISIBLE);
@@ -445,6 +582,7 @@ public class ExistingPublicationActivity
         fab_call_owner.startAnimation(expandIn);
         fab_navigate.setVisibility(View.VISIBLE);
         fab_navigate.startAnimation(expandIn);
+        toolbar.inflateMenu(R.menu.existing_publication_others_menu);
     }
 
     private void CollapseButtonsAfterUnregister(){
@@ -455,6 +593,7 @@ public class ExistingPublicationActivity
         fab_call_owner.setVisibility(View.GONE);
         fab_navigate.startAnimation(collapseOut);
         fab_navigate.setVisibility(View.GONE);
+        toolbar.getMenu().clear();
     }
 
     protected boolean CheckInternetForAction(String action) {
@@ -644,6 +783,171 @@ public class ExistingPublicationActivity
         if (intentSMS.resolveActivity(getPackageManager()) != null) {
             startActivity(intentSMS);
         }
+    }
 
+    @Override
+    public void onBroadcastReceived(Intent intent) {
+        super.onBroadcastReceived(intent);
+        int actionCode = intent.getIntExtra(ServicesBroadcastReceiver.BROADCAST_REC_EXTRA_ACTION_KEY, -1);
+        switch (actionCode) {
+            case ServicesBroadcastReceiver.ACTION_CODE_REGISTER_TO_PUBLICATION_SUCCESS:
+                Log.i(MY_TAG, "successfully registered to publication " + currentPublication.getUniqueId());
+                break;
+            case ServicesBroadcastReceiver.ACTION_CODE_REGISTER_TO_PUBLICATION_FAIL:
+                Log.i(MY_TAG, "failed to register to publication");
+                if (progressDialog != null)
+                    progressDialog.dismiss();
+                progressDialog = null;
+                Toast.makeText(getBaseContext(),
+                        getResources().getString(R.string.pub_det_uimessage_failed_register_to_pub), Toast.LENGTH_LONG).show();
+                break;
+            case ServicesBroadcastReceiver.ACTION_CODE_UNREGISTER_FROM_PUBLICATION_SUCCESS:
+                break;
+            case ServicesBroadcastReceiver.ACTION_CODE_UNREGISTER_FROM_PUBLICATION_FAIL:
+                if (progressDialog != null)
+                    progressDialog.dismiss();
+                progressDialog = null;
+                Toast.makeText(getBaseContext(),
+                        getResources().getString(R.string.pub_det_uimessage_failed_unregister_from_pub), Toast.LENGTH_LONG).show();
+                break;
+            case ServicesBroadcastReceiver.ACTION_CODE_ADD_MYSELF_TO_REGS_FOR_PUBLICATION:
+                Log.i(MY_TAG, "successfully added myself to regs! refreshing number");
+                amIRegisteredToThisPublication = true;
+                PopButtonsAfterRegistration();
+                fab_reg_unreg.setImageDrawable(getResources().getDrawable(R.drawable.fab_unregister));
+                RefreshNumberOfJoinedUsers();
+                if (progressDialog != null)
+                    progressDialog.dismiss();
+                progressDialog = null;
+                break;
+            case ServicesBroadcastReceiver.ACTION_CODE_REMOVE_MYSELF_FROM_REGS_FOR_PUBLICATION:
+                Log.i(MY_TAG, "successfully removed myself from regs! refreshing number");
+                amIRegisteredToThisPublication = false;
+                CollapseButtonsAfterUnregister();
+                fab_reg_unreg.setImageDrawable(getResources().getDrawable(R.drawable.fab_register));
+                RefreshNumberOfJoinedUsers();
+                if (progressDialog != null)
+                    progressDialog.dismiss();
+                progressDialog = null;
+                break;
+            case ServicesBroadcastReceiver.ACTION_CODE_REPORT_TO_PUBLICATION_SUCCESS:
+                Log.i(MY_TAG, "successfully left report for publication!");
+                amIRegisteredToThisPublication = false;
+                CollapseButtonsAfterUnregister();
+                if (progressDialog != null)
+                    progressDialog.dismiss();
+                progressDialog = null;
+                RefreshNumberOfJoinedUsers();
+                ResetReports();
+                if(progressDialog != null)
+                    progressDialog.dismiss();
+                progressDialog = null;
+                break;
+/*
+            case ServicesBroadcastReceiver.ACTION_CODE_SAVE_EDITED_PUB_SUCCESS:
+                if(editedPublication != null){
+                    editedPublication.setPhotoUrl(null);
+                    editedPublication.setVersion(editedPublication.getVersion() + 1);
+                    publication = editedPublication;
+                    SetPublicationPropertiesToControls();
+                }
+            case ServicesBroadcastReceiver.ACTION_CODE_SAVE_EDITED_PUB_FAIL:
+                if(progressDialog != null)
+                    progressDialog.dismiss();
+                Toast.makeText(this,
+                        getString(actionCode == ServicesBroadcastReceiver.ACTION_CODE_SAVE_EDITED_PUB_FAIL
+                                ? R.string.action_failed
+                                : R.string.action_succeeded).replace("{0}", getString(R.string.action_edit_publication)),
+                        Toast.LENGTH_SHORT).show();
+                break;
+*/
+        }
+        SharedPreferences sp = getSharedPreferences(getString(R.string.shared_preferences_pending_broadcast), MODE_PRIVATE);
+        SharedPreferences.Editor editor = sp.edit();
+        editor.remove(getString(R.string.shared_preferences_pending_broadcast_value));
+        editor.commit();
+    }
+
+    private void RefreshNumberOfJoinedUsers(){
+        Cursor cursorReged = getContentResolver().query(Uri.parse(FooDoNetSQLProvider.URI_GET_REGISTERED_BY_PUBLICATION_ID + "/" + currentPublication.getUniqueId()),
+                RegisteredUserForPublication.GetColumnNamesArray(), null, null, null);
+        ArrayList<RegisteredUserForPublication> regs = RegisteredUserForPublication.GetArrayListOfRegisteredForPublicationsFromCursor(cursorReged);
+        tv_users_joined.setText(
+                getString(R.string.users_joined_format_for_list)
+                        .replace("{0}", String.valueOf(regs != null ? regs.size() : 0)));
+        cursorReged.close();
+    }
+
+    private boolean CheckIfMyLocationAvailableAndAskReportConfirmation() {
+        LatLng myLocation = CommonUtil.GetMyLocationFromPreferences(this);
+        if (myLocation.latitude == -1000 || myLocation.longitude == -1000)
+            return true;
+        double distance = CommonUtil.GetDistanceInKM(
+                new LatLng(currentPublication.getLatitude(), currentPublication.getLongitude()), myLocation);
+        if (distance < 2)
+            return true;
+        else {
+            DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    switch (which) {
+                        case DialogInterface.BUTTON_POSITIVE:
+                            ShowReportDialog();
+                            break;
+                        case DialogInterface.BUTTON_NEGATIVE:
+                            return;
+                    }
+                }
+            };
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage(getString(R.string.report_big_distance))
+                    .setPositiveButton(getString(R.string.yes), dialogClickListener)
+                    .setNegativeButton(getString(R.string.no), dialogClickListener).show();
+        }
+        return false;
+    }
+
+    private void ShowReportDialog(){
+        final Dialog reportDialog = new Dialog(this);
+        reportDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        reportDialog.setContentView(R.layout.report_dialog);
+        final RadioGroup rg_report = (RadioGroup)reportDialog.findViewById(R.id.rg_report_dialog_options);
+        final RatingBar rating_report = (RatingBar)reportDialog.findViewById(R.id.rating_bar_report_dialog);
+        final TextView tv_report_dialog_title = (TextView)reportDialog.findViewById(R.id.tv_report_dialog_title);
+        tv_report_dialog_title.setText(getString(R.string.report_dialog_title_format).replace("{0}", currentPublication.getTitle()));
+        final Button btn_rating_dialog_no = (Button)reportDialog.findViewById(R.id.btn_report_result_no);
+        btn_rating_dialog_no.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                reportDialog.dismiss();
+            }
+        });
+        final Button btn_rating_dialog_yes = (Button)reportDialog.findViewById(R.id.btn_report_result_yes);
+        btn_rating_dialog_yes.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                RadioButton selectedRB = (RadioButton)rg_report.findViewById(rg_report.getCheckedRadioButtonId());
+                int reportType = Integer.parseInt(selectedRB.getTag().toString());
+                int rating = (int)rating_report.getRating();
+                SendReport(reportType, rating);
+                reportDialog.dismiss();
+            }
+        });
+        reportDialog.show();
+    }
+
+    private void SendReport(int reportType, int rating){
+        PublicationReport report = new PublicationReport();
+        report.setReport(reportType);
+        report.setRating(rating);
+        report.setPublication_id(currentPublication.getPublisherID());
+        report.setPublication_version(currentPublication.getVersion());
+        report.setDevice_uuid(CommonUtil.GetIMEI(this));
+        report.setDate_reported(new Date());
+        report.setReport_userID(CommonUtil.GetMyUserID(this));
+        report.setReportContactInfo(CommonUtil.GetMyUserNameFromPreferences(this));
+        report.setReportContactInfo(CommonUtil.GetMyPhoneNumberFromPreferences(this));
+        RegisterUnregisterReportService.startActionReportForPublication(this, report);
+        progressDialog = CommonUtil.ShowProgressDialog(this, getString(R.string.progress_leave_group));
     }
 }

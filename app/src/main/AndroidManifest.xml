@@ -175,7 +175,11 @@
             android:theme="@style/AppDefault" />
         <activity
             android:name=".ExistingPublicationActivity"
-            android:screenOrientation="portrait"></activity>
+            android:screenOrientation="portrait" />
+
+        <service
+            android:name=".RegisterUnregisterReportService"
+            android:exported="false"></service>
     </application>
 
 </manifest>
