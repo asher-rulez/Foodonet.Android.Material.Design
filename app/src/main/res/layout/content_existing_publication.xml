@@ -37,7 +37,8 @@
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
                 android:layout_alignParentLeft="true"
-                android:layout_marginLeft="30dp"/>
+                android:layout_marginLeft="30dp"
+                android:maxLines="1"/>
         </RelativeLayout>
         <RelativeLayout
             android:layout_width="0dip"

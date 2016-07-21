@@ -129,6 +129,7 @@ public class FCPublication implements Serializable, ICanWriteSelfToJSONWriter {
         if(getIsOnAir() != otherPublication.getIsOnAir()) return false;
         if(CommonUtil.CheckIfStringsDiffer(getPhotoUrl(), otherPublication.getPhotoUrl())) return false;
         if(!TextUtils.isEmpty(otherPublication.getPhotoUrl())) return false;
+        if(getAudience() != otherPublication.getAudience()) return false;
         return true;
     }
 
@@ -554,6 +555,7 @@ public class FCPublication implements Serializable, ICanWriteSelfToJSONWriter {
                     publication.setNumberOfRegistered(cursor.getInt(cursor.getColumnIndex(PUBLICATION_NUMBER_OF_REGISTERED)));
                     publication.set_group_name(cursor.getString(cursor.getColumnIndex(PUBLICATION_GROUP_NAME)));
                 } else {
+                    publication.setAudience(cursor.getInt(cursor.getColumnIndex(PUBLICATION_AUDIENCE_KEY)));
                     publication.setPhotoUrl(cursor.getString(cursor.getColumnIndex(PUBLICATION_PHOTO_URL)));
                     publication.setPublisherUID(cursor.getString(cursor.getColumnIndex(PUBLICATION_PUBLISHER_UUID_KEY)));
                     publication.setSubtitle(cursor.getString(cursor.getColumnIndex(PUBLICATION_SUBTITLE_KEY)));

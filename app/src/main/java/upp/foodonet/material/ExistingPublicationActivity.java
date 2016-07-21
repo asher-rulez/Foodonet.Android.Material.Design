@@ -83,10 +83,14 @@ public class ExistingPublicationActivity
     private static final int MODE_MY_PUBLICATION = 1;
     private static final int MODE_OTHERS_PUBLICATION = 2;
 
+    private static final int REQUEST_CODE_REGISTER = 1;
+    private static final int REQUEST_CODE_EDIT_PUBLICATION = 2;
+
     private boolean amIRegisteredToThisPublication;
 
     public static final String PUBLICATION_EXTRA_KEY = "publication";
     FCPublication currentPublication;
+    FCPublication editedPublication;
 
     Toolbar toolbar;
 
@@ -143,6 +147,8 @@ public class ExistingPublicationActivity
 
     AlertDialog dialog;
 
+    boolean waitingForActionFinish;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -169,6 +175,21 @@ public class ExistingPublicationActivity
             }
         }
 
+        toolbar = (Toolbar) findViewById(R.id.tb_existing_publication);
+        iv_group_icon = (ImageView) findViewById(R.id.iv_pub_det_group_icon);
+        tv_group_name = (TextView) findViewById(R.id.tv_pub_det_group_name);
+        tv_time_left = (TextView) findViewById(R.id.tv_time_left_pub_det);
+        tv_users_joined = (TextView) findViewById(R.id.tv_users_joined_pub_det);
+        iv_publication_image = (ImageView) findViewById(R.id.iv_pub_det_image);
+        riv_user_avatar = (RoundedImageView) findViewById(R.id.riv_pub_det_user_avatar);
+        tv_address = (TextView) findViewById(R.id.tv_pub_det_address);
+        iv_rating_star = (ImageView) findViewById(R.id.iv_pub_det_rating_star);
+        tv_user_rating = (TextView) findViewById(R.id.tv_pub_det_user_rating);
+        tv_user_name = (TextView) findViewById(R.id.tv_pub_det_user_name);
+        tv_price = (TextView) findViewById(R.id.tv_pub_det_price);
+        tv_reports_title = (TextView) findViewById(R.id.tv_pub_det_reports_title);
+        ll_reports = (LinearLayout) findViewById(R.id.ll_pub_det_reports);
+
         InitToolBar();
         InitTopInfoBar();
         SetPublicationImage();
@@ -182,13 +203,7 @@ public class ExistingPublicationActivity
             tv_subtitle.setText(currentPublication.getSubtitle());
 
         InitUserData();
-
-        tv_price = (TextView) findViewById(R.id.tv_pub_det_price);
-        if (currentPublication.getPrice() == null || currentPublication.getPrice() == 0)
-            tv_price.setText(getString(R.string.publication_details_price_free));
-        else tv_price.setText(getString(R.string.publication_details_price_format)
-                .replace("{0}", String.valueOf(currentPublication.getPrice())));
-
+        SetPrice();
         SetReports();
         InitFABPanel();
 
@@ -204,9 +219,17 @@ public class ExistingPublicationActivity
 */
     }
 
+    private void SetPrice(){
+        if (currentPublication.getPrice() == null || currentPublication.getPrice() == 0)
+            tv_price.setText(getString(R.string.publication_details_price_free));
+        else tv_price.setText(getString(R.string.publication_details_price_format)
+                .replace("{0}", String.valueOf(currentPublication.getPrice())));
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
+        waitingForActionFinish = false;
         isInternetAvailable = CheckInternetConnection();
         if (!isInternetAvailable)
             OnInternetNotConnected();
@@ -225,7 +248,6 @@ public class ExistingPublicationActivity
     }
 
     private void InitToolBar() {
-        toolbar = (Toolbar) findViewById(R.id.tb_existing_publication);
         //setSupportActionBar(toolbar);
         //getSupportActionBar().setDisplayShowTitleEnabled(false);
         toolbar.setTitle(null);
@@ -249,7 +271,7 @@ public class ExistingPublicationActivity
     @Override
     public boolean onMenuItemClick(MenuItem item) {
         if (item.getTitle().toString().compareToIgnoreCase(getString(R.string.menu_item_edit)) == 0) {
-
+            EditCurrentPublication();
         } else if (item.getTitle().toString().compareToIgnoreCase(getString(R.string.menu_item_delete)) == 0) {
 
         } else if (item.getTitle().toString().compareToIgnoreCase(getString(R.string.menu_item_stop_event)) == 0) {
@@ -257,17 +279,42 @@ public class ExistingPublicationActivity
         } else if (item.getTitle().toString().compareToIgnoreCase(getString(R.string.menu_item_restart_event)) == 0) {
 
         } else if (item.getTitle().toString().compareToIgnoreCase(getString(R.string.menu_item_report)) == 0) {
+            if(CheckIfPublicationHasMyReport()){
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle(getString(R.string.additional_report_not_allowed_title));
+                builder.setMessage(getString(R.string.additional_report_not_allowed_content));
+                String positiveText = getString(R.string.address_dialog_btn_ok);
+                builder.setPositiveButton(positiveText, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.dismiss();
+                    }
+                });
+                AlertDialog dialog = builder.create();
+                dialog.show();
+                return false;
+            }
+            if(waitingForActionFinish) return false;
+            waitingForActionFinish = true;
             CheckIfMyLocationAvailableAndAskReportConfirmation();
         }
         return true;
     }
 
-    private void InitTopInfoBar() {
-        iv_group_icon = (ImageView) findViewById(R.id.iv_pub_det_group_icon);
-        tv_group_name = (TextView) findViewById(R.id.tv_pub_det_group_name);
-        tv_time_left = (TextView) findViewById(R.id.tv_time_left_pub_det);
-        tv_users_joined = (TextView) findViewById(R.id.tv_users_joined_pub_det);
+    private boolean CheckIfPublicationHasMyReport(){
+        for(PublicationReport report : currentPublication.getPublicationReports())
+            if(report.getReport_userID() == CommonUtil.GetMyUserID(this))
+                return true;
+        return false;
+    }
 
+    private void EditCurrentPublication(){
+        Intent editPubIntent = new Intent(this, AddEditPublicationActivity.class);
+        editPubIntent.putExtra(AddEditPublicationActivity.PUBLICATION_KEY, currentPublication);
+        startActivityForResult(editPubIntent, REQUEST_CODE_EDIT_PUBLICATION);
+    }
+
+    private void InitTopInfoBar() {
         if (currentPublication.getAudience() == 0) {
             iv_group_icon.setImageDrawable(getResources().getDrawable(R.drawable.public_group_pub_det_icon));
             tv_group_name.setText(getString(R.string.public_share_group_name));
@@ -287,7 +334,6 @@ public class ExistingPublicationActivity
     }
 
     private void SetPublicationImage() {
-        iv_publication_image = (ImageView) findViewById(R.id.iv_pub_det_image);
         final int id = currentPublication.getUniqueId();
         final int version = currentPublication.getVersion();
         imageDownloader = new ImageDownloader(this, null);
@@ -299,23 +345,14 @@ public class ExistingPublicationActivity
     }
 
     private void InitUserData() {
-        riv_user_avatar = (RoundedImageView) findViewById(R.id.riv_pub_det_user_avatar);
         imageDownloader.DownloadUserAvatar(
                 getString(R.string.amazon_user_avatar_image_name).replace("{0}",
                         String.valueOf(currentPublication.getPublisherID())), riv_user_avatar);
-
-        tv_address = (TextView) findViewById(R.id.tv_pub_det_address);
         tv_address.setText(currentPublication.getAddress());
-
-        iv_rating_star = (ImageView) findViewById(R.id.iv_pub_det_rating_star);
         iv_rating_star.setImageDrawable(getRatingStarByUserRating(currentPublication.getRating()));
-
-        tv_user_rating = (TextView) findViewById(R.id.tv_pub_det_user_rating);
         tv_user_rating.setText(getString(R.string.user_rating_format)
                 .replace("{0}", String.valueOf((int) (currentPublication.getRating() / 1)))
                 .replace("{1}", String.valueOf((int) (currentPublication.getRating() % 1))));
-
-        tv_user_name = (TextView) findViewById(R.id.tv_pub_det_user_name);
         tv_user_name.setText(currentPublication.getPublisherUserName());
     }
 
@@ -330,7 +367,6 @@ public class ExistingPublicationActivity
     }
 
     private void SetReports() {
-        tv_reports_title = (TextView) findViewById(R.id.tv_pub_det_reports_title);
         if (currentPublication.getPublicationReports() == null
                 || currentPublication.getPublicationReports().size() == 0) {
             tv_reports_title.setText(getString(R.string.publication_details_no_reports));
@@ -338,7 +374,6 @@ public class ExistingPublicationActivity
         } else {
             tv_reports_title.setText(getString(R.string.publication_details_reports));
         }
-        ll_reports = (LinearLayout) findViewById(R.id.ll_pub_det_reports);
         for (PublicationReport report : currentPublication.getPublicationReports())
             AddReportToPanel(report);
     }
@@ -460,7 +495,7 @@ public class ExistingPublicationActivity
                 break;
             case R.id.fab_pub_det_register_unregister:
                 if (!CommonUtil.GetFromPreferencesIsRegisteredToGoogleFacebook(this))
-                    dialog = CommonUtil.ShowDialogNeedToRegister(this, 0, this);
+                    dialog = CommonUtil.ShowDialogNeedToRegister(this, REQUEST_CODE_REGISTER, this);
                 else {
                     RegisterUnregister();
                 }
@@ -495,21 +530,41 @@ public class ExistingPublicationActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        switch (resultCode) {
-            case 1:
-                InternalRequest ir = (InternalRequest) data.getSerializableExtra(InternalRequest.INTERNAL_REQUEST_EXTRA_KEY);
-                ir.DoAfterRegistrationActionID = requestCode;
-                if (ir != null) {
-                    HttpServerConnectorAsync connectorAsync
-                            = new HttpServerConnectorAsync(getString(R.string.server_base_url), (IFooDoNetServerCallback) this);
-                    connectorAsync.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, ir);
-                    return;
+        switch (requestCode){
+            case REQUEST_CODE_REGISTER:
+                switch (resultCode) {
+                    case 1:
+                        InternalRequest ir = (InternalRequest) data.getSerializableExtra(InternalRequest.INTERNAL_REQUEST_EXTRA_KEY);
+                        ir.DoAfterRegistrationActionID = requestCode;
+                        if (ir != null) {
+                            HttpServerConnectorAsync connectorAsync
+                                    = new HttpServerConnectorAsync(getString(R.string.server_base_url), (IFooDoNetServerCallback) this);
+                            connectorAsync.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, ir);
+                            return;
+                        }
+                        Log.e(MY_TAG, "InternalRequest extra null");
+                        break;
+                    default:
+                        Log.i(MY_TAG, "User decided not to login with google/facebook");
+                        OnServerRespondedCallback(null);
+                        break;
                 }
-                Log.e(MY_TAG, "InternalRequest extra null");
                 break;
-            default:
-                Log.i(MY_TAG, "User decided not to login with google/facebook");
-                OnServerRespondedCallback(null);
+            case REQUEST_CODE_EDIT_PUBLICATION:
+                switch (resultCode){
+                    case RESULT_OK:
+                        editedPublication = (FCPublication)data.getSerializableExtra(AddEditPublicationActivity.PUBLICATION_KEY);
+                        if(editedPublication == null){
+                            Log.e(MY_TAG, "unexpected result - no publication got back from edit");
+                            return;
+                        }
+                        progressDialog = CommonUtil.ShowProgressDialog(this, getString(R.string.progress_saving_publication));
+                        AddEditPublicationService.StartSaveEditedPublication(this, editedPublication);
+                        break;
+                    case RESULT_CANCELED:
+                        break;
+                }
+
                 break;
         }
     }
@@ -843,12 +898,11 @@ public class ExistingPublicationActivity
                     progressDialog.dismiss();
                 progressDialog = null;
                 break;
-/*
             case ServicesBroadcastReceiver.ACTION_CODE_SAVE_EDITED_PUB_SUCCESS:
                 if(editedPublication != null){
                     editedPublication.setPhotoUrl(null);
                     editedPublication.setVersion(editedPublication.getVersion() + 1);
-                    publication = editedPublication;
+                    currentPublication = editedPublication;
                     SetPublicationPropertiesToControls();
                 }
             case ServicesBroadcastReceiver.ACTION_CODE_SAVE_EDITED_PUB_FAIL:
@@ -856,16 +910,25 @@ public class ExistingPublicationActivity
                     progressDialog.dismiss();
                 Toast.makeText(this,
                         getString(actionCode == ServicesBroadcastReceiver.ACTION_CODE_SAVE_EDITED_PUB_FAIL
-                                ? R.string.action_failed
-                                : R.string.action_succeeded).replace("{0}", getString(R.string.action_edit_publication)),
+                                ? R.string.failed_to_save_edited_publication
+                                : R.string.succeeded_to_save_edited_publication),
                         Toast.LENGTH_SHORT).show();
                 break;
-*/
         }
         SharedPreferences sp = getSharedPreferences(getString(R.string.shared_preferences_pending_broadcast), MODE_PRIVATE);
         SharedPreferences.Editor editor = sp.edit();
         editor.remove(getString(R.string.shared_preferences_pending_broadcast_value));
         editor.commit();
+    }
+
+    private void SetPublicationPropertiesToControls(){
+        tv_title.setText(currentPublication.getTitle());
+        tv_subtitle.setText(currentPublication.getSubtitle());
+        tv_address.setText(currentPublication.getAddress());
+        SetPrice();
+        SetPublicationImage();
+        InitToolBar();
+        InitTopInfoBar();
     }
 
     private void RefreshNumberOfJoinedUsers(){
@@ -895,6 +958,7 @@ public class ExistingPublicationActivity
                             ShowReportDialog();
                             break;
                         case DialogInterface.BUTTON_NEGATIVE:
+                            waitingForActionFinish = false;
                             return;
                     }
                 }
@@ -902,7 +966,12 @@ public class ExistingPublicationActivity
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setMessage(getString(R.string.report_big_distance))
                     .setPositiveButton(getString(R.string.yes), dialogClickListener)
-                    .setNegativeButton(getString(R.string.no), dialogClickListener).show();
+                    .setNegativeButton(getString(R.string.no), dialogClickListener).show().setOnDismissListener(new DialogInterface.OnDismissListener() {
+                @Override
+                public void onDismiss(DialogInterface dialogInterface) {
+                    waitingForActionFinish = false;
+                }
+            });
         }
         return false;
     }
@@ -920,6 +989,7 @@ public class ExistingPublicationActivity
             @Override
             public void onClick(View view) {
                 reportDialog.dismiss();
+                waitingForActionFinish = false;
             }
         });
         final Button btn_rating_dialog_yes = (Button)reportDialog.findViewById(R.id.btn_report_result_yes);
@@ -931,6 +1001,7 @@ public class ExistingPublicationActivity
                 int rating = (int)rating_report.getRating();
                 SendReport(reportType, rating);
                 reportDialog.dismiss();
+                waitingForActionFinish = false;
             }
         });
         reportDialog.show();
@@ -940,7 +1011,7 @@ public class ExistingPublicationActivity
         PublicationReport report = new PublicationReport();
         report.setReport(reportType);
         report.setRating(rating);
-        report.setPublication_id(currentPublication.getPublisherID());
+        report.setPublication_id(currentPublication.getUniqueId());
         report.setPublication_version(currentPublication.getVersion());
         report.setDevice_uuid(CommonUtil.GetIMEI(this));
         report.setDate_reported(new Date());
@@ -948,6 +1019,6 @@ public class ExistingPublicationActivity
         report.setReportContactInfo(CommonUtil.GetMyUserNameFromPreferences(this));
         report.setReportContactInfo(CommonUtil.GetMyPhoneNumberFromPreferences(this));
         RegisterUnregisterReportService.startActionReportForPublication(this, report);
-        progressDialog = CommonUtil.ShowProgressDialog(this, getString(R.string.progress_leave_group));
+        progressDialog = CommonUtil.ShowProgressDialog(this, getString(R.string.progress_leaving_report));
     }
 }

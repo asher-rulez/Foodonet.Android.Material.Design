@@ -414,6 +414,7 @@
     <string name="public_share_group_name">Public</string>
     <string name="loading_groups">Loading groups</string>
     <string name="title_activity_settings_select">SettingsSelectActivity</string>
+    <string name="share_with_format">Share with: {0}</string>
 
     <!-- Settings -->
 
@@ -480,5 +481,10 @@
     <string name="report_dialog_please_rate_it">Please rate it:</string>
     <string name="progress_leaving_report">Leaving report</string>
 
+    <string name="additional_report_not_allowed_title">You\'ve already posted a report on this event</string>
+    <string name="additional_report_not_allowed_content">only one report can be posted for each event</string>
+
+    <string name="failed_to_save_edited_publication">Failed to save publication</string>
+    <string name="succeeded_to_save_edited_publication">Succeeded to save publication</string>
 
 </resources>
