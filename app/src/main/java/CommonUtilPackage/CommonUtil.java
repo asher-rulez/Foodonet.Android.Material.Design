@@ -881,15 +881,20 @@ public class CommonUtil {
                 picsDeleted++;
             }
         }
-        int registeredDeleted
-                = context.getContentResolver().delete(FooDoNetSQLProvider.URI_GET_ALL_REGS,
-                RegisteredUserForPublication.REGISTERED_FOR_PUBLICATION_KEY_PUBLICATION_ID + " = ", pubIDs);
-        int reportsDeleted
-                = context.getContentResolver().delete(FooDoNetSQLProvider.URI_GET_ALL_REPORTS,
-                PublicationReport.PUBLICATION_REPORT_FIELD_KEY_PUBLICATION_ID + " = ", pubIDs);
-        int publicationsDeletedFromDB
-                = context.getContentResolver()
-                .delete(FooDoNetSQLProvider.CONTENT_URI, FCPublication.PUBLICATION_AUDIENCE_KEY + " != 0", null);
+        int registeredDeleted = 0;
+        int reportsDeleted = 0;
+        int publicationsDeletedFromDB = 0;
+        if(pubIDs.length > 0) {
+            registeredDeleted
+                    = context.getContentResolver().delete(FooDoNetSQLProvider.URI_GET_ALL_REGS,
+                    RegisteredUserForPublication.REGISTERED_FOR_PUBLICATION_KEY_PUBLICATION_ID + " = ", pubIDs);
+            reportsDeleted
+                    = context.getContentResolver().delete(FooDoNetSQLProvider.URI_GET_ALL_REPORTS,
+                    PublicationReport.PUBLICATION_REPORT_FIELD_KEY_PUBLICATION_ID + " = ", pubIDs);
+            publicationsDeletedFromDB
+                    = context.getContentResolver()
+                    .delete(FooDoNetSQLProvider.CONTENT_URI, FCPublication.PUBLICATION_AUDIENCE_KEY + " != 0", null);
+        }
         Log.i(MY_TAG, "Cleared db on logout. Pubs deleted: " + String.valueOf(publicationsDeletedFromDB)
                         + ", regs deleted: " + String.valueOf(registeredDeleted)
                         + ", reps deleted: " + String.valueOf(reportsDeleted)

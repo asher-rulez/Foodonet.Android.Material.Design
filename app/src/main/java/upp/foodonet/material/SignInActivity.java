@@ -143,12 +143,24 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
             handleSignInResult(result);
         }
         else if (requestCode == RC_REG_PHONE_NUM) {
-            String phoneNumber = data.getStringExtra(PHONE_KEY);
-            ir.PhoneNumber = phoneNumber;
-            Intent dataUserRegistrationIntent = new Intent();
-            dataUserRegistrationIntent.putExtra(InternalRequest.INTERNAL_REQUEST_EXTRA_KEY, ir);
-            setResult(1, dataUserRegistrationIntent);
-            finish();
+            switch (resultCode) {
+                case RESULT_OK:
+                    if(account != null)
+                        CommonUtil.PutCommonPreferencesIsRegisteredGoogleFacebook(this, account);
+                    else if (profile != null)
+                        CommonUtil.PutCommonPreferencesIsRegisteredGoogleFacebook(this, profile);
+                    String phoneNumber = data.getStringExtra(PHONE_KEY);
+                    ir.PhoneNumber = phoneNumber;
+                    Intent dataUserRegistrationIntent = new Intent();
+                    dataUserRegistrationIntent.putExtra(InternalRequest.INTERNAL_REQUEST_EXTRA_KEY, ir);
+                    setResult(RESULT_OK, dataUserRegistrationIntent);
+                    finish();
+                    break;
+                case RESULT_CANCELED:
+                    setResult(resultCode);
+                    finish();
+                    break;
+            }
         }
     }
 
@@ -185,7 +197,7 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
                 break;
             case R.id.sign_in_tv_continue:
                 // Toast.makeText(this,"continue",Toast.LENGTH_LONG).show();
-                setResult(0);
+                setResult(RESULT_CANCELED);
                 finish();
                 break;
         }
@@ -194,7 +206,7 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
 
     @Override
     public void onBackPressed() {
-        setResult(0);
+        setResult(RESULT_CANCELED);
         finish();
     }
 
@@ -297,7 +309,7 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
         if (result.isSuccess()) {
             // Signed in successfully, show authenticated UI.
             account = result.getSignInAccount();
-            CommonUtil.PutCommonPreferencesIsRegisteredGoogleFacebook(this, account);
+            //CommonUtil.PutCommonPreferencesIsRegisteredGoogleFacebook(this, account);
             CreateGoogleInternalRequest();
             Intent regPhoneIntent = new Intent(getApplicationContext(), RegisterPhoneActivity.class);
             regPhoneIntent.putExtra(AVATAR_KEY, ir.PhotoURL);
@@ -335,7 +347,7 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
     @Override
     public void onSuccess(LoginResult loginResult) {
         profile = Profile.getCurrentProfile();
-        CommonUtil.PutCommonPreferencesIsRegisteredGoogleFacebook(this, profile);
+        //CommonUtil.PutCommonPreferencesIsRegisteredGoogleFacebook(this, profile);
         CreateFacebookInternalRequest();
         Intent regPhoneIntent = new Intent(getApplicationContext(), RegisterPhoneActivity.class);
         regPhoneIntent.putExtra(NETWORKTYPE_KEY, ir.SocialNetworkType);

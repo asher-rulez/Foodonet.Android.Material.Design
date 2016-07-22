@@ -201,6 +201,7 @@ public class EntarenceMapAndListActivity
     final int DO_AFTER_REGISTRATION_CODE_ADD_PUBLICATION = 11;
     final int DO_AFTER_REGISTRATION_CODE_GROUPS = 12;
     final int DO_AFTER_REGISTRATION_CODE_SETTING = 13;
+    final int DO_AFTER_REGISTRATION_CODE_MY_PUBS = 14;
 
     //endregion
 
@@ -297,8 +298,12 @@ public class EntarenceMapAndListActivity
         if (isSideMenuOpened) {
             drawerLayout.closeDrawers();
             return;
+        } else {
+            Intent intent = new Intent(Intent.ACTION_MAIN);
+            intent.addCategory(Intent.CATEGORY_HOME);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
         }
-
         super.onBackPressed();
     }
 
@@ -348,8 +353,10 @@ public class EntarenceMapAndListActivity
             case DO_AFTER_REGISTRATION_CODE_GROUPS:
             case DO_AFTER_REGISTRATION_CODE_ADD_PUBLICATION:
             case DO_AFTER_REGISTRATION_CODE_SETTING:
+            case DO_AFTER_REGISTRATION_CODE_MY_PUBS:
                 switch (resultCode) {
-                    case 1:
+                    case RESULT_OK:
+                        SetupSideMenuHeader();
                         InternalRequest ir = (InternalRequest) data.getSerializableExtra(InternalRequest.INTERNAL_REQUEST_EXTRA_KEY);
                         ir.DoAfterRegistrationActionID = requestCode;
                         if (ir != null) {
@@ -372,7 +379,7 @@ public class EntarenceMapAndListActivity
                         RestartLoadingForMarkers();
                         currentListMode = LIST_MODE_MY;
                         onClick(btn_nav_menu_my_pubs);
-                        riv_user_portrait.setImageDrawable(getResources().getDrawable(R.drawable.foodonet_logo_200_200));
+                        riv_user_portrait.setImageDrawable(null);
                         tv_user_name.setText(null);
                         tv_user_email.setText(null);
                         break;
@@ -410,6 +417,10 @@ public class EntarenceMapAndListActivity
                 googleMap.animateCamera(cu);
                 break;
             case R.id.rl_btn_my_publications_list:
+                if (!CommonUtil.GetFromPreferencesIsRegisteredToGoogleFacebook(this)) {
+                    dialog = CommonUtil.ShowDialogNeedToRegister(this, DO_AFTER_REGISTRATION_CODE_ADD_PUBLICATION, this);
+                    return;
+                }
                 switch (currentListMode) {
                     case LIST_MODE_ALL:
                         currentListMode = LIST_MODE_MY;
@@ -422,7 +433,7 @@ public class EntarenceMapAndListActivity
                         currentFilterID = FooDoNetSQLHelper.FILTER_ID_LIST_ALL_BY_CLOSEST;
                         break;
                 }
-                if(adapter != null)
+                if (adapter != null)
                     adapter.UpdatePublicationsList(new ArrayList<FCPublication>(), currentListMode == LIST_MODE_MY);
                 SetTabsVisibility(currentListMode);
                 RestartLoadingForPublicationsList();
@@ -624,9 +635,10 @@ public class EntarenceMapAndListActivity
                     getResources(), R.drawable.map_marker, 13, 13);
             icon = BitmapDescriptorFactory.fromBitmap(markerIcon);
 
-            myMarkers.put(AddMarker(publication.getLatitude().floatValue(),
-                    publication.getLongitude().floatValue(),
-                    publication.getTitle(), icon), publication.getUniqueId());
+            if (isMapLoaded)
+                myMarkers.put(AddMarker(publication.getLatitude().floatValue(),
+                        publication.getLongitude().floatValue(),
+                        publication.getTitle(), icon), publication.getUniqueId());
 
             AddImageToGallery(publication);
         }
@@ -661,6 +673,7 @@ public class EntarenceMapAndListActivity
 
         int size = getResources().getDimensionPixelSize(R.dimen.gallery_image_btn_height);
         ImageButton imageButton = new ImageButton(getApplicationContext());
+        imageButton.setScaleType(ImageView.ScaleType.FIT_CENTER);
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(size, size);
         lp.setMargins(15, 30, 15, 30);
 
@@ -777,7 +790,7 @@ public class EntarenceMapAndListActivity
             publications = loader.getId() == -1
                     ? FCPublication.GetArrayListOfPublicationsForMapFromCursor(data)
                     : FCPublication.GetArrayListOfPublicationsFromCursor(data, true);
-            if (publications == null || publications.size() == 0){
+            if (publications == null || publications.size() == 0) {
                 Log.e(MY_TAG, "no publications got from sql");
                 adapter.UpdatePublicationsList(new ArrayList<FCPublication>(), currentListMode == LIST_MODE_MY);
             }
@@ -893,12 +906,7 @@ public class EntarenceMapAndListActivity
         riv_user_portrait = (RoundedImageView) findViewById(R.id.riv_nav_header_user_portrait);
         tv_user_name = (TextView) findViewById(R.id.tv_nav_header_user_name);
         tv_user_email = (TextView) findViewById(R.id.tv_nav_header_user_email);
-
-        riv_user_portrait.setImageDrawable(
-                CommonUtil.GetBitmapDrawableFromFile(getString(R.string.user_avatar_file_name),
-                        getString(R.string.image_folder_path), 90, 90));
-        tv_user_name.setText(CommonUtil.GetMyUserNameFromPreferences(this));
-        tv_user_email.setText(CommonUtil.GetMyEmailFromPreferences(this));
+        SetupSideMenuHeader();
 
         btn_nav_menu_my_pubs = (RelativeLayout) findViewById(R.id.rl_btn_my_publications_list);
         btn_nav_menu_my_pubs.setOnClickListener(this);
@@ -968,6 +976,14 @@ public class EntarenceMapAndListActivity
 
     //region All publications list
 
+    private void SetupSideMenuHeader(){
+        riv_user_portrait.setImageDrawable(
+                CommonUtil.GetBitmapDrawableFromFile(getString(R.string.user_avatar_file_name),
+                        getString(R.string.image_folder_path), 90, 90));
+        tv_user_name.setText(CommonUtil.GetMyUserNameFromPreferences(this));
+        tv_user_email.setText(CommonUtil.GetMyEmailFromPreferences(this));
+    }
+
     private void SetupRecyclerViewPublications() {
         rv_all_publications_list.setLayoutManager(new LinearLayoutManager(rv_all_publications_list.getContext()));
         adapter = new AllPublicationsListRecyclerViewAdapter(this, new ArrayList<FCPublication>(), this);
@@ -1003,13 +1019,13 @@ public class EntarenceMapAndListActivity
 
     @Override
     public void OnSQLTaskComplete(InternalRequest request) {
-        switch (request.ActionCommand){
+        switch (request.ActionCommand) {
             case InternalRequest.ACTION_SQL_GET_SINGLE_PUBLICATION_BY_ID:
                 FCPublication loadedPublication = request.publicationForDetails;
                 Intent intent = new Intent(this, ExistingPublicationActivity.class);
                 intent.putExtra(ExistingPublicationActivity.PUBLICATION_EXTRA_KEY, loadedPublication);
                 startActivityForResult(intent, 1);
-                if(progressDialog != null){
+                if (progressDialog != null) {
                     progressDialog.dismiss();
                     progressDialog = null;
                 }
@@ -1323,14 +1339,14 @@ public class EntarenceMapAndListActivity
 
     @Override
     public void OnServerRespondedCallback(InternalRequest response) {
-        if(response == null) return;
+        if (response == null) return;
         switch (response.Status) {
             case InternalRequest.STATUS_OK:
                 if (response.newUserID > 0) {
                     CommonUtil.SaveMyUserID(this, response.newUserID);
                     File avatarFile = new File(Environment.getExternalStorageDirectory()
                             + getResources().getString(R.string.image_folder_path), getString(R.string.user_avatar_file_name));
-                    if(avatarFile.exists()){
+                    if (avatarFile.exists()) {
                         AmazonImageUploader uploader = new AmazonImageUploader(this, this);
                         uploader.UploadUserAvatarToAmazon(avatarFile);
                     }
@@ -1347,6 +1363,9 @@ public class EntarenceMapAndListActivity
                     case DO_AFTER_REGISTRATION_CODE_SETTING:
                         Intent intentSettings = new Intent(this, SettingsSelectActivity.class);
                         startActivityForResult(intentSettings, REQUEST_CODE_SETTINGS);
+                        break;
+                    case DO_AFTER_REGISTRATION_CODE_MY_PUBS:
+                        onClick(btn_nav_menu_my_pubs);
                         break;
                     case DO_AFTER_REGISTRATION_CODE_NOTHING:
                         break;
