@@ -441,6 +441,10 @@ public class FooDoNetSQLProvider extends ContentProvider {
                             FCPublication.PUBLICATION_UNIQUE_ID_KEY + "=" + id + " and " + selection, selectionArgs);
                 }
                 break;
+            case REGS_FOR_PUBLICATION:
+                rowsDeleted = db.delete(RegisteredForPublicationTable.REGISTERED_FOR_PUBLICATION_TABLE_NAME,
+                        selection, selectionArgs);
+                break;
             case DELETE_REG_FOR_PUBLICATION:
                 id = uri.getLastPathSegment();
                 if (TextUtils.isEmpty(selection)) {
@@ -462,6 +466,10 @@ public class FooDoNetSQLProvider extends ContentProvider {
                     rowsDeleted = db.delete(RegisteredForPublicationTable.REGISTERED_FOR_PUBLICATION_TABLE_NAME,
                             RegisteredUserForPublication.REGISTERED_FOR_PUBLICATION_KEY_PUBLICATION_ID + "=" + id + selection, selectionArgs);
                 }
+                break;
+            case PUBLICATION_REPORT:
+                rowsDeleted = db.delete(PublicationReportsTable.PUBLICATION_REPORTS_TABLE_NAME,
+                        selection, selectionArgs);
                 break;
             case PUBLICATION_REPORTS_BY_ID:
                 id = uri.getLastPathSegment();
@@ -510,7 +518,7 @@ public class FooDoNetSQLProvider extends ContentProvider {
                 return rowsDeleted;
             case GROUP:
                 rowsDeleted = 0;
-                rowsDeleted += db.delete(GroupTable.GROUP_TABLE_NAME, null, null);
+                rowsDeleted += db.delete(GroupTable.GROUP_TABLE_NAME, selection, selectionArgs);
                 return rowsDeleted;
             case GROUP_MEMBER:
                 rowsDeleted = 0;

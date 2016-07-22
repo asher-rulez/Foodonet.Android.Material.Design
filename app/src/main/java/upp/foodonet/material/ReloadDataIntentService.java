@@ -102,8 +102,7 @@ public class ReloadDataIntentService
                 break;
             case taskSQL:
                 Log.i(MY_TAG, "Perfoming task " + workPlan[currentIndexInWorkPlan]);
-                sqlExecuter = new FooDoNetSQLExecuterAsync(this, getContentResolver());
-                sqlExecuter.SetContext(this);
+                sqlExecuter = new FooDoNetSQLExecuterAsync(this, this);
                 sqlExecuter.execute(
                         new InternalRequest(InternalRequest.ACTION_SQL_UPDATE_DB_PUBLICATIONS_FROM_SERVER, fetchedFromServer, null, groupsFetchedFromServer));
                 sqlExecuter = null;

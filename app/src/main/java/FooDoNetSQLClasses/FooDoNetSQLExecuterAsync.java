@@ -23,6 +23,7 @@ import DataModel.PublicationReport;
 import DataModel.RegisteredUserForPublication;
 import CommonUtilPackage.InternalRequest;
 import upp.foodonet.material.FooDoNetSQLProvider;
+import upp.foodonet.material.R;
 
 /**
  * Created by Asher on 24-Jul-15.
@@ -50,17 +51,13 @@ public class FooDoNetSQLExecuterAsync extends AsyncTask<InternalRequest, Void, V
     //    Map<Integer, Integer> needToLoadPicturesFor;
     Context context;
 
-    public FooDoNetSQLExecuterAsync(IFooDoNetSQLCallback callback, ContentResolver content) {
+    public FooDoNetSQLExecuterAsync(IFooDoNetSQLCallback callback, Context context) {
         //ArrayList<FCPublication> fromServer removed from parameters
         //publicationsFromServer = fromServer;
         callbackHandler = callback;
-        contentResolver = content;
-    }
-
-    public void SetContext(Context context) {
         this.context = context;
+        contentResolver = context.getContentResolver();
     }
-
 
     @Override
     protected Void doInBackground(InternalRequest... params) {
@@ -468,6 +465,12 @@ public class FooDoNetSQLExecuterAsync extends AsyncTask<InternalRequest, Void, V
         Uri deleteUri = publication.getUniqueId() < 0 ? FooDoNetSQLProvider.URI_PUBLICATION_ID_NEGATIVE : FooDoNetSQLProvider.CONTENT_URI;
         int idToDelete = publication.getUniqueId() < 0 ? publication.getUniqueId() * -1 : publication.getUniqueId();
         contentResolver.delete(Uri.parse(deleteUri + "/" + idToDelete), null, null);
+        File pubPic = new File(Environment.getExternalStorageDirectory() + context.getString(R.string.image_folder_path),
+                context.getString(R.string.publication_picture_file_name_format)
+                        .replace("{0}", String.valueOf(publication.getUniqueId()))
+                        .replace("{1}", String.valueOf(publication.getVersion())));
+        if(pubPic.exists())
+            pubPic.delete();
     }
 
     private void UpdateRegsAndReports(ContentResolver contentResolver, FCPublication publication) {

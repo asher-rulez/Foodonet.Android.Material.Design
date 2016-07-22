@@ -126,6 +126,7 @@ public class EntarenceMapAndListActivity
     private int currentListMode;
 
     private static final int REQUEST_CODE_NEW_PUB = 0;
+    private static final int REQUEST_CODE_SETTINGS = 1;
 
     //region Map variables
     SupportMapFragment mapFragment;
@@ -199,6 +200,7 @@ public class EntarenceMapAndListActivity
     final int DO_AFTER_REGISTRATION_CODE_NOTHING = 10;
     final int DO_AFTER_REGISTRATION_CODE_ADD_PUBLICATION = 11;
     final int DO_AFTER_REGISTRATION_CODE_GROUPS = 12;
+    final int DO_AFTER_REGISTRATION_CODE_SETTING = 13;
 
     //endregion
 
@@ -345,6 +347,7 @@ public class EntarenceMapAndListActivity
                 break;
             case DO_AFTER_REGISTRATION_CODE_GROUPS:
             case DO_AFTER_REGISTRATION_CODE_ADD_PUBLICATION:
+            case DO_AFTER_REGISTRATION_CODE_SETTING:
                 switch (resultCode) {
                     case 1:
                         InternalRequest ir = (InternalRequest) data.getSerializableExtra(InternalRequest.INTERNAL_REQUEST_EXTRA_KEY);
@@ -361,6 +364,20 @@ public class EntarenceMapAndListActivity
                         Log.i(MY_TAG, "User decided not to login with google/facebook");
                         OnServerRespondedCallback(null);
                         break;
+                }
+                break;
+            case REQUEST_CODE_SETTINGS:
+                switch (resultCode) {
+                    case SettingsSelectActivity.RESULT_CODE_LOGOUT_MADE:
+                        RestartLoadingForMarkers();
+                        currentListMode = LIST_MODE_MY;
+                        onClick(btn_nav_menu_my_pubs);
+                        riv_user_portrait.setImageDrawable(getResources().getDrawable(R.drawable.foodonet_logo_200_200));
+                        tv_user_name.setText(null);
+                        tv_user_email.setText(null);
+                        break;
+                    default:
+                        return;
                 }
                 break;
             default:
@@ -425,8 +442,12 @@ public class EntarenceMapAndListActivity
                 }
                 break;
             case R.id.rl_btn_settings:
-                Intent intentSettings = new Intent(this, SettingsSelectActivity.class);
-                startActivity(intentSettings);
+                if (!CommonUtil.GetFromPreferencesIsRegisteredToGoogleFacebook(this))
+                    dialog = CommonUtil.ShowDialogNeedToRegister(this, DO_AFTER_REGISTRATION_CODE_SETTING, this);
+                else {
+                    Intent intentSettings = new Intent(this, SettingsSelectActivity.class);
+                    startActivityForResult(intentSettings, REQUEST_CODE_SETTINGS);
+                }
                 break;
             case R.id.rl_btn_contact_us:
                 break;
@@ -756,8 +777,10 @@ public class EntarenceMapAndListActivity
             publications = loader.getId() == -1
                     ? FCPublication.GetArrayListOfPublicationsForMapFromCursor(data)
                     : FCPublication.GetArrayListOfPublicationsFromCursor(data, true);
-            if (publications == null || publications.size() == 0)
+            if (publications == null || publications.size() == 0){
                 Log.e(MY_TAG, "no publications got from sql");
+                adapter.UpdatePublicationsList(new ArrayList<FCPublication>(), currentListMode == LIST_MODE_MY);
+            }
             switch (loader.getId()) {
                 case -1:
                     SetGalleryAndMarkers(publications);
@@ -1119,7 +1142,7 @@ public class EntarenceMapAndListActivity
     @Override
     public void OnPublicationFromListClicked(int publicationID) {
         progressDialog = CommonUtil.ShowProgressDialog(this, getString(R.string.progress_loading_publication));
-        FooDoNetSQLExecuterAsync sqlGetPubAsync = new FooDoNetSQLExecuterAsync(this, getContentResolver());
+        FooDoNetSQLExecuterAsync sqlGetPubAsync = new FooDoNetSQLExecuterAsync(this, this);
         InternalRequest ir = new InternalRequest(InternalRequest.ACTION_SQL_GET_SINGLE_PUBLICATION_BY_ID);
         ir.PublicationID = publicationID;
         sqlGetPubAsync.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, ir);
@@ -1320,6 +1343,10 @@ public class EntarenceMapAndListActivity
                     case DO_AFTER_REGISTRATION_CODE_GROUPS:
                         Intent intentGroups = new Intent(getApplicationContext(), GroupsListActivity.class);
                         startActivity(intentGroups);
+                        break;
+                    case DO_AFTER_REGISTRATION_CODE_SETTING:
+                        Intent intentSettings = new Intent(this, SettingsSelectActivity.class);
+                        startActivityForResult(intentSettings, REQUEST_CODE_SETTINGS);
                         break;
                     case DO_AFTER_REGISTRATION_CODE_NOTHING:
                         break;

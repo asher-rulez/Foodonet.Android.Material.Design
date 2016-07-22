@@ -41,7 +41,7 @@ public class SelectGroupForPublicationActivity extends AppCompatActivity impleme
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         setupGroupRecyclerView();
         pd_loadingGroups = CommonUtil.ShowProgressDialog(this, getString(R.string.loading_groups));
-        FooDoNetSQLExecuterAsync sqlExecuter = new FooDoNetSQLExecuterAsync(this, getContentResolver());
+        FooDoNetSQLExecuterAsync sqlExecuter = new FooDoNetSQLExecuterAsync(this, this);
         InternalRequest irGroups = new InternalRequest(InternalRequest.ACTION_GET_GROUPS_FROM_SQL);
         sqlExecuter.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, irGroups);
     }

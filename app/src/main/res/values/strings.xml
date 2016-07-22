@@ -375,6 +375,7 @@
     <string name="title_activity_add_edit_publication">AddEditPublicationActivity</string>
     <string name="hello_world">Hello world!</string>
     <string name="user_avatar_file_name">avatar.jpeg</string>
+    <string name="publication_picture_file_name_format">{0}.{1}.jpg</string>
 
     <string name="title_activity_select_group_for_publication">aaa</string>
 
@@ -422,6 +423,8 @@
     <string name="notification_settings_button_text">Notifications</string>
     <string name="logout_button_text">Log out</string>
     <string name="title_activity_profile_view_and_edit">profile_view_and_edit</string>
+    <string name="settings_ask_if_sure_to_logout">Are you\'re sure you want to logout?</string>
+    <string name="progress_logout">Logging out</string>
 
     <!-- Profile -->
 

@@ -166,7 +166,7 @@ public class RegisterUnregisterReportService
                     SendBroadcastAndSavePending(intent);
                     return;
                 }
-                FooDoNetSQLExecuterAsync sqlExecutor = new FooDoNetSQLExecuterAsync(this, getContentResolver());
+                FooDoNetSQLExecuterAsync sqlExecutor = new FooDoNetSQLExecuterAsync(this, this);
                 InternalRequest ir = new InternalRequest(InternalRequest.ACTION_SQL_ADD_MYSELF_TO_REGISTERED_TO_PUB);
                 ir.myRegisterToPublication = myRegistrationToPublication;
                 sqlExecutor.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, ir);
@@ -179,7 +179,7 @@ public class RegisterUnregisterReportService
                     SendBroadcastAndSavePending(intent);
                     return;
                 }
-                FooDoNetSQLExecuterAsync sqlExecuter = new FooDoNetSQLExecuterAsync(this, getContentResolver());
+                FooDoNetSQLExecuterAsync sqlExecuter = new FooDoNetSQLExecuterAsync(this, this);
                 InternalRequest irUnreg = new InternalRequest(InternalRequest.ACTION_SQL_REMOVE_MYSELF_FROM_REGISTERED_TO_PUB);
                 irUnreg.myRegisterToPublication = myRegistrationToPublication;
                 sqlExecuter.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, irUnreg);
@@ -205,7 +205,7 @@ public class RegisterUnregisterReportService
                 RegisteredUserForPublication regToDelete = new RegisteredUserForPublication();
                 regToDelete.setDevice_registered_uuid(CommonUtil.GetIMEI(this));
                 regToDelete.setPublication_id(myReportToPublication.getPublication_id());
-                FooDoNetSQLExecuterAsync sqlExecuter1 = new FooDoNetSQLExecuterAsync(this, getContentResolver());
+                FooDoNetSQLExecuterAsync sqlExecuter1 = new FooDoNetSQLExecuterAsync(this, this);
                 InternalRequest irUnreg1 = new InternalRequest(InternalRequest.ACTION_SQL_REMOVE_MYSELF_FROM_REGISTERED_TO_PUB);
                 irUnreg1.myRegisterToPublication = regToDelete;
                 sqlExecuter1.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, irUnreg1);

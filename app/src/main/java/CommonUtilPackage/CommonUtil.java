@@ -43,6 +43,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -59,6 +60,10 @@ import android.widget.EditText;
 //import org.apache.http.client.methods.HttpGet;
 
 import DataModel.FCPublication;
+import DataModel.PublicationReport;
+import DataModel.RegisteredUserForPublication;
+import FooDoNetServiceUtil.ServicesBroadcastReceiver;
+import upp.foodonet.material.FooDoNetSQLProvider;
 import upp.foodonet.material.R;
 import upp.foodonet.material.SignInActivity;
 
@@ -844,5 +849,63 @@ public class CommonUtil {
                 : context.getString(R.string.time_left_format_less_one_day).replace("{0}", String.valueOf(timeSpanInHours)).replace("{1}", String.valueOf(minutesLeft));
     }
 
+    public static void ClearUserDataOnLogOut(Context context){
+        //clearing user data from SharedPreferences
+        SharedPreferences spSocialNetworkData = context.getSharedPreferences(context.getString(R.string.shared_preferences_google_facebook_data_token), Context.MODE_PRIVATE);
+        SharedPreferences.Editor editorSND = spSocialNetworkData.edit();
+        editorSND.clear();
+        editorSND.commit();
+        SharedPreferences spUserData = context.getSharedPreferences(context.getString(R.string.shared_preferences_user_data_token), Context.MODE_PRIVATE);
+        SharedPreferences.Editor editorUD = spUserData.edit();
+        editorUD.clear();
+        editorUD.commit();
 
+        //clear non public data from db
+        int groupsDeleted = context.getContentResolver().delete(FooDoNetSQLProvider.URI_GROUP, null, null);
+        Cursor cursor = context.getContentResolver()
+                .query(FooDoNetSQLProvider.CONTENT_URI,
+                        FCPublication.GetColumnNamesArray(),
+                        FCPublication.PUBLICATION_AUDIENCE_KEY + " != 0", null, null);
+        ArrayList<FCPublication> pubs = FCPublication.GetArrayListOfPublicationsFromCursor(cursor, false);
+        cursor.close();
+        String pubIDs[] = new String[pubs.size()];
+        int picsDeleted = 0;
+        for(int i = 0; i < pubIDs.length; i++) {
+            pubIDs[i] = String.valueOf(pubs.get(i).getUniqueId());
+            File pubPic = new File(Environment.getExternalStorageDirectory() + context.getString(R.string.image_folder_path),
+                    context.getString(R.string.publication_picture_file_name_format)
+                            .replace("{0}", String.valueOf(pubs.get(i).getUniqueId()))
+                            .replace("{1}", String.valueOf(pubs.get(i).getVersion())));
+            if(pubPic.exists()) {
+                pubPic.delete();
+                picsDeleted++;
+            }
+        }
+        int registeredDeleted
+                = context.getContentResolver().delete(FooDoNetSQLProvider.URI_GET_ALL_REGS,
+                RegisteredUserForPublication.REGISTERED_FOR_PUBLICATION_KEY_PUBLICATION_ID + " = ", pubIDs);
+        int reportsDeleted
+                = context.getContentResolver().delete(FooDoNetSQLProvider.URI_GET_ALL_REPORTS,
+                PublicationReport.PUBLICATION_REPORT_FIELD_KEY_PUBLICATION_ID + " = ", pubIDs);
+        int publicationsDeletedFromDB
+                = context.getContentResolver()
+                .delete(FooDoNetSQLProvider.CONTENT_URI, FCPublication.PUBLICATION_AUDIENCE_KEY + " != 0", null);
+        Log.i(MY_TAG, "Cleared db on logout. Pubs deleted: " + String.valueOf(publicationsDeletedFromDB)
+                        + ", regs deleted: " + String.valueOf(registeredDeleted)
+                        + ", reps deleted: " + String.valueOf(reportsDeleted)
+                        + ", groups deleted: " + String.valueOf(groupsDeleted)
+                        + ", pub pics deleted: " + String.valueOf(picsDeleted));
+        Intent intent = new Intent(ServicesBroadcastReceiver.BROADCAST_REC_INTENT_FILTER);
+        intent.putExtra(ServicesBroadcastReceiver.BROADCAST_REC_EXTRA_ACTION_KEY,
+                ServicesBroadcastReceiver.ACTION_CODE_RELOAD_DATA_SUCCESS);
+        context.sendBroadcast(intent);
+
+        //delete avatar picture
+        File avatarPic = new File(Environment.getExternalStorageDirectory() + context.getString(R.string.image_folder_path),
+                                    context.getString(R.string.user_avatar_file_name));
+        if(avatarPic.exists()) {
+            avatarPic.delete();
+            Log.i(MY_TAG, "user avatar image file deleted");
+        }
+    }
 }

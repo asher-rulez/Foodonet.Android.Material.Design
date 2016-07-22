@@ -186,7 +186,7 @@ public class AddEditPublicationService extends IntentService implements IFooDoNe
             }
         }
         FooDoNetSQLExecuterAsync saveExecuter
-                = new FooDoNetSQLExecuterAsync(this, getContentResolver());
+                = new FooDoNetSQLExecuterAsync(this, this);
         saveExecuter.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
                 new InternalRequest(
                         InternalRequest.ACTION_SQL_SAVE_NEW_PUBLICATION, publication));
@@ -294,14 +294,14 @@ public class AddEditPublicationService extends IntentService implements IFooDoNe
                         e.printStackTrace();
                     }
                 }
-                FooDoNetSQLExecuterAsync executerAsync = new FooDoNetSQLExecuterAsync(this, getContentResolver());
+                FooDoNetSQLExecuterAsync executerAsync = new FooDoNetSQLExecuterAsync(this, this);
                 executerAsync.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new InternalRequest(
                         InternalRequest.ACTION_SQL_UPDATE_ID_OF_PUB_AFTER_SAVING_ON_SERVER,
                         response.publicationForSaving));
                 break;
             case InternalRequest.ACTION_PUT_EDIT_PUBLICATION:
                 FooDoNetSQLExecuterAsync saveExecuter
-                        = new FooDoNetSQLExecuterAsync(this, getContentResolver());
+                        = new FooDoNetSQLExecuterAsync(this, this);
                 saveExecuter.execute(new InternalRequest(InternalRequest.ACTION_SQL_SAVE_EDITED_PUBLICATION, response.publicationForSaving));
                 break;
         }
