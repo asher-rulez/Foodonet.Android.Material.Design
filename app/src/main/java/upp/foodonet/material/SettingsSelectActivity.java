@@ -39,13 +39,13 @@ public class SettingsSelectActivity
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
-        btn_profile_settings = (Button)findViewById(R.id.btn_profile_settings);
+        btn_profile_settings = (Button) findViewById(R.id.btn_profile_settings);
         btn_profile_settings.setOnClickListener(this);
 
-        btn_settings_notifications = (Button)findViewById(R.id.btn_notifications_settings);
+        btn_settings_notifications = (Button) findViewById(R.id.btn_notifications_settings);
         btn_settings_notifications.setOnClickListener(this);
 
-        btn_logout = (Button)findViewById(R.id.btn_logout);
+        btn_logout = (Button) findViewById(R.id.btn_logout);
         btn_logout.setOnClickListener(this);
 
 
@@ -62,7 +62,7 @@ public class SettingsSelectActivity
 
     @Override
     public void onClick(View view) {
-        switch (view.getId()){
+        switch (view.getId()) {
             case R.id.btn_profile_settings:
                 Intent intent = new Intent(this, ProfileViewAndEditActivity.class);
                 startActivity(intent);
@@ -103,10 +103,10 @@ public class SettingsSelectActivity
 
     @Override
     public void onClick(DialogInterface dialog, int which) {
-        switch (which){
+        switch (which) {
             case AlertDialog.BUTTON_POSITIVE:
                 ProgressDialog pDialogLogout = CommonUtil.ShowProgressDialog(this, getString(R.string.progress_logout));
-                CommonUtil.ClearUserDataOnLogOut(this);
+                CommonUtil.ClearUserDataOnLogOut(this, false);
                 pDialogLogout.dismiss();
                 dialog.dismiss();
                 setResult(RESULT_CODE_LOGOUT_MADE);

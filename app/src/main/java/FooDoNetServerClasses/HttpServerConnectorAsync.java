@@ -324,7 +324,12 @@ public class HttpServerConnectorAsync extends AsyncTask<InternalRequest, Void, S
             //region take pub off air
             case InternalRequest.ACTION_PUT_TAKE_PUBLICATION_OFF_AIR:
                 //publicationForSaving = params[0].publicationForSaving;
-                MakeServerRequest(REQUEST_METHOD_PUT, server_sub_path, ForDisabling, false);
+                MakeServerRequest(REQUEST_METHOD_PUT, server_sub_path, ForDisablingOrEnabling, false);
+                return "";
+            //endregion
+            //region reactivate pub
+            case InternalRequest.ACTION_PUT_REACTIVATE_PUBLICATION:
+                MakeServerRequest(REQUEST_METHOD_PUT, server_sub_path, ForDisablingOrEnabling, false);
                 return "";
             //endregion
             //region delete publication
@@ -695,6 +700,11 @@ public class HttpServerConnectorAsync extends AsyncTask<InternalRequest, Void, S
                 InternalRequest irOffAir = new InternalRequest(Action_Command_ID, isSuccess);
                 callbackListener.OnServerRespondedCallback(irOffAir);
                 break;
+            case InternalRequest.ACTION_PUT_REACTIVATE_PUBLICATION:
+                Log.i(MY_TAG, "reactivate publication: " + (isSuccess ? "ok" : "fail"));
+                InternalRequest irReact = new InternalRequest(Action_Command_ID, isSuccess);
+                callbackListener.OnServerRespondedCallback(irReact);
+                break;
             case InternalRequest.ACTION_DELETE_PUBLICATION:
                 Log.i(MY_TAG, "delete publication: " + (isSuccess ? "ok" : "fail"));
                 InternalRequest irDelete = new InternalRequest(Action_Command_ID, isSuccess);
@@ -771,7 +781,7 @@ public class HttpServerConnectorAsync extends AsyncTask<InternalRequest, Void, S
         return publications;
     }
 
-    private FCPublicationForDisabling ForDisabling = new FCPublicationForDisabling();
+    private FCPublicationForDisabling ForDisablingOrEnabling = new FCPublicationForDisabling();
 
     class FCPublicationForDisabling implements ICanWriteSelfToJSONWriter {
 

@@ -127,6 +127,7 @@ public class EntarenceMapAndListActivity
 
     private static final int REQUEST_CODE_NEW_PUB = 0;
     private static final int REQUEST_CODE_SETTINGS = 1;
+    private static final int REQUEST_CODE_PUBLICATION_DETAILS = 2;
 
     //region Map variables
     SupportMapFragment mapFragment;
@@ -387,6 +388,15 @@ public class EntarenceMapAndListActivity
                         return;
                 }
                 break;
+            case REQUEST_CODE_PUBLICATION_DETAILS:
+                switch (resultCode){
+                    case RESULT_OK:
+                        RestartLoadingForMarkers();
+                        RestartLoadingForPublicationsList();
+                        break;
+                    default:
+                        return;
+                }
             default:
                 break;
         }
@@ -417,7 +427,7 @@ public class EntarenceMapAndListActivity
                 googleMap.animateCamera(cu);
                 break;
             case R.id.rl_btn_my_publications_list:
-                if (!CommonUtil.GetFromPreferencesIsRegisteredToGoogleFacebook(this)) {
+                if (currentListMode == LIST_MODE_ALL && !CommonUtil.GetFromPreferencesIsRegisteredToGoogleFacebook(this)) {
                     dialog = CommonUtil.ShowDialogNeedToRegister(this, DO_AFTER_REGISTRATION_CODE_ADD_PUBLICATION, this);
                     return;
                 }
@@ -1024,7 +1034,7 @@ public class EntarenceMapAndListActivity
                 FCPublication loadedPublication = request.publicationForDetails;
                 Intent intent = new Intent(this, ExistingPublicationActivity.class);
                 intent.putExtra(ExistingPublicationActivity.PUBLICATION_EXTRA_KEY, loadedPublication);
-                startActivityForResult(intent, 1);
+                startActivityForResult(intent, REQUEST_CODE_PUBLICATION_DETAILS);
                 if (progressDialog != null) {
                     progressDialog.dismiss();
                     progressDialog = null;
@@ -1372,6 +1382,9 @@ public class EntarenceMapAndListActivity
                 }
                 break;
             case InternalRequest.STATUS_FAIL:
+                CommonUtil.ClearUserDataOnLogOut(this, true);
+                SetupSideMenuHeader();
+                Snackbar.make(fab, getString(R.string.failed_to_login_try_later), Snackbar.LENGTH_SHORT).show();
                 break;
         }
     }

@@ -849,7 +849,7 @@ public class CommonUtil {
                 : context.getString(R.string.time_left_format_less_one_day).replace("{0}", String.valueOf(timeSpanInHours)).replace("{1}", String.valueOf(minutesLeft));
     }
 
-    public static void ClearUserDataOnLogOut(Context context){
+    public static void ClearUserDataOnLogOut(Context context, boolean sharedPrefsOnly){
         //clearing user data from SharedPreferences
         SharedPreferences spSocialNetworkData = context.getSharedPreferences(context.getString(R.string.shared_preferences_google_facebook_data_token), Context.MODE_PRIVATE);
         SharedPreferences.Editor editorSND = spSocialNetworkData.edit();
@@ -859,6 +859,17 @@ public class CommonUtil {
         SharedPreferences.Editor editorUD = spUserData.edit();
         editorUD.clear();
         editorUD.commit();
+
+        //delete avatar picture
+        File avatarPic = new File(Environment.getExternalStorageDirectory() + context.getString(R.string.image_folder_path),
+                context.getString(R.string.user_avatar_file_name));
+        if(avatarPic.exists()) {
+            avatarPic.delete();
+            Log.i(MY_TAG, "user avatar image file deleted");
+        }
+
+        if(sharedPrefsOnly)
+            return;
 
         //clear non public data from db
         int groupsDeleted = context.getContentResolver().delete(FooDoNetSQLProvider.URI_GROUP, null, null);
@@ -904,13 +915,5 @@ public class CommonUtil {
         intent.putExtra(ServicesBroadcastReceiver.BROADCAST_REC_EXTRA_ACTION_KEY,
                 ServicesBroadcastReceiver.ACTION_CODE_RELOAD_DATA_SUCCESS);
         context.sendBroadcast(intent);
-
-        //delete avatar picture
-        File avatarPic = new File(Environment.getExternalStorageDirectory() + context.getString(R.string.image_folder_path),
-                                    context.getString(R.string.user_avatar_file_name));
-        if(avatarPic.exists()) {
-            avatarPic.delete();
-            Log.i(MY_TAG, "user avatar image file deleted");
-        }
     }
 }

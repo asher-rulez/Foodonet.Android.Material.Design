@@ -51,6 +51,7 @@ public class InternalRequest implements Serializable {
     public static final int ACTION_PUT_EDIT_PUBLICATION = 19;
     public static final int ACTION_SQL_SAVE_EDITED_PUBLICATION = 20;
     public static final int ACTION_PUT_TAKE_PUBLICATION_OFF_AIR = 21;
+    public static final int ACTION_PUT_REACTIVATE_PUBLICATION = -21;
     public static final int ACTION_DELETE_PUBLICATION = 22;
     public static final int ACTION_NO_ACTION = 23;
     public static final int ACTION_REPORT_LOCATION = 24;

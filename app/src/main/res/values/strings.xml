@@ -341,6 +341,7 @@
     <string name="validation_phone_number_empty">Phone number cannot be empty</string>
     <string name="validation_phone_number_invalid">You entered invalid number</string>
     <string name="action_sign_in_short">Sign in</string>
+    <string name="failed_to_login_try_later">Failed to login, please try later</string>
 
     <!-- Group add/edit -->
 
@@ -408,7 +409,7 @@
     <string name="ttl_item_groups_menu">Groups</string>
     <string name="ttl_item_settings_menu">Settings</string>
     <string name="ttl_item_contact_menu">Contact us</string>
-    <string name="ttl_item_terms_menu"><![CDATA[Terms & conditions]]></string>
+    <string name="ttl_item_terms_menu">About</string><!--<![CDATA[Terms & conditions]]>-->
 
     <!-- Add/edit publication -->
 
@@ -489,5 +490,11 @@
 
     <string name="failed_to_save_edited_publication">Failed to save publication</string>
     <string name="succeeded_to_save_edited_publication">Succeeded to save publication</string>
+
+    <string name="failed_to_save_changes">Failed to save changes</string>
+
+    <string name="progress_taking_pub_off_air">Stopping event</string>
+    <string name="progress_activating_pub">Activating event</string>
+    <string name="progress_delete_pub">Deleting event</string>
 
 </resources>

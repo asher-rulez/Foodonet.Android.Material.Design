@@ -61,6 +61,8 @@ import CommonUtilPackage.InternalRequest;
 import DataModel.FCPublication;
 import DataModel.PublicationReport;
 import DataModel.RegisteredUserForPublication;
+import FooDoNetSQLClasses.FooDoNetSQLExecuterAsync;
+import FooDoNetSQLClasses.IFooDoNetSQLCallback;
 import FooDoNetServerClasses.ConnectionDetector;
 import FooDoNetServerClasses.HttpServerConnectorAsync;
 import FooDoNetServerClasses.IFooDoNetServerCallback;
@@ -75,7 +77,7 @@ public class ExistingPublicationActivity
                     View.OnClickListener,
                     IRegisteredUserSelectedCallback,
                     IPleaseRegisterDialogCallback,
-                    IFooDoNetServerCallback, IAmazonFinishedCallback {
+                    IFooDoNetServerCallback, IAmazonFinishedCallback, IFooDoNetSQLCallback {
 
     private static final String MY_TAG = "food_existPub";
 
@@ -149,6 +151,8 @@ public class ExistingPublicationActivity
 
     boolean waitingForActionFinish;
 
+    boolean ifChangesMade;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -219,6 +223,12 @@ public class ExistingPublicationActivity
 */
     }
 
+    @Override
+    public void onBackPressed() {
+        setResult(ifChangesMade ? RESULT_OK : RESULT_CANCELED);
+        finish();
+    }
+
     private void SetPrice(){
         if (currentPublication.getPrice() == null || currentPublication.getPrice() == 0)
             tv_price.setText(getString(R.string.publication_details_price_free));
@@ -273,11 +283,48 @@ public class ExistingPublicationActivity
         if (item.getTitle().toString().compareToIgnoreCase(getString(R.string.menu_item_edit)) == 0) {
             EditCurrentPublication();
         } else if (item.getTitle().toString().compareToIgnoreCase(getString(R.string.menu_item_delete)) == 0) {
-
+            if (progressDialog != null)
+                progressDialog.dismiss();
+            progressDialog = CommonUtil.ShowProgressDialog(this, getString(R.string.progress_delete_pub));
+            HttpServerConnectorAsync connector2
+                    = new HttpServerConnectorAsync(getResources().getString(R.string.server_base_url), (IFooDoNetServerCallback) this);
+            String subPath1 = getString(R.string.server_edit_publication_path);
+            subPath1 = subPath1.replace("{0}", String.valueOf(currentPublication.getUniqueId()));
+            InternalRequest ir2 = new InternalRequest(InternalRequest.ACTION_DELETE_PUBLICATION, subPath1);
+            connector2.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, ir2);
         } else if (item.getTitle().toString().compareToIgnoreCase(getString(R.string.menu_item_stop_event)) == 0) {
-
+            if (!CheckInternetForAction(getString(R.string.action_take_off_air)))
+                return false;
+            if (progressDialog != null)
+                progressDialog.dismiss();
+            progressDialog = CommonUtil.ShowProgressDialog(this, getString(R.string.progress_taking_pub_off_air));
+            currentPublication.setIsOnAir(false);
+            //currentPublication.setPublisherUserName();
+            HttpServerConnectorAsync connector1
+                    = new HttpServerConnectorAsync(getResources().getString(R.string.server_base_url), (IFooDoNetServerCallback) this);
+            String subPath = getString(R.string.server_edit_publication_path);
+            subPath = subPath.replace("{0}", String.valueOf(currentPublication.getUniqueId()));
+            InternalRequest ir1
+                    = new InternalRequest(InternalRequest.ACTION_PUT_TAKE_PUBLICATION_OFF_AIR,
+                    subPath, currentPublication);
+            ir1.publicationForSaving = currentPublication;
+            connector1.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, ir1);
         } else if (item.getTitle().toString().compareToIgnoreCase(getString(R.string.menu_item_restart_event)) == 0) {
-
+            if (!CheckInternetForAction(getString(R.string.action_take_off_air)))
+                return false;
+            if (progressDialog != null)
+                progressDialog.dismiss();
+            progressDialog = CommonUtil.ShowProgressDialog(this, getString(R.string.progress_activating_pub));
+            currentPublication.setIsOnAir(true);
+            HttpServerConnectorAsync connector1
+                    = new HttpServerConnectorAsync(getResources().getString(R.string.server_base_url), (IFooDoNetServerCallback) this);
+            String subPath = getString(R.string.server_edit_publication_path);
+            subPath = subPath.replace("{0}", String.valueOf(currentPublication.getUniqueId()));
+            InternalRequest ir1
+                    = new InternalRequest(InternalRequest.ACTION_PUT_REACTIVATE_PUBLICATION,
+                    subPath, currentPublication);
+            ir1.publicationForSaving = currentPublication;
+            connector1.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, ir1);
         } else if (item.getTitle().toString().compareToIgnoreCase(getString(R.string.menu_item_report)) == 0) {
             if(CheckIfPublicationHasMyReport()){
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -571,27 +618,63 @@ public class ExistingPublicationActivity
 
     @Override
     public void OnServerRespondedCallback(InternalRequest response) {
+        if(response == null)
+            return;
+        switch (response.ActionCommand){
+            case InternalRequest.ACTION_PUT_TAKE_PUBLICATION_OFF_AIR:
+                if (response.Status == InternalRequest.STATUS_OK) {
+                    currentPublication.setIsOnAir(response.Status == InternalRequest.STATUS_FAIL);
+                    toolbar.getMenu().clear();
+                    InitToolBar();
+                    InitTopInfoBar();
+                    getContentResolver().update(Uri.parse(
+                            FooDoNetSQLProvider.CONTENT_URI + "/" + currentPublication.getUniqueId()),
+                            currentPublication.GetContentValuesRow(), null, null);
+                    ifChangesMade = true;
+                } else
+                    Snackbar.make(fab_facebook, getString(R.string.failed_to_save_changes), Snackbar.LENGTH_SHORT).show();
+                break;
+            case InternalRequest.ACTION_PUT_REACTIVATE_PUBLICATION:
+                if (response.Status == InternalRequest.STATUS_OK) {
+                    currentPublication.setIsOnAir(response.Status == InternalRequest.STATUS_OK);
+                    toolbar.getMenu().clear();
+                    InitToolBar();
+                    InitTopInfoBar();
+                    getContentResolver().update(Uri.parse(
+                            FooDoNetSQLProvider.CONTENT_URI + "/" + currentPublication.getUniqueId()),
+                            currentPublication.GetContentValuesRow(), null, null);
+                    ifChangesMade = true;
+                } else
+                    Snackbar.make(fab_facebook, getString(R.string.failed_to_save_changes), Snackbar.LENGTH_SHORT).show();
+                break;
+            case InternalRequest.ACTION_DELETE_PUBLICATION:
+                FooDoNetSQLExecuterAsync sqlExecutor
+                        = new FooDoNetSQLExecuterAsync(this, this);
+                sqlExecutor.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
+                        new InternalRequest(response.ActionCommand, currentPublication));
+                break;
+            case InternalRequest.ACTION_POST_NEW_USER:
+                switch (response.Status) {
+                    case InternalRequest.STATUS_OK:
+                        if (response.newUserID > 0) {
+                            CommonUtil.SaveMyUserID(this, response.newUserID);
+                            File avatarFile = new File(Environment.getExternalStorageDirectory()
+                                    + getResources().getString(R.string.image_folder_path), getString(R.string.user_avatar_file_name));
+                            if(avatarFile.exists()){
+                                AmazonImageUploader uploader = new AmazonImageUploader(this, this);
+                                uploader.UploadUserAvatarToAmazon(avatarFile);
+                            }
+                        }
+                        RegisterUnregister();
+                        break;
+                    case InternalRequest.STATUS_FAIL:
+                        break;
+                }
+                break;
+        }
         if(progressDialog != null)
             progressDialog.dismiss();
         progressDialog = null;
-        if(response == null)
-            return;
-        switch (response.Status) {
-            case InternalRequest.STATUS_OK:
-                if (response.newUserID > 0) {
-                    CommonUtil.SaveMyUserID(this, response.newUserID);
-                    File avatarFile = new File(Environment.getExternalStorageDirectory()
-                            + getResources().getString(R.string.image_folder_path), getString(R.string.user_avatar_file_name));
-                    if(avatarFile.exists()){
-                        AmazonImageUploader uploader = new AmazonImageUploader(this, this);
-                        uploader.UploadUserAvatarToAmazon(avatarFile);
-                    }
-                }
-                RegisterUnregister();
-                break;
-            case InternalRequest.STATUS_FAIL:
-                break;
-        }
     }
 
     @Override
@@ -871,6 +954,7 @@ public class ExistingPublicationActivity
                 PopButtonsAfterRegistration();
                 fab_reg_unreg.setImageDrawable(getResources().getDrawable(R.drawable.fab_unregister));
                 RefreshNumberOfJoinedUsers();
+                ifChangesMade = true;
                 if (progressDialog != null)
                     progressDialog.dismiss();
                 progressDialog = null;
@@ -881,6 +965,7 @@ public class ExistingPublicationActivity
                 CollapseButtonsAfterUnregister();
                 fab_reg_unreg.setImageDrawable(getResources().getDrawable(R.drawable.fab_register));
                 RefreshNumberOfJoinedUsers();
+                ifChangesMade = true;
                 if (progressDialog != null)
                     progressDialog.dismiss();
                 progressDialog = null;
@@ -904,6 +989,7 @@ public class ExistingPublicationActivity
                     editedPublication.setVersion(editedPublication.getVersion() + 1);
                     currentPublication = editedPublication;
                     SetPublicationPropertiesToControls();
+                    ifChangesMade = true;
                 }
             case ServicesBroadcastReceiver.ACTION_CODE_SAVE_EDITED_PUB_FAIL:
                 if(progressDialog != null)
@@ -1020,5 +1106,19 @@ public class ExistingPublicationActivity
         report.setReportContactInfo(CommonUtil.GetMyPhoneNumberFromPreferences(this));
         RegisterUnregisterReportService.startActionReportForPublication(this, report);
         progressDialog = CommonUtil.ShowProgressDialog(this, getString(R.string.progress_leaving_report));
+    }
+
+    @Override
+    public void OnSQLTaskComplete(InternalRequest request) {
+        switch (request.ActionCommand) {
+            case InternalRequest.ACTION_DELETE_PUBLICATION:
+                CommonUtil.RemoveImageByPublication(currentPublication, this);
+                if (progressDialog != null)
+                    progressDialog.dismiss();
+                Intent resultIntent = new Intent();
+                setResult(RESULT_OK, resultIntent);
+                finish();
+                break;
+        }
     }
 }

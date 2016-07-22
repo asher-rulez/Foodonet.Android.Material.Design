@@ -16,6 +16,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -94,9 +95,9 @@ public class FCPublication implements Serializable, ICanWriteSelfToJSONWriter {
     }
 */
 
-    public FCPublication(FCPublication publication){
+    public FCPublication(FCPublication publication) {
         this();
-        if(publication == null) return;
+        if (publication == null) return;
         setUniqueId(publication.getUniqueId());
         setVersion(publication.getVersion());
         setTitle(publication.getTitle());
@@ -113,23 +114,28 @@ public class FCPublication implements Serializable, ICanWriteSelfToJSONWriter {
         setPhotoUrl(publication.getPhotoUrl());
     }
 
-    public boolean IsEqualTo(FCPublication otherPublication){
-        if(getUniqueId() != otherPublication.getUniqueId()) return false;
-        if(getVersion() != otherPublication.getVersion()) return false;
-        if(CommonUtil.CheckIfStringsDiffer(getTitle(), otherPublication.getTitle())) return false;
-        if(CommonUtil.CheckIfStringsDiffer(getSubtitle(), otherPublication.getSubtitle())) return false;
-        if(CommonUtil.CheckIfStringsDiffer(getPublisherUID(), otherPublication.getPublisherUID()))return false;
-        if(CommonUtil.CheckIfStringsDiffer(getAddress(), otherPublication.getAddress())) return false;
-        if(getStartingDateUnixTime() != otherPublication.getStartingDateUnixTime()) return false;
+    public boolean IsEqualTo(FCPublication otherPublication) {
+        if (getUniqueId() != otherPublication.getUniqueId()) return false;
+        if (getVersion() != otherPublication.getVersion()) return false;
+        if (CommonUtil.CheckIfStringsDiffer(getTitle(), otherPublication.getTitle())) return false;
+        if (CommonUtil.CheckIfStringsDiffer(getSubtitle(), otherPublication.getSubtitle()))
+            return false;
+        if (CommonUtil.CheckIfStringsDiffer(getPublisherUID(), otherPublication.getPublisherUID()))
+            return false;
+        if (CommonUtil.CheckIfStringsDiffer(getAddress(), otherPublication.getAddress()))
+            return false;
+        if (getStartingDateUnixTime() != otherPublication.getStartingDateUnixTime()) return false;
         if (getEndingDateUnixTime() != otherPublication.getEndingDateUnixTime()) return false;
-        if(getTypeOfCollecting() != otherPublication.getTypeOfCollecting()) return false;
-        if(getLatitude() != otherPublication.getLatitude()) return false;
-        if(getLongitude() != otherPublication.getLongitude()) return false;
-        if(CommonUtil.CheckIfStringsDiffer(getContactInfo(), otherPublication.getContactInfo())) return false;
-        if(getIsOnAir() != otherPublication.getIsOnAir()) return false;
-        if(CommonUtil.CheckIfStringsDiffer(getPhotoUrl(), otherPublication.getPhotoUrl())) return false;
-        if(!TextUtils.isEmpty(otherPublication.getPhotoUrl())) return false;
-        if(getAudience() != otherPublication.getAudience()) return false;
+        if (getTypeOfCollecting() != otherPublication.getTypeOfCollecting()) return false;
+        if (getLatitude() != otherPublication.getLatitude()) return false;
+        if (getLongitude() != otherPublication.getLongitude()) return false;
+        if (CommonUtil.CheckIfStringsDiffer(getContactInfo(), otherPublication.getContactInfo()))
+            return false;
+        if (getIsOnAir() != otherPublication.getIsOnAir()) return false;
+        if (CommonUtil.CheckIfStringsDiffer(getPhotoUrl(), otherPublication.getPhotoUrl()))
+            return false;
+        if (!TextUtils.isEmpty(otherPublication.getPhotoUrl())) return false;
+        if (getAudience() != otherPublication.getAudience()) return false;
         return true;
     }
 
@@ -145,11 +151,11 @@ public class FCPublication implements Serializable, ICanWriteSelfToJSONWriter {
 
     private int newIdFromServer;
 
-    public void setNewIdFromServer(int id){
+    public void setNewIdFromServer(int id) {
         this.newIdFromServer = id;
     }
 
-    public int getNewIdFromServer(){
+    public int getNewIdFromServer() {
         return newIdFromServer;
     }
 
@@ -177,9 +183,13 @@ public class FCPublication implements Serializable, ICanWriteSelfToJSONWriter {
 
     private int versionFromServer;
 
-    public int getVersionFromServer(){ return versionFromServer; }
+    public int getVersionFromServer() {
+        return versionFromServer;
+    }
 
-    public void setVersionFromServer(int ver){ versionFromServer = ver; }
+    public void setVersionFromServer(int ver) {
+        versionFromServer = ver;
+    }
 
     private String title;
 
@@ -252,7 +262,7 @@ public class FCPublication implements Serializable, ICanWriteSelfToJSONWriter {
     }
 
     public long getStartingDateUnixTime() {
-        return startingDate.getTime()/1000;
+        return startingDate.getTime() / 1000;
     }
 
     public void setStartingDate(Date startingDate) {
@@ -270,7 +280,7 @@ public class FCPublication implements Serializable, ICanWriteSelfToJSONWriter {
     }
 
     public long getEndingDateUnixTime() {
-        return endingDate.getTime()/1000;
+        return endingDate.getTime() / 1000;
     }
 
     public void setEndingDate(Date endingDate) {
@@ -279,6 +289,14 @@ public class FCPublication implements Serializable, ICanWriteSelfToJSONWriter {
 
     public void setEndingDate(long endingDate) {
         this.endingDate = new Date(endingDate * 1000);
+    }
+
+    public void setStandardStartEndDates(){
+        setStartingDate(new Date());
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(new Date());
+        cal.add(Calendar.DATE, 2);
+        setEndingDate(cal.getTime());
     }
 
     private String contactInfo; // make it nullable
@@ -301,7 +319,7 @@ public class FCPublication implements Serializable, ICanWriteSelfToJSONWriter {
         this.isOnAir = isOnAir;
     }
 
-    public boolean IsActivePublication(){
+    public boolean IsActivePublication() {
         return getIsOnAir()
                 && ((new Date()).compareTo(getStartingDate()) >= 0)
                 && ((new Date()).compareTo(getEndingDate()) <= 0);
@@ -339,11 +357,11 @@ public class FCPublication implements Serializable, ICanWriteSelfToJSONWriter {
 
     private int numberOfRegistered;
 
-    public int getNumberOfRegistered(){
+    public int getNumberOfRegistered() {
         return numberOfRegistered;
     }
 
-    public void setNumberOfRegistered(int num){
+    public void setNumberOfRegistered(int num) {
         numberOfRegistered = num;
     }
 
@@ -427,28 +445,28 @@ public class FCPublication implements Serializable, ICanWriteSelfToJSONWriter {
 
     private ArrayList<RegisteredUserForPublication> registeredForThisPublication;
 
-    public void setRegisteredForThisPublication(ArrayList<RegisteredUserForPublication> regedUsers){
-        if(registeredForThisPublication == null)
+    public void setRegisteredForThisPublication(ArrayList<RegisteredUserForPublication> regedUsers) {
+        if (registeredForThisPublication == null)
             registeredForThisPublication = new ArrayList<>();
         registeredForThisPublication.addAll(regedUsers);
     }
 
-    public ArrayList<RegisteredUserForPublication> getRegisteredForThisPublication(){
-        if(registeredForThisPublication == null)
+    public ArrayList<RegisteredUserForPublication> getRegisteredForThisPublication() {
+        if (registeredForThisPublication == null)
             registeredForThisPublication = new ArrayList<>();
         return registeredForThisPublication;
     }
 
     private ArrayList<PublicationReport> publicationReports;
 
-    public void setPublicationReports(ArrayList<PublicationReport> reports){
-        if(publicationReports == null)
+    public void setPublicationReports(ArrayList<PublicationReport> reports) {
+        if (publicationReports == null)
             publicationReports = new ArrayList<>();
         publicationReports.addAll(reports);
     }
 
-    public ArrayList<PublicationReport> getPublicationReports(){
-        if(publicationReports == null)
+    public ArrayList<PublicationReport> getPublicationReports() {
+        if (publicationReports == null)
             publicationReports = new ArrayList<>();
         return publicationReports;
     }
@@ -457,11 +475,11 @@ public class FCPublication implements Serializable, ICanWriteSelfToJSONWriter {
 
     private String _group_name;
 
-    public String get_group_name(){
+    public String get_group_name() {
         return _group_name;
     }
 
-    public void set_group_name(String name){
+    public void set_group_name(String name) {
         _group_name = name;
     }
 
@@ -541,7 +559,7 @@ public class FCPublication implements Serializable, ICanWriteSelfToJSONWriter {
 
     public static ArrayList<FCPublication> GetArrayListOfPublicationsFromCursor(Cursor cursor, boolean isForList) {
         ArrayList<FCPublication> result = new ArrayList<FCPublication>();
-        if(cursor != null && cursor.moveToFirst()) {
+        if (cursor != null && cursor.moveToFirst()) {
             do {
                 FCPublication publication = new FCPublication();
                 publication.setUniqueId(cursor.getInt(cursor.getColumnIndex(PUBLICATION_UNIQUE_ID_KEY)));
@@ -551,7 +569,7 @@ public class FCPublication implements Serializable, ICanWriteSelfToJSONWriter {
                 publication.setLongitude(cursor.getDouble(cursor.getColumnIndex(PUBLICATION_LONGITUDE_KEY)));
                 publication.setVersion(cursor.getInt(cursor.getColumnIndex(PUBLICATION_VERSION_KEY)));
                 publication.setEndingDate(cursor.getLong(cursor.getColumnIndex(PUBLICATION_ENDING_DATE_KEY)));
-                if(isForList){
+                if (isForList) {
                     publication.setNumberOfRegistered(cursor.getInt(cursor.getColumnIndex(PUBLICATION_NUMBER_OF_REGISTERED)));
                     publication.set_group_name(cursor.getString(cursor.getColumnIndex(PUBLICATION_GROUP_NAME)));
                 } else {
@@ -564,6 +582,7 @@ public class FCPublication implements Serializable, ICanWriteSelfToJSONWriter {
                     publication.setContactInfo(cursor.getString(cursor.getColumnIndex(PUBLICATION_CONTACT_INFO_KEY)));
                     publication.setIsOnAir(cursor.getInt(cursor.getColumnIndex(PUBLICATION_IS_ON_AIR_KEY)) == 1);
                     publication.setPublisherID(cursor.getInt(cursor.getColumnIndex(PUBLICATION_PUBLISHER_ID_KEY)));
+                    publication.setPublisherUserName(cursor.getString(cursor.getColumnIndex(PUBLICATION_PUBLISHER_USER_NAME_KEY)));
                     //publication.setIfTriedToGetPictureBefore(cursor.getInt(cursor.getColumnIndex(PUBLICATION_TRIED_TO_LOAD_IMAGE)));
                 }
                 result.add(publication);
@@ -575,7 +594,7 @@ public class FCPublication implements Serializable, ICanWriteSelfToJSONWriter {
 
     public static ArrayList<FCPublication> GetArrayListOfPublicationsForMapFromCursor(Cursor cursor) {
         ArrayList<FCPublication> result = new ArrayList<FCPublication>();
-        if(cursor != null && cursor.moveToFirst()) {
+        if (cursor != null && cursor.moveToFirst()) {
             do {
                 FCPublication publication = new FCPublication();
                 publication.setUniqueId(cursor.getInt(cursor.getColumnIndex(PUBLICATION_UNIQUE_ID_KEY)));
@@ -636,8 +655,8 @@ public class FCPublication implements Serializable, ICanWriteSelfToJSONWriter {
         return publication;
     }
 
-    public static AbstractMap.SimpleEntry<Integer,Integer> ParseServerResponseToNewPublication(JSONObject jo){
-        if(jo == null) return null;
+    public static AbstractMap.SimpleEntry<Integer, Integer> ParseServerResponseToNewPublication(JSONObject jo) {
+        if (jo == null) return null;
         int idValue, versionValue;
         try {
             idValue = jo.getInt(PUBLICATION_UNIQUE_ID_KEY_JSON);
@@ -657,8 +676,8 @@ public class FCPublication implements Serializable, ICanWriteSelfToJSONWriter {
         publicationData.put(PUBLICATION_STARTING_DATE_KEY, getStartingDateUnixTime());
         publicationData.put(PUBLICATION_ADDRESS_KEY, getAddress());
         publicationData.put(PUBLICATION_ENDING_DATE_KEY, getEndingDateUnixTime());
-        publicationData.put(PUBLICATION_CONTACT_INFO_KEY, TextUtils.isEmpty(getContactInfo())? "":getContactInfo());
-        publicationData.put(PUBLICATION_SUBTITLE_KEY, TextUtils.isEmpty(getSubtitle())? "": getSubtitle());
+        publicationData.put(PUBLICATION_CONTACT_INFO_KEY, TextUtils.isEmpty(getContactInfo()) ? "" : getContactInfo());
+        publicationData.put(PUBLICATION_SUBTITLE_KEY, TextUtils.isEmpty(getSubtitle()) ? "" : getSubtitle());
         publicationData.put(PUBLICATION_TITLE_KEY, getTitle());
         publicationData.put(PUBLICATION_TYPE_OF_COLLECTION_KEY, getTypeOfCollecting() + 1);
         publicationData.put(PUBLICATION_IS_ON_AIR_KEY, true);//getIsOnAir());
@@ -706,19 +725,19 @@ public class FCPublication implements Serializable, ICanWriteSelfToJSONWriter {
 
     private byte[] ImageByteArray;
 
-    public void setImageByteArray(byte[] bytes){
+    public void setImageByteArray(byte[] bytes) {
         ImageByteArray = bytes;
     }
 
-    public byte[] getImageByteArray(){
+    public byte[] getImageByteArray() {
         return ImageByteArray;
     }
 
-    public void setImageByteArrayFromBitmap(Bitmap bitmap){
+    public void setImageByteArrayFromBitmap(Bitmap bitmap) {
         setImageByteArray(CommonUtil.BitmapToBytes(bitmap));
     }
 
-    public String GetImageFileName(){
+    public String GetImageFileName() {
         return String.valueOf(getUniqueId()) + "." + String.valueOf(getVersion()) + ".jpg";
     }
     //endregion
