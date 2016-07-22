@@ -129,6 +129,7 @@ public class FCPublication implements Serializable, ICanWriteSelfToJSONWriter {
         if(getIsOnAir() != otherPublication.getIsOnAir()) return false;
         if(CommonUtil.CheckIfStringsDiffer(getPhotoUrl(), otherPublication.getPhotoUrl())) return false;
         if(!TextUtils.isEmpty(otherPublication.getPhotoUrl())) return false;
+        if(getAudience() != otherPublication.getAudience()) return false;
         return true;
     }
 
@@ -298,6 +299,12 @@ public class FCPublication implements Serializable, ICanWriteSelfToJSONWriter {
 
     public void setIsOnAir(boolean isOnAir) {
         this.isOnAir = isOnAir;
+    }
+
+    public boolean IsActivePublication(){
+        return getIsOnAir()
+                && ((new Date()).compareTo(getStartingDate()) >= 0)
+                && ((new Date()).compareTo(getEndingDate()) <= 0);
     }
 
     private Boolean didModifyCoords;
@@ -543,18 +550,20 @@ public class FCPublication implements Serializable, ICanWriteSelfToJSONWriter {
                 publication.setLatitude(cursor.getDouble(cursor.getColumnIndex(PUBLICATION_LATITUDE_KEY)));
                 publication.setLongitude(cursor.getDouble(cursor.getColumnIndex(PUBLICATION_LONGITUDE_KEY)));
                 publication.setVersion(cursor.getInt(cursor.getColumnIndex(PUBLICATION_VERSION_KEY)));
+                publication.setEndingDate(cursor.getLong(cursor.getColumnIndex(PUBLICATION_ENDING_DATE_KEY)));
                 if(isForList){
                     publication.setNumberOfRegistered(cursor.getInt(cursor.getColumnIndex(PUBLICATION_NUMBER_OF_REGISTERED)));
                     publication.set_group_name(cursor.getString(cursor.getColumnIndex(PUBLICATION_GROUP_NAME)));
                 } else {
+                    publication.setAudience(cursor.getInt(cursor.getColumnIndex(PUBLICATION_AUDIENCE_KEY)));
                     publication.setPhotoUrl(cursor.getString(cursor.getColumnIndex(PUBLICATION_PHOTO_URL)));
                     publication.setPublisherUID(cursor.getString(cursor.getColumnIndex(PUBLICATION_PUBLISHER_UUID_KEY)));
                     publication.setSubtitle(cursor.getString(cursor.getColumnIndex(PUBLICATION_SUBTITLE_KEY)));
                     publication.setTypeOfCollecting(cursor.getInt(cursor.getColumnIndex(PUBLICATION_TYPE_OF_COLLECTION_KEY)));
                     publication.setStartingDateUnixTime(cursor.getLong(cursor.getColumnIndex(PUBLICATION_STARTING_DATE_KEY)));
-                    publication.setEndingDate(cursor.getLong(cursor.getColumnIndex(PUBLICATION_ENDING_DATE_KEY)));
                     publication.setContactInfo(cursor.getString(cursor.getColumnIndex(PUBLICATION_CONTACT_INFO_KEY)));
                     publication.setIsOnAir(cursor.getInt(cursor.getColumnIndex(PUBLICATION_IS_ON_AIR_KEY)) == 1);
+                    publication.setPublisherID(cursor.getInt(cursor.getColumnIndex(PUBLICATION_PUBLISHER_ID_KEY)));
                     //publication.setIfTriedToGetPictureBefore(cursor.getInt(cursor.getColumnIndex(PUBLICATION_TRIED_TO_LOAD_IMAGE)));
                 }
                 result.add(publication);
@@ -706,15 +715,7 @@ public class FCPublication implements Serializable, ICanWriteSelfToJSONWriter {
     }
 
     public void setImageByteArrayFromBitmap(Bitmap bitmap){
-        setImageByteArray(BitmapToBytes(bitmap));
-    }
-
-    private byte[] BitmapToBytes(Bitmap bitmap){
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        //todo: error null pointer could be thrown here, check if reproducable
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
-        byte[] byteArray = stream.toByteArray();
-        return byteArray;
+        setImageByteArray(CommonUtil.BitmapToBytes(bitmap));
     }
 
     public String GetImageFileName(){

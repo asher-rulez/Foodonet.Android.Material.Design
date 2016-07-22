@@ -79,6 +79,7 @@ public class HttpServerConnectorAsync extends AsyncTask<InternalRequest, Void, S
     public ArrayList<RegisteredUserForPublication> registeredUsers;
     private int newUserID;
     private Group group;
+    private int groupMemberToDeleteID;
 
     private int Action_Command_ID;
     private long publicationID;
@@ -444,7 +445,7 @@ public class HttpServerConnectorAsync extends AsyncTask<InternalRequest, Void, S
                 MakeServerRequest(REQUEST_METHOD_POST, server_sub_path, fr, false);
                 return "";
             //endregion
-            //region POST USER
+            //region POST NEW USER
             case InternalRequest.ACTION_POST_NEW_USER:
                 doAfterRegistrationActionID = params[0].DoAfterRegistrationActionID;
                 UserRegistrationAddEdit registration = new UserRegistrationAddEdit();
@@ -468,6 +469,20 @@ public class HttpServerConnectorAsync extends AsyncTask<InternalRequest, Void, S
                     }
                 }
                 isSuccess = newUserID > 0;
+                return "";
+            //endregion
+            //region PUT EDIT USER
+            case InternalRequest.ACTION_PUT_EDIT_USER:
+                UserRegistrationAddEdit updateUser = new UserRegistrationAddEdit();
+                updateUser.IsLoggedIn = true;
+                updateUser.SocialNetworkType = params[0].SocialNetworkType;
+                updateUser.SocialNetworkID = params[0].SocialNetworkID;
+                updateUser.Token = params[0].SocialNetworkToken;
+                updateUser.PhoneNumber = params[0].PhoneNumber;
+                updateUser.Email = params[0].Email;
+                updateUser.UserName = params[0].UserName;
+                updateUser.DeviceUUID = params[0].DeviceUUID;
+                MakeServerRequest(REQUEST_METHOD_PUT, server_sub_path, updateUser, true);
                 return "";
             //endregion
             //region POST GROUP
@@ -528,7 +543,13 @@ public class HttpServerConnectorAsync extends AsyncTask<InternalRequest, Void, S
             case InternalRequest.ACTION_GET_GROUPS_BY_USER:
                 MakeServerRequest(REQUEST_METHOD_GET, server_sub_path, null, true);
                 return "";
-            //endregioin
+            //endregion
+            //region Delete group member
+            case InternalRequest.ACTION_DELETE_GROUP_MEMBER:
+                groupMemberToDeleteID = params[0].GroupMemberToDeleteID;
+                MakeServerRequest(REQUEST_METHOD_DELETE, server_sub_path  + "/" + String.valueOf(params[0].GroupMemberToDeleteID), null, false);
+                return "";
+            //endregion
             default:
                 return "";
         }
@@ -708,6 +729,11 @@ public class HttpServerConnectorAsync extends AsyncTask<InternalRequest, Void, S
                 irNewUser.DoAfterRegistrationActionID = doAfterRegistrationActionID;
                 callbackListener.OnServerRespondedCallback(irNewUser);
                 break;
+            case InternalRequest.ACTION_PUT_EDIT_USER:
+                Log.i(MY_TAG, "put edit user complete: " + (isSuccess ? "ok" : "fail"));
+                InternalRequest irEditedUser = new InternalRequest(Action_Command_ID, isSuccess);
+                callbackListener.OnServerRespondedCallback(irEditedUser);
+                break;
             case InternalRequest.ACTION_POST_NEW_GROUP:
                 Log.i(MY_TAG, "post new group complete: " + (isSuccess ? "ok" : "fail"));
                 InternalRequest irGroupResponse = new InternalRequest(Action_Command_ID, isSuccess);
@@ -719,6 +745,12 @@ public class HttpServerConnectorAsync extends AsyncTask<InternalRequest, Void, S
                 InternalRequest irGroupsByUser = new InternalRequest(Action_Command_ID, isSuccess);
                 irGroupsByUser.resultString = responseString;
                 callbackListener.OnServerRespondedCallback(irGroupsByUser);
+                break;
+            case InternalRequest.ACTION_DELETE_GROUP_MEMBER:
+                Log.i(MY_TAG, "delete group member: " + (isSuccess ? "ok" : "fail"));
+                InternalRequest irDeleteMember = new InternalRequest(Action_Command_ID, isSuccess);
+                irDeleteMember.GroupMemberToDeleteID = groupMemberToDeleteID;
+                callbackListener.OnServerRespondedCallback(irDeleteMember);
                 break;
         }
     }

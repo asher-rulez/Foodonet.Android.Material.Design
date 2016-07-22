@@ -16,6 +16,7 @@ import android.graphics.drawable.StateListDrawable;
 import android.location.Location;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -72,6 +73,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -80,13 +82,17 @@ import java.util.Map;
 import Adapters.AllPublicationsListRecyclerViewAdapter;
 import Adapters.IOnPublicationFromListSelected;
 import Adapters.MapMarkerInfoWindowAdapter;
+import CommonUtilPackage.AmazonImageUploader;
 import CommonUtilPackage.CommonUtil;
+import CommonUtilPackage.IAmazonFinishedCallback;
 import CommonUtilPackage.INewGroupNameEnter;
 import CommonUtilPackage.IPleaseRegisterDialogCallback;
 import CommonUtilPackage.ImageDictionarySyncronized;
 import CommonUtilPackage.InternalRequest;
 import DataModel.FCPublication;
+import FooDoNetSQLClasses.FooDoNetSQLExecuterAsync;
 import FooDoNetSQLClasses.FooDoNetSQLHelper;
+import FooDoNetSQLClasses.IFooDoNetSQLCallback;
 import FooDoNetServerClasses.HttpServerConnectorAsync;
 import FooDoNetServerClasses.IFooDoNetServerCallback;
 import FooDoNetServerClasses.ImageDownloader;
@@ -107,7 +113,7 @@ public class EntarenceMapAndListActivity
         TabLayout.OnTabSelectedListener,
         TextWatcher,
         IPleaseRegisterDialogCallback,
-        IFooDoNetServerCallback {
+        IFooDoNetServerCallback, IAmazonFinishedCallback, IFooDoNetSQLCallback {
 
     private static final String MY_TAG = "food_mapAndList";
 
@@ -399,6 +405,8 @@ public class EntarenceMapAndListActivity
                         currentFilterID = FooDoNetSQLHelper.FILTER_ID_LIST_ALL_BY_CLOSEST;
                         break;
                 }
+                if(adapter != null)
+                    adapter.UpdatePublicationsList(new ArrayList<FCPublication>(), currentListMode == LIST_MODE_MY);
                 SetTabsVisibility(currentListMode);
                 RestartLoadingForPublicationsList();
 //                Intent intent = new Intent(getApplicationContext(), MyPublicationsActivity.class);
@@ -417,6 +425,8 @@ public class EntarenceMapAndListActivity
                 }
                 break;
             case R.id.rl_btn_settings:
+                Intent intentSettings = new Intent(this, SettingsSelectActivity.class);
+                startActivity(intentSettings);
                 break;
             case R.id.rl_btn_contact_us:
                 break;
@@ -963,6 +973,30 @@ public class EntarenceMapAndListActivity
         }
     }
 
+    @Override
+    public void NotifyToBListenerAboutEvent(int eventCode) {
+
+    }
+
+    @Override
+    public void OnSQLTaskComplete(InternalRequest request) {
+        switch (request.ActionCommand){
+            case InternalRequest.ACTION_SQL_GET_SINGLE_PUBLICATION_BY_ID:
+                FCPublication loadedPublication = request.publicationForDetails;
+                Intent intent = new Intent(this, ExistingPublicationActivity.class);
+                intent.putExtra(ExistingPublicationActivity.PUBLICATION_EXTRA_KEY, loadedPublication);
+                startActivityForResult(intent, 1);
+                if(progressDialog != null){
+                    progressDialog.dismiss();
+                    progressDialog = null;
+                }
+                break;
+            default:
+                Log.w(MY_TAG, "unexpected sql async task result!");
+                break;
+        }
+    }
+
     public abstract class HidingScrollListener extends RecyclerView.OnScrollListener {
         private static final float HIDE_THRESHOLD = 10;
         private static final float SHOW_THRESHOLD = 70;
@@ -1084,7 +1118,11 @@ public class EntarenceMapAndListActivity
 
     @Override
     public void OnPublicationFromListClicked(int publicationID) {
-
+        progressDialog = CommonUtil.ShowProgressDialog(this, getString(R.string.progress_loading_publication));
+        FooDoNetSQLExecuterAsync sqlGetPubAsync = new FooDoNetSQLExecuterAsync(this, getContentResolver());
+        InternalRequest ir = new InternalRequest(InternalRequest.ACTION_SQL_GET_SINGLE_PUBLICATION_BY_ID);
+        ir.PublicationID = publicationID;
+        sqlGetPubAsync.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, ir);
     }
 
     @Override
@@ -1262,10 +1300,18 @@ public class EntarenceMapAndListActivity
 
     @Override
     public void OnServerRespondedCallback(InternalRequest response) {
+        if(response == null) return;
         switch (response.Status) {
             case InternalRequest.STATUS_OK:
-                if (response.newUserID > 0)
+                if (response.newUserID > 0) {
                     CommonUtil.SaveMyUserID(this, response.newUserID);
+                    File avatarFile = new File(Environment.getExternalStorageDirectory()
+                            + getResources().getString(R.string.image_folder_path), getString(R.string.user_avatar_file_name));
+                    if(avatarFile.exists()){
+                        AmazonImageUploader uploader = new AmazonImageUploader(this, this);
+                        uploader.UploadUserAvatarToAmazon(avatarFile);
+                    }
+                }
                 switch (response.DoAfterRegistrationActionID) {
                     case DO_AFTER_REGISTRATION_CODE_ADD_PUBLICATION:
                         Intent addPub = new Intent(this, AddEditPublicationActivity.class);

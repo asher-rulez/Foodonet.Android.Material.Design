@@ -13,6 +13,7 @@ import android.widget.TextView;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 import CommonUtilPackage.CommonUtil;
 import CommonUtilPackage.ImageDictionarySyncronized;
@@ -107,7 +108,9 @@ public class AllPublicationsListRecyclerViewAdapter extends RecyclerView.Adapter
 
             tv_title_all.setText(publication.getTitle());
             tv_title_all.setVisibility(isMine?View.GONE:View.VISIBLE);
-            group_name.setText(publication.get_group_name());
+            group_name.setText(publication.get_group_name().compareToIgnoreCase("0") == 0
+                    ? context.getString(R.string.public_share_group_name)
+                    : publication.get_group_name());
             group_name.setVisibility(isMine?View.VISIBLE:View.GONE);
 
             tv_address.setText(context.getString(R.string.address_format_for_list).replace("{0}",
@@ -120,7 +123,7 @@ public class AllPublicationsListRecyclerViewAdapter extends RecyclerView.Adapter
             tv_number_of_users.setText(
                     context.getString(R.string.users_joined_format_for_list)
                             .replace("{0}", String.valueOf(publication.getNumberOfRegistered())));
-            tv_time_left.setText("00:00");
+            tv_time_left.setText(CommonUtil.GetTimeLeftString(context, new Date(), publication.getEndingDate()));
             SetPublicationImage(publication, publicationImage);
             //tv_time_left.setText(CommonUtil.); commonUtil.gettimeleftforpublication
         }

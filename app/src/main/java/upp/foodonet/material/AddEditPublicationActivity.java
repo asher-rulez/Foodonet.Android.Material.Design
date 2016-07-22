@@ -80,6 +80,7 @@ import CommonUtilPackage.IGotMyLocationCallback;
 import CommonUtilPackage.InternalRequest;
 import DataModel.FCPublication;
 import DataModel.FCTypeOfCollecting;
+import DataModel.Group;
 
 
 public class AddEditPublicationActivity extends FragmentActivity
@@ -139,6 +140,7 @@ public class AddEditPublicationActivity extends FragmentActivity
     private boolean startedSelectGroup = false;
     private final int ACTIVITY_FOR_RESULT_REQUEST_CODE_SELECT_GROUP = 3;
 
+    Group customGroup;
 
     Context context = this;
 
@@ -156,7 +158,7 @@ public class AddEditPublicationActivity extends FragmentActivity
             publication.setLatitude(latitude);
             publication.setLongitude(longitude);
             publication.setAddress(address);
-            publication.setAudience(-1);
+            publication.setAudience(0);
             isNew = true;
         } else {
             publication = (FCPublication) extras.get(PUBLICATION_KEY);
@@ -167,19 +169,16 @@ public class AddEditPublicationActivity extends FragmentActivity
         et_publication_title = (EditText) findViewById(R.id.et_title_new_publication);
         et_publication_title.setOnClickListener(this);
         et_publication_title.setOnEditorActionListener(this);
+        et_address = (EditText) findViewById(R.id.et_address_edit_add_pub);
+        et_address.setOnClickListener(this);
+        et_address.setOnTouchListener(this);
 
         et_more_details = (EditText) findViewById(R.id.et_subtitle_add_edit_pub);
         if (!isNew) {
             et_publication_title.setText(publication.getTitle());
             et_more_details.setText(publication.getSubtitle());
-            //et_additional_info.setText(publication.getContactInfo());
             et_address.setText(publication.getAddress());
-//            String imagePath = CommonUtil.GetFileNameByPublication(publication);
-//            imagePath = Environment.getExternalStorageDirectory() + getString(R.string.image_folder_path) + "/" + imagePath;
-//            Bitmap bm = CommonUtil.decodeScaledBitmapFromSdCard(imagePath, 200, 200);
-//            mAddPicImageView.setImageBitmap(bm);
         }
-
 
         mAddPicImageView = (ImageView) findViewById(R.id.imgAddPicture);
         mAddPicImageView.setOnClickListener(this);
@@ -192,12 +191,9 @@ public class AddEditPublicationActivity extends FragmentActivity
         fab_add_photo = (FloatingActionButton) findViewById(R.id.fab_add_photo);
         fab_add_photo.setOnClickListener(this);
 
-        et_address = (EditText) findViewById(R.id.et_address_edit_add_pub);
-        et_address.setOnClickListener(this);
-        et_address.setOnTouchListener(this);
-
         et_share_with = (EditText) findViewById(R.id.et_share_with);
         et_share_with.setOnTouchListener(this);
+        SetShareWithRow();
 
         if (isNew || publication.getEndingDate().compareTo(new Date()) <= 0) {
             Calendar calendar = Calendar.getInstance();
@@ -236,6 +232,20 @@ public class AddEditPublicationActivity extends FragmentActivity
         toolbar.inflateMenu(R.menu.menu_add_edit_publication);
     }
 
+    private void SetShareWithRow(){
+        if(publication.getAudience() == 0){
+            et_share_with.setText(getString(R.string.public_share_group_name));
+            et_share_with.setCompoundDrawablesWithIntrinsicBounds(null, null, getResources().getDrawable(R.drawable.public_group_pub_det_icon), null);
+        } else {
+            Cursor cursor = getContentResolver().query(
+                    Uri.parse(FooDoNetSQLProvider.URI_GROUP + "/" + publication.getAudience()),
+                    Group.GetColumnNamesArray(), null, null, null);
+            customGroup = Group.GetGroupsFromCursor(cursor).get(0);
+            et_share_with.setText(customGroup.Get_name());
+            publication.set_group_name(customGroup.Get_name());
+            et_share_with.setCompoundDrawablesWithIntrinsicBounds(null, null, getResources().getDrawable(R.drawable.group_pub_det_icon), null);
+        }
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -349,14 +359,14 @@ public class AddEditPublicationActivity extends FragmentActivity
         publication.setPriceDescription("");
         publication.setContactInfo(CommonUtil.GetMyPhoneNumberFromPreferences(this));
         publication.setPriceDescription("");
-
+        publication.setPublisherID(CommonUtil.GetMyUserID(this));
 //        publication.setIfTriedToGetPictureBefore(true);
     }
 
     private boolean ValidateInputData() {
         return ValidateTitle()
                 && ValidateAddress()
-                    && ValidateGroupChoosen();
+                && ValidateGroupChoosen();
     }
 
     private boolean ValidateTitle() {
@@ -370,7 +380,7 @@ public class AddEditPublicationActivity extends FragmentActivity
         if (et_publication_title.getText().toString().length() >= 10000) {//HARDCODE!!!
             CommonUtil.SetEditTextIsValid(this, et_publication_title, false);
             Toast.makeText(this, getString(
-                            R.string.validation_title_too_long).replace("{0}", String.valueOf(10000)),
+                    R.string.validation_title_too_long).replace("{0}", String.valueOf(10000)),
                     Toast.LENGTH_LONG).show();
             return false;
         }
@@ -415,8 +425,8 @@ public class AddEditPublicationActivity extends FragmentActivity
         return true;
     }
 
-    private boolean ValidateGroupChoosen(){
-        if(publication.getAudience() < 0){
+    private boolean ValidateGroupChoosen() {
+        if (publication.getAudience() < 0) {
             CommonUtil.SetEditTextIsValid(this, et_share_with, false);
             Toast.makeText(this, getString(R.string.validation_must_choose_group), Toast.LENGTH_SHORT).show();
             return false;
@@ -557,8 +567,9 @@ public class AddEditPublicationActivity extends FragmentActivity
                 }
                 break;
             case ACTIVITY_FOR_RESULT_REQUEST_CODE_SELECT_GROUP:
-                if(resultCode < 0) return;
+                if (resultCode < 0) return;
                 publication.setAudience(resultCode);
+/*
                 et_share_with.setText(data.getStringExtra(SelectGroupForPublicationActivity.EXTRA_KEY_GROUP_NAME));
                 Bitmap validationBitmap = CommonUtil.decodeScaledBitmapFromDrawableResource(context.getResources(),
                         resultCode == 0 ? R.drawable.globe_icon_list : R.drawable.group_icon_list,
@@ -567,6 +578,8 @@ public class AddEditPublicationActivity extends FragmentActivity
                 Drawable validationDrawable = new BitmapDrawable(validationBitmap);
                 et_share_with.setCompoundDrawablesWithIntrinsicBounds(validationDrawable, null, null, null);
                 et_share_with.setCompoundDrawablePadding(10);
+*/
+                SetShareWithRow();
                 startedSelectGroup = false;
                 break;
         }

@@ -11,12 +11,14 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.LocationManager;
 //import android.net.http.AndroidHttpClient;
+import android.media.ExifInterface;
 import android.os.Environment;
 import android.util.Log;
 
@@ -29,6 +31,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -205,6 +208,7 @@ public class CommonUtil {
             FileInputStream fis = new FileInputStream(photo.getPath());
             byte[] imageBytes = IOUtils.toByteArray(fis);
             Bitmap bImage = CommonUtil.decodeScaledBitmapFromByteArray(imageBytes, width, heigth);
+            bImage = PreRotateBitmapFromFile(bImage, photo);
             result = new BitmapDrawable(bImage);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -451,18 +455,18 @@ public class CommonUtil {
     }
 
     public static void PutCommonPreferencesIsRegisteredGoogleFacebook(Context context, GoogleSignInAccount account) {
-        PutCommonPreferencesSocialAccountData(context, "google", account.getDisplayName(), account.getIdToken());
+        PutCommonPreferencesSocialAccountData(context, "google", account.getDisplayName(), account.getIdToken(), account.getId());
         SaveMyUserNameToPreferences(context, account.getDisplayName());
         SaveMyEmailToPreferences(context, account.getEmail());
     }
 
     public static void PutCommonPreferencesIsRegisteredGoogleFacebook(Context context, Profile account) {
-        PutCommonPreferencesSocialAccountData(context, "facebook", account.getName(), account.getId());
+        PutCommonPreferencesSocialAccountData(context, "facebook", account.getName(), account.getId(), account.getId());
         SaveMyUserNameToPreferences(context, account.getName());
         SaveMyEmailToPreferences(context, "");
     }
 
-    private static void PutCommonPreferencesSocialAccountData(Context context, String socialAccountType, String socialAccountName, String socialAccountToken) {
+    private static void PutCommonPreferencesSocialAccountData(Context context, String socialAccountType, String socialAccountName, String socialAccountToken, String socialAccountID) {
         SharedPreferences sp = context.getSharedPreferences(
                 context.getString(R.string.shared_preferences_google_facebook_data_token), Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sp.edit();
@@ -470,8 +474,34 @@ public class CommonUtil {
         editor.putString(context.getString(R.string.shared_preferences_social_account_type_key), socialAccountType);
         editor.putString(context.getString(R.string.shared_preferences_social_account_name_key), socialAccountName);
         editor.putString(context.getString(R.string.shared_preferences_social_account_token_key), socialAccountToken);
+        editor.putString(context.getString(R.string.shared_preferences_social_account_id), socialAccountID);
         editor.commit();
         Log.i(MY_TAG, "Registered to " + socialAccountType + ", name: " + socialAccountName);
+    }
+
+    public static void ClearPreferencesSocialAccountDataForLogout(Context context) {
+        SharedPreferences sp = context.getSharedPreferences(
+                context.getString(R.string.shared_preferences_google_facebook_data_token), Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sp.edit();
+        editor.putBoolean(context.getString(R.string.shared_preferences_is_registered_to_google_facebook_key), false);
+        editor.putString(context.getString(R.string.shared_preferences_social_account_type_key), null);
+        editor.putString(context.getString(R.string.shared_preferences_social_account_name_key), null);
+        editor.putString(context.getString(R.string.shared_preferences_social_account_token_key), null);
+        editor.putString(context.getString(R.string.shared_preferences_social_account_id), null);
+        editor.commit();
+        Log.i(MY_TAG, "Cleared registration data for logout");
+    }
+
+    public static String GetSocialAccountTypeFromPreferences(Context context) {
+        SharedPreferences sp = context.getSharedPreferences(
+                context.getString(R.string.shared_preferences_google_facebook_data_token), Context.MODE_PRIVATE);
+        return sp.getString(context.getString(R.string.shared_preferences_social_account_type_key), "");
+    }
+
+    public static String GetSocialAccountIDFromPreferences(Context context) {
+        SharedPreferences sp = context.getSharedPreferences(
+                context.getString(R.string.shared_preferences_google_facebook_data_token), Context.MODE_PRIVATE);
+        return sp.getString(context.getString(R.string.shared_preferences_social_account_id), "");
     }
 
     public static String GetSocialAccountNameFromPreferences(Context context) {
@@ -548,7 +578,7 @@ public class CommonUtil {
     }
 
     public static Bitmap LoadAndSavePicture(InputStream is, String url, int maxImageWidthHeight, String imageFolderPath, String fileName) {
-        InputStream inputStream = is;
+        InputStream input = is;
         try {
             HttpURLConnection connection = null;
             URL urlurl = new URL(url);
@@ -557,40 +587,55 @@ public class CommonUtil {
             connection.setReadTimeout(5000);
             connection.setConnectTimeout(1000);
             connection.setUseCaches(false);
-            inputStream = connection.getInputStream();
+            input = new BufferedInputStream(connection.getInputStream());
 
-            //is = new java.net.URL(url).openStream();
-            byte[] result = IOUtils.toByteArray(inputStream);
-            result = CommonUtil.CompressImageByteArrayByMaxSize(result, maxImageWidthHeight);
-            Log.i(MY_TAG, "Compressed image to " + (int) Math.round(result.length / 1024) + " kb");
+            if(imageFolderPath != null) {
+                File photo = new File(Environment.getExternalStorageDirectory() + imageFolderPath, fileName);
+                if (photo.exists()) {
+                    photo.delete();
+                }
+                photo.createNewFile();
+                OutputStream output = new FileOutputStream(photo.getAbsolutePath());
+                byte data[] = new byte[1024];
+                int count;
+                while ((count = input.read(data)) != -1) {
+                    output.write(data, 0, count);
+                }
+                output.flush();
+                output.close();
+                input.close();
 
-            File photo = new File(Environment.getExternalStorageDirectory() + imageFolderPath, fileName);
 
-            if (photo.exists()) {
-                photo.delete();
+/*
+            if (imageFolderPath != null) {
+                try {
+                    FileOutputStream fos = new FileOutputStream(photo.getPath());
+                    fos.write(result);
+                    fos.close();
+                } catch (IOException e) {
+                    Log.e(MY_TAG, "cant save image");
+                }
+                Log.i(MY_TAG, "succeeded load and image " + photo.getPath());
             }
-
-            try {
-                FileOutputStream fos = new FileOutputStream(photo.getPath());
-
-                fos.write(result);
-                fos.close();
-            } catch (IOException e) {
-                Log.e(MY_TAG, "cant save image");
+*/
+                Bitmap bitmap = decodeScaledBitmapFromSdCard(photo.getAbsolutePath(), 1000, 1000);
+                bitmap = PreRotateBitmapFromFile(bitmap, photo);
+                return bitmap;
+            } else {
+                byte[] result = IOUtils.toByteArray(input);
+                result = CommonUtil.CompressImageByteArrayByMaxSize(result, maxImageWidthHeight);
+                Log.i(MY_TAG, "Compressed image to " + (int) Math.round(result.length / 1024) + " kb");
+                Bitmap b = BitmapFactory.decodeByteArray(result, 0, result.length);
+                return b;
             }
-            //resultImages.put(id, result);
-            Log.i(MY_TAG, "succeeded load and image " + photo.getPath());
-            //return BitmapFactory.decodeByteArray(result, 0, result.length);
-            Bitmap b = BitmapFactory.decodeByteArray(result, 0, result.length);
-            return b;
         } catch (MalformedURLException e) {
             e.printStackTrace();
         } catch (IOException e) {
-            //e.printStackTrace();
+            e.printStackTrace();
             Log.e(MY_TAG, "cant load image for: " + fileName);
         } finally {
-            if (inputStream != null) try {
-                inputStream.close();
+            if (input != null) try {
+                input.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -598,6 +643,39 @@ public class CommonUtil {
         return null;
     }
 
+    private static Bitmap PreRotateBitmapFromFile(Bitmap bitmap, File photoFile){
+        Bitmap result = null;
+        try {
+            ExifInterface ei = new ExifInterface(photoFile.getAbsolutePath());
+            int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+            Matrix mtx = new Matrix();
+            int w = bitmap.getWidth();
+            int h = bitmap.getHeight();
+            switch (orientation) {
+                case ExifInterface.ORIENTATION_ROTATE_90:
+                    //rotate CCW
+                    mtx.preRotate(90);
+                    result = Bitmap.createBitmap(bitmap, 0, 0, w, h, mtx, true);
+                    break;
+
+                case ExifInterface.ORIENTATION_ROTATE_270:
+                    //rotate CW
+                    mtx.preRotate(-90);
+                    result = Bitmap.createBitmap(bitmap, 0, 0, w, h, mtx, true);
+                    break;
+
+                //CONSIDER OTHER CASES HERE....
+
+                default:
+                    result = bitmap;
+                    break;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    return result;
+    }
 
     public static boolean CheckIfStringsDiffer(String string1, String string2) {
         if (string1 == null && string2 != null) return true;
@@ -639,10 +717,10 @@ public class CommonUtil {
         return sp.getString(context.getString(R.string.shared_preferences_user_data_user_name), "");
     }
 
-    public static boolean SaveMyUserNameToPreferences(Context context, String phoneNum) {
+    public static boolean SaveMyUserNameToPreferences(Context context, String userName) {
         SharedPreferences sp = context.getSharedPreferences(context.getString(R.string.shared_preferences_user_data_token), Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sp.edit();
-        editor.putString(context.getString(R.string.shared_preferences_user_data_user_name), phoneNum);
+        editor.putString(context.getString(R.string.shared_preferences_user_data_user_name), userName);
         return editor.commit();
     }
 
@@ -677,11 +755,11 @@ public class CommonUtil {
     }
 
     public static void HideSoftKeyboard(Activity activity) {
-        InputMethodManager inputMethodManager = (InputMethodManager)  activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
+        InputMethodManager inputMethodManager = (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
         inputMethodManager.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(), 0);
     }
 
-    public static AlertDialog ShowDialogNeedToRegister(final Context context, final int doAfterRegistrationCode, final IPleaseRegisterDialogCallback callback){
+    public static AlertDialog ShowDialogNeedToRegister(final Context context, final int doAfterRegistrationCode, final IPleaseRegisterDialogCallback callback) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle(context.getString(R.string.dialog_title_please_register));
         builder.setMessage(context.getString(R.string.dialog_message_please_register));
@@ -704,4 +782,67 @@ public class CommonUtil {
         dialog.show();
         return dialog;
     }
+
+    public static byte[] BitmapToBytes(Bitmap bitmap) {
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        //todo: error null pointer could be thrown here, check if reproducable
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+        byte[] byteArray = stream.toByteArray();
+        return byteArray;
+    }
+
+    public static int GetNotificationsSettingsRadius(Context context) {
+        SharedPreferences sp = context.getSharedPreferences(context.getString(R.string.notif_settings_sp_key), Context.MODE_PRIVATE);
+        int result = sp.getInt(context.getString(R.string.notif_settings_radius_key), context.getResources().getInteger(R.integer.notifications_settings_default_radius));
+        if (result == context.getResources().getInteger(R.integer.notifications_settings_default_radius)) {
+            SharedPreferences.Editor editor = sp.edit();
+            editor.putInt(context.getString(R.string.notif_settings_radius_key), context.getResources().getInteger(R.integer.notifications_settings_default_radius));
+            editor.commit();
+        }
+        return result;
+    }
+
+    public static void SetNotificationsSettingsRadius(Context context, int radius) {
+        SharedPreferences sp = context.getSharedPreferences(context.getString(R.string.notif_settings_sp_key), Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sp.edit();
+        editor.putInt(context.getString(R.string.notif_settings_radius_key), radius);
+        editor.commit();
+    }
+
+    public static void SetDefaultNotificationsSettingsRadius(Context context) {
+        SetNotificationsSettingsRadius(context, context.getResources().getInteger(R.integer.notifications_settings_default_radius));
+    }
+
+    public static boolean GetNotificationsSettingsIsOn(Context context) {
+        SharedPreferences sp = context.getSharedPreferences(context.getString(R.string.notif_settings_sp_key), Context.MODE_PRIVATE);
+        boolean result = sp.getBoolean(context.getString(R.string.notif_settings_is_on_key), true);
+        if (result) {
+            SharedPreferences.Editor editor = sp.edit();
+            editor.putBoolean(context.getString(R.string.notif_settings_is_on_key), true);
+            editor.commit();
+        }
+        return result;
+    }
+
+    public static void SetNotificationsSettingsIsOn(Context context, boolean isOn) {
+        SharedPreferences sp = context.getSharedPreferences(context.getString(R.string.notif_settings_sp_key), Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sp.edit();
+        editor.putBoolean(context.getString(R.string.notif_settings_is_on_key), isOn);
+        editor.commit();
+    }
+
+    public static String GetTimeLeftString(Context context, Date start, Date end){
+        long timeSpanInSeconds = (end.getTime() - start.getTime())/1000;
+        long secondsLeft = (timeSpanInSeconds >= 60 ? timeSpanInSeconds % 60 : timeSpanInSeconds);
+        long timeSpanInMinutes = timeSpanInSeconds / 60;
+        long minutesLeft = (timeSpanInMinutes >= 60 ? timeSpanInMinutes % 60 : timeSpanInMinutes);
+        long timeSpanInHours = timeSpanInMinutes / 60;
+        long hoursLeft = (timeSpanInHours >= 24 ? timeSpanInHours % 24 : timeSpanInHours);
+        long timeSpanInDays = timeSpanInHours / 24;
+        return timeSpanInDays >= 1
+                ? context.getString(R.string.time_left_format_more_than_day).replace("{0}", String.valueOf(timeSpanInDays)).replace("{1}", String.valueOf(hoursLeft))
+                : context.getString(R.string.time_left_format_less_one_day).replace("{0}", String.valueOf(timeSpanInHours)).replace("{1}", String.valueOf(minutesLeft));
+    }
+
+
 }

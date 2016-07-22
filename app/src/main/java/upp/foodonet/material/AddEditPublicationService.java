@@ -28,7 +28,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import CommonUtilPackage.AmazonImageUploader;
 import CommonUtilPackage.CommonUtil;
+import CommonUtilPackage.IAmazonFinishedCallback;
 import CommonUtilPackage.InternalRequest;
 import DataModel.FCPublication;
 import FooDoNetSQLClasses.FooDoNetSQLExecuterAsync;
@@ -44,7 +46,7 @@ import FooDoNetServiceUtil.ServicesBroadcastReceiver;
  * TODO: Customize class - update intent actions, extra parameters and static
  * helper methods.
  */
-public class AddEditPublicationService extends IntentService implements IFooDoNetSQLCallback, IFooDoNetServerCallback {
+public class AddEditPublicationService extends IntentService implements IFooDoNetSQLCallback, IFooDoNetServerCallback, IAmazonFinishedCallback {
 
     private static final String MY_TAG = "food_serviceAddEditPub";
 
@@ -233,8 +235,10 @@ public class AddEditPublicationService extends IntentService implements IFooDoNe
                 }
                 File imgFile = new File(Environment.getExternalStorageDirectory() + getString(R.string.image_folder_path),
                         CommonUtil.GetFileNameByPublication(request.publicationForSaving));
-                if (imgFile.exists())
-                    UploadImageToAmazon(imgFile, false);
+                if (imgFile.exists()) {
+                    AmazonImageUploader imageUploader = new AmazonImageUploader(getApplicationContext(), this);
+                    imageUploader.UploadPublicationImageToAmazon(imgFile, false);
+                }
                 else
                     NotifyToBListenerAboutEvent(ServicesBroadcastReceiver.ACTION_CODE_SAVE_NEW_PUB_SUCCESS);
                 //NotifyToBListenerAboutPubSavedInDB(ServicesBroadcastReceiver.ACTION_CODE_SAVE_NEW_PUB_COMPLETE);
@@ -242,15 +246,17 @@ public class AddEditPublicationService extends IntentService implements IFooDoNe
             case InternalRequest.ACTION_SQL_SAVE_EDITED_PUBLICATION:
                 File imgFile1 = new File(Environment.getExternalStorageDirectory() + getString(R.string.image_folder_path),
                         CommonUtil.GetFileNameByPublication(request.publicationForSaving));
-                if (imgFile1.exists())
-                    UploadImageToAmazon(imgFile1, true);
+                if (imgFile1.exists()) {
+                    AmazonImageUploader imageUploader = new AmazonImageUploader(getApplicationContext(), this);
+                    imageUploader.UploadPublicationImageToAmazon(imgFile1, true);
+                }
                 else
                     NotifyToBListenerAboutEvent(ServicesBroadcastReceiver.ACTION_CODE_SAVE_EDITED_PUB_SUCCESS);
                 break;
         }
     }
 
-    private void NotifyToBListenerAboutEvent(int eventCode) {
+    public void NotifyToBListenerAboutEvent(int eventCode) {
         Intent intent = new Intent(ServicesBroadcastReceiver.BROADCAST_REC_INTENT_FILTER);
         intent.putExtra(ServicesBroadcastReceiver.BROADCAST_REC_EXTRA_ACTION_KEY, eventCode);
         sendBroadcast(intent);
@@ -300,71 +306,4 @@ public class AddEditPublicationService extends IntentService implements IFooDoNe
                 break;
         }
     }
-
-    private void UploadImageToAmazon(File imgFile, boolean isEdit) {
-        RegisterAWSS3();
-        File imageToSave = imgFile;
-        String imageName = imgFile.getName();
-        uploadPhotoForPublication(imageToSave, imageName, isEdit);
-    }
-
-    public void RegisterAWSS3() {
-        // initialize a credentials provider object with your Activity’s context and
-        // the values from your identity pool
-        credentialsProvider = new CognitoCachingCredentialsProvider(
-                getApplicationContext(), // get the context for the current activity
-                "458352772906", // your AWS Account id
-                "us-east-1:ec4b269f-88a9-471d-b548-7886e1f9f2d7", // your identity pool id
-                "arn:aws:iam::458352772906:role/Cognito_food_collector_poolUnauth_DefaultRole", // an unauthenticated role ARN
-                "arn:aws:iam::458352772906:role/Cognito_food_collector_poolAuth_DefaultRole",// an authenticated role ARN
-                Regions.US_EAST_1 //Region
-        );
-        Log.i(MY_TAG, "succesfully registered to amazon");
-    }
-
-    private void uploadPhotoForPublication(File sourceFile, String fileName, final boolean isEdit) {
-        // Create an S3 client
-        AmazonS3 s3 = new AmazonS3Client(credentialsProvider);
-
-        // Set the region of your S3 bucket
-        s3.setRegion(Region.getRegion(Regions.US_EAST_1));
-
-        TransferUtility transferUtility = new TransferUtility(s3, getApplicationContext());
-
-        TransferObserver observer = transferUtility.upload(
-                "foodcollectordev",     /* The bucket to upload to */
-                fileName,          /* The key for the uploaded object */
-                sourceFile        /* The file where the data to upload exists */
-        );
-
-        observer.setTransferListener(new TransferListener() {
-
-            @Override
-            public void onStateChanged(int id, TransferState state) {
-                // do something
-                //Log.d(MY_TAG,"AMAZON UPLOAD STATE IS ---> " + state);
-            }
-
-            @Override
-            public void onProgressChanged(int id, long bytesCurrent, long bytesTotal) {
-                int percentage = (int) (bytesCurrent / bytesTotal * 100);
-                //Display percentage transfered to user
-                //Log.d(MY_TAG,"AMAZON PROGRESS OF UPLOAD PICTURE IS ---> " + percentage);
-                if (percentage >= 99)
-                    NotifyToBListenerAboutEvent(isEdit
-                            ? ServicesBroadcastReceiver.ACTION_CODE_SAVE_EDITED_PUB_SUCCESS
-                            : ServicesBroadcastReceiver.ACTION_CODE_SAVE_NEW_PUB_SUCCESS);
-            }
-
-            @Override
-            public void onError(int id, Exception ex) {
-                // do something
-                Log.d(MY_TAG, "OOOOPPPSSSS - UPLOAD DIDN'T WORK WELL ---> " + ex.getMessage());
-            }
-
-        });
-
-    }
-
-
 }

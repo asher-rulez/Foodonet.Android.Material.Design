@@ -38,30 +38,23 @@ public class ImageDownloader {
     }
 
     public void Download(int publicationID, int publicationVersion, ImageView imageView) {
-
-/*
-        if (publicationID == 0 && publicationVersion == 0) {
-            BitmapDrawable bitmapDrawable = CommonUtil.GetBitmapDrawableFromFile("avatar1.jpeg", context.getString(R.string.image_folder_path), 100, 100);
-            String fileName = "882.1.jpg";
-            if (bitmapDrawable == null) {
-                ForceDownload(0, fileName, imageFolderPath, imageRepositoryBaseUrl, imageView);
-            } else {
-                Toast.makeText(context, "file found on sd-card, should add to dict", Toast.LENGTH_LONG).show();
-                imageView.setImageDrawable(bitmapDrawable);
-            }
-            return;
-        }
-*/
-
         BitmapDrawable bitmapDrawable = CommonUtil.GetImageFromFileForPublication(context, publicationID, publicationVersion, null, 100);
         String fileName = CommonUtil.GetFileNameByIdAndVersion(publicationID, publicationVersion);
         if (bitmapDrawable == null) {
             ForceDownload(publicationID, fileName, imageFolderPath, imageRepositoryBaseUrl, imageView);
         } else {
-            imageDictionary.Put(publicationID, bitmapDrawable);
+            if(imageDictionary != null)
+                imageDictionary.Put(publicationID, bitmapDrawable);
             CancelPotentialDownload(fileName, imageView);
             imageView.setImageDrawable(bitmapDrawable);
         }
+    }
+
+    public void DownloadUserAvatar(String fileName, ImageView imageView){
+        BitmapDownloaderTask task = new BitmapDownloaderTask(imageView, fileName, context.getString(R.string.amazon_url_for_user_avatar));
+        DownloadedDrawable downloadedDrawable = new DownloadedDrawable(task, defaultBitmap, context.getResources());
+        imageView.setImageDrawable(downloadedDrawable);
+        task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     private void ForceDownload(int id, String fileName, String imageFolderPath, String imageRepositoryBaseUrl, ImageView imageView) {
@@ -116,6 +109,8 @@ public class ImageDownloader {
         private final WeakReference<ImageView> imageViewReference;
         private final WeakReference<ImageDictionarySyncronized> imageDictionary;
 
+        boolean notForSaving;
+
         private String getImageUrl() {
             return baseUrl + "/" + fileName;
         }
@@ -126,7 +121,15 @@ public class ImageDownloader {
             this.publicationID = id;
             this.baseUrl = baseUrl;
             this.imageFolderPath = imageFolderPath;
-            this.imageDictionary = new WeakReference<ImageDictionarySyncronized>(imageDictionary);
+            this.imageDictionary = imageDictionary != null ? new WeakReference<ImageDictionarySyncronized>(imageDictionary) : null;
+        }
+
+        public BitmapDownloaderTask(ImageView imageView, String fileName, String baseUrl){
+            imageViewReference = new WeakReference<ImageView>(imageView);
+            this.fileName = fileName;
+            this.baseUrl = baseUrl;
+            imageDictionary = null;
+            notForSaving = true;
         }
 
         /**
@@ -134,7 +137,7 @@ public class ImageDownloader {
          */
         @Override
         protected Bitmap doInBackground(Void... params) {
-            return CommonUtil.LoadAndSavePicture(null, getImageUrl(), 100, imageFolderPath, fileName);
+            return CommonUtil.LoadAndSavePicture(null, getImageUrl(), 100, notForSaving ? null : imageFolderPath, fileName);
         }
 
         /**

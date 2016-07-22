@@ -27,6 +27,10 @@ public class RegisteredUserForPublication implements Serializable, ICanWriteSelf
     public static final String REGISTERED_FOR_PUBLICATION_KEY_PUBLICATION_VERSION = "publication_version";
     public static final String REGISTERED_FOR_PUBLICATION_KEY_DATE = "date_of_registration";
     public static final String REGISTERED_FOR_PUBLICATION_KEY_DEVICE_UUID = "active_device_dev_uuid";
+    public static final String REGISTERED_FOR_PUBLICATION_KEY_USER_ID = "collector_user_id";
+    public static final String REGISTERED_FOR_PUBLICATION_KEY_USER_NAME = "collector_name";
+    public static final String REGISTERED_FOR_PUBLICATION_KEY_USER_CONTACT_INFO = "collector_contact_info";
+
 
     public static final String REGISTERED_FOR_PUBLICATION_KEY_NEW_NEGATIVE_ID = "neg_id";
 
@@ -86,6 +90,10 @@ public class RegisteredUserForPublication implements Serializable, ICanWriteSelf
         collectorPhone = phone;
     }
 
+    private int collectorUserID;
+    public int getUserID() { return collectorUserID; }
+    public void setUserID(int userID) { collectorUserID = userID; }
+
     public static String[] GetColumnNamesArray() {
         return
                 new String[]{
@@ -93,7 +101,10 @@ public class RegisteredUserForPublication implements Serializable, ICanWriteSelf
                         REGISTERED_FOR_PUBLICATION_KEY_PUBLICATION_ID,
                         REGISTERED_FOR_PUBLICATION_KEY_PUBLICATION_VERSION,
                         REGISTERED_FOR_PUBLICATION_KEY_DATE,
-                        REGISTERED_FOR_PUBLICATION_KEY_DEVICE_UUID
+                        REGISTERED_FOR_PUBLICATION_KEY_DEVICE_UUID,
+                        REGISTERED_FOR_PUBLICATION_KEY_USER_NAME,
+                        REGISTERED_FOR_PUBLICATION_KEY_USER_CONTACT_INFO,
+                        REGISTERED_FOR_PUBLICATION_KEY_USER_ID
                 };
     }
 
@@ -104,6 +115,9 @@ public class RegisteredUserForPublication implements Serializable, ICanWriteSelf
         cv.put(REGISTERED_FOR_PUBLICATION_KEY_PUBLICATION_VERSION, getPublication_version());
         cv.put(REGISTERED_FOR_PUBLICATION_KEY_DATE, getDate_registered_unix_time());
         cv.put(REGISTERED_FOR_PUBLICATION_KEY_DEVICE_UUID, getDevice_registered_uuid());
+        cv.put(REGISTERED_FOR_PUBLICATION_KEY_USER_NAME, getCollectorName());
+        cv.put(REGISTERED_FOR_PUBLICATION_KEY_USER_CONTACT_INFO, getCollectorphone());
+        cv.put(REGISTERED_FOR_PUBLICATION_KEY_USER_ID, getUserID());
         return cv;
     }
 
@@ -118,6 +132,9 @@ public class RegisteredUserForPublication implements Serializable, ICanWriteSelf
                 rufp.setPublication_version(cursor.getInt(cursor.getColumnIndex(REGISTERED_FOR_PUBLICATION_KEY_PUBLICATION_VERSION)));
                 rufp.setDate_registered(cursor.getLong(cursor.getColumnIndex(REGISTERED_FOR_PUBLICATION_KEY_DATE)));
                 rufp.setDevice_registered_uuid(cursor.getString(cursor.getColumnIndex(REGISTERED_FOR_PUBLICATION_KEY_DEVICE_UUID)));
+                rufp.setCollectorName(cursor.getString(cursor.getColumnIndex(REGISTERED_FOR_PUBLICATION_KEY_USER_NAME)));
+                rufp.setCollectorphone(cursor.getString(cursor.getColumnIndex(REGISTERED_FOR_PUBLICATION_KEY_USER_CONTACT_INFO)));
+                rufp.setUserID(cursor.getInt(cursor.getColumnIndex(REGISTERED_FOR_PUBLICATION_KEY_USER_ID)));
                 result.add(rufp);
             } while (cursor.moveToNext());
         }
@@ -147,6 +164,10 @@ public class RegisteredUserForPublication implements Serializable, ICanWriteSelf
             rufp.setPublication_version(jo.getInt(REGISTERED_FOR_PUBLICATION_KEY_PUBLICATION_VERSION));
             rufp.setDate_registered(jo.getLong(REGISTERED_FOR_PUBLICATION_KEY_DATE));
             rufp.setDevice_registered_uuid(jo.getString(REGISTERED_FOR_PUBLICATION_KEY_DEVICE_UUID));
+            rufp.setCollectorName(jo.getString(REGISTERED_FOR_PUBLICATION_KEY_USER_NAME));
+            rufp.setCollectorphone(jo.getString(REGISTERED_FOR_PUBLICATION_KEY_USER_CONTACT_INFO));
+            if(!jo.isNull(REGISTERED_FOR_PUBLICATION_KEY_USER_ID))
+                rufp.setUserID(jo.getInt(REGISTERED_FOR_PUBLICATION_KEY_USER_ID));
         } catch (JSONException e) {
             e.printStackTrace();
             Log.e(MY_TAG, e.getMessage());
@@ -158,16 +179,18 @@ public class RegisteredUserForPublication implements Serializable, ICanWriteSelf
     @Override
     public org.json.simple.JSONObject GetJsonObjectForPost() {
         Map<String, Object> deviceData = new HashMap<String, Object>();
-        deviceData.put("publication_id", getPublication_id());
-        deviceData.put("date_of_registration", getDate_registered_unix_time());
-        deviceData.put("active_device_dev_uuid", getDevice_registered_uuid());
-        deviceData.put("publication_version", getPublication_version());
-        deviceData.put("collector_contact_info", getCollectorphone());
-        deviceData.put("collector_name", getCollectorName());
+        deviceData.put(REGISTERED_FOR_PUBLICATION_KEY_PUBLICATION_ID, getPublication_id());
+        deviceData.put(REGISTERED_FOR_PUBLICATION_KEY_DATE, getDate_registered_unix_time());
+        deviceData.put(REGISTERED_FOR_PUBLICATION_KEY_DEVICE_UUID, getDevice_registered_uuid());
+        deviceData.put(REGISTERED_FOR_PUBLICATION_KEY_PUBLICATION_VERSION, getPublication_version());
+        deviceData.put(REGISTERED_FOR_PUBLICATION_KEY_USER_CONTACT_INFO, getCollectorphone());
+        deviceData.put(REGISTERED_FOR_PUBLICATION_KEY_USER_NAME, getCollectorName());
+        //deviceData.put(REGISTERED_FOR_PUBLICATION_KEY_USER_ID, getUserID());
         Map<String, Object> dataToSend = new HashMap<String, Object>();
         dataToSend.put("registered_user_for_publication", deviceData);
 
         org.json.simple.JSONObject json = new org.json.simple.JSONObject(dataToSend);
         return json;
     }
+
 }

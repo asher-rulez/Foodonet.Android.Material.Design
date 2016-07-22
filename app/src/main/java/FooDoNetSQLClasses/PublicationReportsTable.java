@@ -31,6 +31,10 @@ public class PublicationReportsTable {
         sb.append(" text null, ");
         sb.append(PublicationReport.PUBLICATION_REPORT_FIELD_KEY_REPORT_CONTACT_INFO);
         sb.append(" text null, ");
+        sb.append(PublicationReport.PUBLICATION_REPORT_FIELD_KEY_REPORT_USER_ID);
+        sb.append(" integer not null, ");
+        sb.append(PublicationReport.PUBLICATION_REPORT_FIELD_KEY_REPORT_RATING);
+        sb.append(" integer not null, ");
         sb.append(PublicationReport.PUBLICATION_REPORT_FIELD_KEY_REPORT);
         sb.append(" integer not null);");
         return sb.toString();

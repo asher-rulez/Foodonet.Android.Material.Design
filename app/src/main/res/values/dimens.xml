@@ -45,7 +45,7 @@
     <dimen name="pub_details_btn_leave_report_marginRight">14dp</dimen>
     <dimen name="pub_details_btn_leave_report_marginTop">14dp</dimen>
 
-    <dimen name="pub_details_image_size">100dp</dimen>
+    <dimen name="pub_details_image_height">200dp</dimen>
     <dimen name="pub_details_pub_props_panel_height">180dp</dimen>
     <dimen name="pub_details_pub_props_ll_width">0dp</dimen>
     <dimen name="pub_details_pub_props_ll_marginLeft">16dp</dimen>
@@ -172,5 +172,8 @@
 
 
     <!-- ============== -->
+
+    <!-- Notifications -->
+    <integer name="notifications_settings_default_radius">60</integer>
 
 </resources>

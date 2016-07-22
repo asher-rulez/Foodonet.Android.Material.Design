@@ -357,6 +357,12 @@
 
     <string name="group_admin_subtitle">Admin</string>
 
+    <string name="button_text_leave">Leave</string>
+    <string name="button_text_group">group</string>
+
+    <string name="progress_delete_member">Removing group member</string>
+    <string name="progress_leave_group">Leaving group</string>
+
     <!-- Common -->
 
     <string name="confirmAction">Sure?</string>
@@ -387,14 +393,12 @@
     <string name="title_activity_my_publications">MyPublicationsActivity</string>
     <string name="all_shares_toolbar_title">All shares</string>
     <string name="toolbar_title_map">Sharings on map</string>
-
-    <!-- My publications list -->
-
     <string name="filter_all_my_pubs">Ends</string>
     <string name="filter_active_my_pubs">On Air</string>
     <string name="filter_ended_my_pubs">Off Air</string>
     <string name="new_pub_waiting_for_save_on_server">Saving publications to server, please wait</string>
     <string name="my_shares_toolbar_title">My shares</string>
+    <string name="progress_loading_publication">Loading publication</string>
 
     <!-- Navigation side menu -->
 
@@ -409,5 +413,78 @@
 
     <string name="public_share_group_name">Public</string>
     <string name="loading_groups">Loading groups</string>
+    <string name="title_activity_settings_select">SettingsSelectActivity</string>
+    <string name="share_with_format">Share with: {0}</string>
+
+    <!-- Settings -->
+
+    <string name="profile_settings_button_text">Profile settings</string>
+    <string name="notification_settings_button_text">Notifications</string>
+    <string name="logout_button_text">Log out</string>
+    <string name="title_activity_profile_view_and_edit">profile_view_and_edit</string>
+
+    <!-- Profile -->
+
+    <string name="profile_header_label">Profile</string>
+    <string name="profile_settings_header_label">Profile settings</string>
+    <string name="edit_button_text">Edit</string>
+    <string name="update_button_text">Save changes</string>
+    <string name="profile_edit_user_name_hint">Edit name</string>
+    <string name="profile_edit_phone_hint">Edit phone number</string>
+    <string name="progress_saving_profile">Saving profile</string>
+    <string name="title_activity_notification_settings">NotificationSettings</string>
+
+    <!-- Notifications settings -->
+
+    <string name="notifications_settings_set_distance">Set the distance</string>
+    <string name="notifications_settings_radius">Notifications Radius:</string>
+    <string name="title_activity_existing_publication">Share details</string>
+
+    <!-- Existing publication -->
+
+    <string name="share_details_activity_title">Share details</string>
+    <string name="menu_item_edit">Edit</string>
+    <string name="menu_item_stop_event">Stop Event</string>
+    <string name="menu_item_restart_event">Restart Event</string>
+    <string name="menu_item_delete">Delete</string>
+    <string name="menu_item_report">Report</string>
+    <string name="time_left_format_less_one_day">{0}h {1}m</string>
+    <string name="time_left_format_more_than_day">{0}d {1}h</string>
+    <string name="time_left_ended">Ended</string>
+    <string name="user_rating_format">{0}.{1}</string>
+    <string name="publication_details_price">Price:</string>
+    <string name="publication_details_price_free">Free</string>
+    <string name="publication_details_price_format">{0} ₪</string>
+    <string name="publication_details_no_reports">No reports</string>
+    <string name="publication_details_reports">Reports:</string>
+    <string name="report_format">{0} (reported {1} ago)</string>
+
+    <string name="report_has_more">Has more to pickup</string>
+    <string name="report_took_all">Took all</string>
+    <string name="report_nothing_found">Found nothing there</string>
+    <string name="report_error">Report error</string>
+
+    <string name="post_on_facebook_action">post on facebook</string>
+    <string name="post_on_tweeter_action">post on tweeter</string>
+    <string name="no_registered_user_for_sms_or_call">No users registered</string>
+    <string name="select_reg_user_title">Select user:</string>
+    <string name="action_registering_for_publication">Registering to publication</string>
+    <string name="action_unregistering_from_publication">Unregistering from publication</string>
+    <string name="pub_det_uimessage_failed_register_to_pub">Failed to register to publication</string>
+    <string name="pub_det_uimessage_failed_unregister_from_pub">Failed to unregister from publication</string>
+
+    <string name="progress_creating_account">Creating account</string>
+
+    <string name="report_big_distance">You\'re more than 2km away from place, are you sure you want to leave report?</string>
+
+    <string name="report_dialog_title_format">You arrived to {0}</string>
+    <string name="report_dialog_please_rate_it">Please rate it:</string>
+    <string name="progress_leaving_report">Leaving report</string>
+
+    <string name="additional_report_not_allowed_title">You\'ve already posted a report on this event</string>
+    <string name="additional_report_not_allowed_content">only one report can be posted for each event</string>
+
+    <string name="failed_to_save_edited_publication">Failed to save publication</string>
+    <string name="succeeded_to_save_edited_publication">Succeeded to save publication</string>
 
 </resources>
