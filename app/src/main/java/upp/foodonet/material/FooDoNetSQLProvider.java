@@ -22,11 +22,13 @@ import java.util.HashSet;
 
 import CommonUtilPackage.CommonUtil;
 import DataModel.FCPublication;
+import DataModel.FNotification;
 import DataModel.Group;
 import DataModel.GroupMember;
 import DataModel.PublicationReport;
 import DataModel.RegisteredUserForPublication;
 import FooDoNetSQLClasses.FCPublicationsTable;
+import FooDoNetSQLClasses.FNotificationsTable;
 import FooDoNetSQLClasses.FooDoNetSQLHelper;
 import FooDoNetSQLClasses.GroupMemberTable;
 import FooDoNetSQLClasses.GroupTable;
@@ -69,10 +71,12 @@ public class FooDoNetSQLProvider extends ContentProvider {
     private static final int REPORTS_LIST_FOR_PUBLICATION = 90;
     private static final int GROUP = 100;
     private static final int GROUP_BY_ID = 101;
+    private static final int GROUPS_LIST = 102;
     private static final int GROUP_MEMBERS_BY_GROUP_ID = 105;
     private static final int GROUP_MEMBER_BY_MEMBER_ID = 110;
     private static final int GROUP_MEMBER = 111;
-    private static final int GROUPS_LIST = 102;
+    private static final int NOTIFICATIONS = 120;
+    private static final int NOTIFICATION_BY_ID = 121;
 
     private static final String AUTHORITY = "foodonet.foodcollector.sqlprovider";
 
@@ -124,6 +128,8 @@ public class FooDoNetSQLProvider extends ContentProvider {
     private static final String EXT_GROUP_MEMBER = "/GroupMembers";
 
     private static final String EXT_GROUP_MEMBERS_BY_GROUP = "GroupMembersByGroup";
+
+    private static final String EXT_NOTIFICATIONS = "/Notifications";
 
     public static final String BASE_STRING_FOR_URI = "content://" + AUTHORITY + "/" + BASE_PATH;
 
@@ -184,7 +190,10 @@ public class FooDoNetSQLProvider extends ContentProvider {
             = Uri.parse(BASE_STRING_FOR_URI + EXT_GROUPS_LIST);
     public static final Uri URI_GROUP_MEMBERS
             = Uri.parse(BASE_STRING_FOR_URI + EXT_GROUP_MEMBER);
-    public static final Uri URI_GROUP_MEMBERS_BY_GROUP = Uri.parse(BASE_STRING_FOR_URI + EXT_GROUP_MEMBERS_BY_GROUP);
+    public static final Uri URI_GROUP_MEMBERS_BY_GROUP
+            = Uri.parse(BASE_STRING_FOR_URI + EXT_GROUP_MEMBERS_BY_GROUP);
+    public static final Uri URI_NOTIFICATIONS
+            = Uri.parse(BASE_STRING_FOR_URI + EXT_NOTIFICATIONS);
 
     public static final String CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE + "/publications";
 
@@ -225,6 +234,8 @@ public class FooDoNetSQLProvider extends ContentProvider {
         sURIMatcher.addURI(AUTHORITY, BASE_PATH + EXT_GROUP_MEMBER + "/#", GROUP_MEMBER_BY_MEMBER_ID);
         sURIMatcher.addURI(AUTHORITY, BASE_PATH + EXT_GROUP_MEMBERS_BY_GROUP + "/#", GROUP_MEMBERS_BY_GROUP_ID);
         sURIMatcher.addURI(AUTHORITY, BASE_PATH + EXT_GROUPS_LIST, GROUPS_LIST);
+        sURIMatcher.addURI(AUTHORITY, BASE_PATH + EXT_NOTIFICATIONS, NOTIFICATIONS);
+        sURIMatcher.addURI(AUTHORITY, BASE_PATH + EXT_NOTIFICATIONS + "/#", NOTIFICATION_BY_ID);
     }
 
     @Override
@@ -354,6 +365,9 @@ public class FooDoNetSQLProvider extends ContentProvider {
                 Cursor cGroupsList = database.getReadableDatabase().rawQuery(GroupTable.GetRawSelectGroupsForList(), null);
                 cGroupsList.setNotificationUri(getContext().getContentResolver(), uri);
                 return cGroupsList;
+            case NOTIFICATIONS:
+                queryBuilder.setTables(FNotificationsTable.FNOTIFICATIONSS_TABLE_NAME);
+                break;
 //            case REPORTS_LIST_FOR_PUBLICATION:
 //                return database.getReadableDatabase()
 //                        .rawQuery(FooDoNetSQLHelper.RAW_SELECT_REPORTS_FOR_PUB_DETAILS.replace("{0}", String.valueOf(uri.getLastPathSegment())), null);
@@ -391,6 +405,9 @@ public class FooDoNetSQLProvider extends ContentProvider {
                 break;
             case GROUP_MEMBER:
                 id = db.insert(GroupMemberTable.GROUP_MEMBER_TABLE_NAME, null, values);
+                break;
+            case NOTIFICATIONS:
+                id = db.insert(FNotificationsTable.FNOTIFICATIONSS_TABLE_NAME, null, values);
                 break;
             default:
                 throw new IllegalArgumentException("Unknown URI: " + uri);
@@ -498,6 +515,11 @@ public class FooDoNetSQLProvider extends ContentProvider {
             case GROUP_MEMBER:
                 rowsDeleted = 0;
                 rowsDeleted += db.delete(GroupMemberTable.GROUP_MEMBER_TABLE_NAME, null, null);
+                return rowsDeleted;
+            case NOTIFICATION_BY_ID:
+                rowsDeleted = 0;
+                rowsDeleted += db.delete(FNotificationsTable.FNOTIFICATIONSS_TABLE_NAME,
+                        FNotification.FNOTIFICATION_KEY_ID + " = " + uri.getLastPathSegment(), null);
                 return rowsDeleted;
             default:
                 throw new IllegalArgumentException("Unknown URI: " + uri);
@@ -618,6 +640,10 @@ public class FooDoNetSQLProvider extends ContentProvider {
 //                        {PublicationReport.PUBLICATION_REPORT_FIELD_KEY_REPORT,
 //                        PublicationReport.PUBLICATION_REPORT_FIELD_KEY_DATE};
 //                break;
+            case NOTIFICATIONS:
+            case NOTIFICATION_BY_ID:
+                available = FNotification.GetColumnNamesArray();
+                break;
             default:
                 Log.e(MY_TAG, "checkColumns got bad parameter action");
                 available = new String[]{};

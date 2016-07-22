@@ -20,7 +20,7 @@ public class FooDoNetSQLHelper extends SQLiteOpenHelper {
     private static final String MY_TAG = "food_SQLHelper";
 
     public static final String FC_DATABASE_NAME = "FoodCollector.db";
-    public static final int FC_DATABASE_VERSION = 17;
+    public static final int FC_DATABASE_VERSION = 18;
 
     public static final int FILTER_ID_LIST_ALL_BY_CLOSEST = 0;
     public static final int FILTER_ID_LIST_ALL_BY_NEWEST = 1;
@@ -46,6 +46,7 @@ public class FooDoNetSQLHelper extends SQLiteOpenHelper {
         PublicationReportsTable.onCreate(db);
         GroupTable.onCreate(db);
         GroupMemberTable.onCreate(db);
+        FNotificationsTable.onCreate(db);
     }
 
     @Override
@@ -55,6 +56,7 @@ public class FooDoNetSQLHelper extends SQLiteOpenHelper {
         PublicationReportsTable.onUpgrade(db);
         GroupTable.onUpgrade(db);
         GroupMemberTable.onUpgrade(db);
+        FNotificationsTable.onUpgrade(db);
     }
 
     public static String GetRawSelectPublicationsForListByFilterID(int filterID, String... params) {
