@@ -90,6 +90,7 @@ import CommonUtilPackage.IPleaseRegisterDialogCallback;
 import CommonUtilPackage.ImageDictionarySyncronized;
 import CommonUtilPackage.InternalRequest;
 import DataModel.FCPublication;
+import DataModel.PublicationReport;
 import FooDoNetSQLClasses.FooDoNetSQLExecuterAsync;
 import FooDoNetSQLClasses.FooDoNetSQLHelper;
 import FooDoNetSQLClasses.IFooDoNetSQLCallback;
@@ -191,6 +192,7 @@ public class EntarenceMapAndListActivity
     RelativeLayout btn_nav_menu_settings;
     RelativeLayout btn_nav_menu_contact_us;
     RelativeLayout btn_nav_menu_terms;
+    RelativeLayout btn_nav_menu_notifications;
 
 
     //endregion
@@ -203,6 +205,13 @@ public class EntarenceMapAndListActivity
     final int DO_AFTER_REGISTRATION_CODE_GROUPS = 12;
     final int DO_AFTER_REGISTRATION_CODE_SETTING = 13;
     final int DO_AFTER_REGISTRATION_CODE_MY_PUBS = 14;
+
+    //endregion
+
+    //region feedback
+
+    Dialog feedbackDialog;
+    EditText et_feedbackText;
 
     //endregion
 
@@ -471,8 +480,48 @@ public class EntarenceMapAndListActivity
                 }
                 break;
             case R.id.rl_btn_contact_us:
+                feedbackDialog = new Dialog(this);
+                feedbackDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+                feedbackDialog.setContentView(R.layout.dialog_send_feedback);
+                final Button btn_dialog_ok = (Button)feedbackDialog.findViewById(R.id.btn_feedback_ok);
+                final Button btn_dialog_cancel = (Button)feedbackDialog.findViewById(R.id.btn_feedback_cancel);
+                btn_dialog_ok.setOnClickListener(this);
+                btn_dialog_cancel.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        if(feedbackDialog != null)
+                            feedbackDialog.dismiss();
+                    }
+                });
+                et_feedbackText = (EditText)feedbackDialog.findViewById(R.id.et_feedback_text);
+                et_feedbackText.setText("");
+                feedbackDialog.show();
+                break;
+            case R.id.btn_feedback_ok:
+                if(et_feedbackText.getText().toString().length() == 0){
+                    CommonUtil.SetEditTextIsValid(this, et_feedbackText, false);
+                    Toast.makeText(this, getString(R.string.feedback_validation_text_null), Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                progressDialog = CommonUtil.ShowProgressDialog(this, getString(R.string.progress_feedback_sending));
+                HttpServerConnectorAsync serverConnector = new HttpServerConnectorAsync(getString(R.string.server_base_url), (IFooDoNetServerCallback)this);
+                InternalRequest ir = new InternalRequest(InternalRequest.ACTION_POST_FEEDBACK);
+                ir.publicationReport = new PublicationReport();
+                ir.publicationReport.setReportContactInfo(et_feedbackText.getText().toString());
+                ir.publicationReport.setReportUserName(
+                        getSharedPreferences(getString(R.string.shared_preferences_contact_info), MODE_PRIVATE)
+                                .getString(getString(R.string.shared_preferences_contact_info_name), ""));
+                ir.publicationReport.setDevice_uuid(CommonUtil.GetIMEI(this));
+                ir.ServerSubPath = getString(R.string.server_post_report_feedback);
+                serverConnector.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, ir);
                 break;
             case R.id.rl_btn_terms_and_conditions:
+                Intent aboutUsIntent = new Intent(this, AboutUsActivity.class);
+                startActivity(aboutUsIntent);
+                break;
+            case R.id.rl_btn_notifications:
+                Intent notificationsIntent = new Intent(this, NotificationsActivity.class);
+                startActivity(notificationsIntent);
                 break;
         }
 
@@ -930,6 +979,8 @@ public class EntarenceMapAndListActivity
         btn_nav_menu_contact_us.setOnClickListener(this);
         btn_nav_menu_terms = (RelativeLayout) findViewById(R.id.rl_btn_terms_and_conditions);
         btn_nav_menu_terms.setOnClickListener(this);
+        btn_nav_menu_notifications = (RelativeLayout)findViewById(R.id.rl_btn_notifications);
+        btn_nav_menu_notifications.setOnClickListener(this);
 
         tv_side_menu_list_mode = (TextView) findViewById(R.id.tv_side_menu_list_mode);
 
@@ -1350,41 +1401,49 @@ public class EntarenceMapAndListActivity
     @Override
     public void OnServerRespondedCallback(InternalRequest response) {
         if (response == null) return;
-        switch (response.Status) {
-            case InternalRequest.STATUS_OK:
-                if (response.newUserID > 0) {
-                    CommonUtil.SaveMyUserID(this, response.newUserID);
-                    File avatarFile = new File(Environment.getExternalStorageDirectory()
-                            + getResources().getString(R.string.image_folder_path), getString(R.string.user_avatar_file_name));
-                    if (avatarFile.exists()) {
-                        AmazonImageUploader uploader = new AmazonImageUploader(this, this);
-                        uploader.UploadUserAvatarToAmazon(avatarFile);
-                    }
-                }
-                switch (response.DoAfterRegistrationActionID) {
-                    case DO_AFTER_REGISTRATION_CODE_ADD_PUBLICATION:
-                        Intent addPub = new Intent(this, AddEditPublicationActivity.class);
-                        startActivityForResult(addPub, REQUEST_CODE_NEW_PUB);
+        switch (response.ActionCommand){
+            case InternalRequest.ACTION_POST_NEW_USER:
+                switch (response.Status) {
+                    case InternalRequest.STATUS_OK:
+                        if (response.newUserID > 0) {
+                            CommonUtil.SaveMyUserID(this, response.newUserID);
+                            File avatarFile = new File(Environment.getExternalStorageDirectory()
+                                    + getResources().getString(R.string.image_folder_path), getString(R.string.user_avatar_file_name));
+                            if (avatarFile.exists()) {
+                                AmazonImageUploader uploader = new AmazonImageUploader(this, this);
+                                uploader.UploadUserAvatarToAmazon(avatarFile);
+                            }
+                        }
+                        switch (response.DoAfterRegistrationActionID) {
+                            case DO_AFTER_REGISTRATION_CODE_ADD_PUBLICATION:
+                                Intent addPub = new Intent(this, AddEditPublicationActivity.class);
+                                startActivityForResult(addPub, REQUEST_CODE_NEW_PUB);
+                                break;
+                            case DO_AFTER_REGISTRATION_CODE_GROUPS:
+                                Intent intentGroups = new Intent(getApplicationContext(), GroupsListActivity.class);
+                                startActivity(intentGroups);
+                                break;
+                            case DO_AFTER_REGISTRATION_CODE_SETTING:
+                                Intent intentSettings = new Intent(this, SettingsSelectActivity.class);
+                                startActivityForResult(intentSettings, REQUEST_CODE_SETTINGS);
+                                break;
+                            case DO_AFTER_REGISTRATION_CODE_MY_PUBS:
+                                onClick(btn_nav_menu_my_pubs);
+                                break;
+                            case DO_AFTER_REGISTRATION_CODE_NOTHING:
+                                break;
+                        }
                         break;
-                    case DO_AFTER_REGISTRATION_CODE_GROUPS:
-                        Intent intentGroups = new Intent(getApplicationContext(), GroupsListActivity.class);
-                        startActivity(intentGroups);
-                        break;
-                    case DO_AFTER_REGISTRATION_CODE_SETTING:
-                        Intent intentSettings = new Intent(this, SettingsSelectActivity.class);
-                        startActivityForResult(intentSettings, REQUEST_CODE_SETTINGS);
-                        break;
-                    case DO_AFTER_REGISTRATION_CODE_MY_PUBS:
-                        onClick(btn_nav_menu_my_pubs);
-                        break;
-                    case DO_AFTER_REGISTRATION_CODE_NOTHING:
+                    case InternalRequest.STATUS_FAIL:
+                        CommonUtil.ClearUserDataOnLogOut(this, true);
+                        SetupSideMenuHeader();
+                        Snackbar.make(fab, getString(R.string.failed_to_login_try_later), Snackbar.LENGTH_SHORT).show();
                         break;
                 }
                 break;
-            case InternalRequest.STATUS_FAIL:
-                CommonUtil.ClearUserDataOnLogOut(this, true);
-                SetupSideMenuHeader();
-                Snackbar.make(fab, getString(R.string.failed_to_login_try_later), Snackbar.LENGTH_SHORT).show();
+            case InternalRequest.ACTION_POST_FEEDBACK:
+                if(progressDialog != null)
+                    progressDialog.dismiss();
                 break;
         }
     }

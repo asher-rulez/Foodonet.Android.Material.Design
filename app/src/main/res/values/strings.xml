@@ -407,6 +407,7 @@
     <string name="ttl_item_your_sh_menu">Your sharings</string>
     <string name="ttl_item_sub_menu">Subscription</string>
     <string name="ttl_item_groups_menu">Groups</string>
+    <string name="ttl_item_notifications">Notifications</string>
     <string name="ttl_item_settings_menu">Settings</string>
     <string name="ttl_item_contact_menu">Contact us</string>
     <string name="ttl_item_terms_menu">About</string><!--<![CDATA[Terms & conditions]]>-->
@@ -496,5 +497,30 @@
     <string name="progress_taking_pub_off_air">Stopping event</string>
     <string name="progress_activating_pub">Activating event</string>
     <string name="progress_delete_pub">Deleting event</string>
+    <string name="title_activity_about_us">About_us</string>
+
+    <!-- About us -->
+    <string name="about_us_title">About Foodonet</string>
+    <string name="about_us_current_version_format">v {0}</string>
+    <string name="about_us_text">Foodonet is a social initiative aiming to reduce food waste. Foodonet develops a mobile platform that allows people to easily donate spare food to each other. Foodonet is connecting food producers directly to customers with no mediators and cutting food costs</string>
+
+    <!-- feedback -->
+
+    <string name="feedback_report_hint">Feedback text</string>
+    <string name="feedback_validation_text_null">Please write something</string>
+    <string name="progress_feedback_sending">Sending feedback</string>
+    <string name="title_activity_notifications">NotificationsActivity</string>
+
+    <!-- Notifications -->
+
+    <string name="notifications_title">Notifications</string>
+    <string name="notification_title_new_event_near_you">New event near you:</string>
+    <string name="notification_title_event_ended">Event ended:</string>
+    <string name="notification_title_user_added_you_to_group">User added you to group:</string>
+    <string name="notification_title_event_changed">Event changed:</string>
+    <string name="notification_title_new_report_for_event">New report for event:</string>
+    <string name="notification_title_you_were_removed_from_group">You was removed from group:</string>
+    <string name="notification_title_someone_registered_for_your_pub">Someone registered for your publication:</string>
+
 
 </resources>
