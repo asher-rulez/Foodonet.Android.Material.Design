@@ -18,6 +18,7 @@ public class ServicesBroadcastReceiver extends BroadcastReceiver {
 
     public static final String BROADCAST_REC_EXTRA_ACTION_KEY = "action_extra_key";
     public static final String BROADCAST_REC_EXTRA_LOCATION_KEY = "action_extra_location";
+    public static final String BROADCAST_REC_EXTRA_NOTIFICATION_KEY = "action_extra_notification";
 
     public static final int ACTION_CODE_REGISTRATION_SUCCESS = 1;
     public static final int ACTION_CODE_REGISTRATION_FAIL = 2;
@@ -38,6 +39,13 @@ public class ServicesBroadcastReceiver extends BroadcastReceiver {
     public static final int ACTION_CODE_REMOVE_MYSELF_FROM_REGS_FOR_PUBLICATION = 46;
     public static final int ACTION_CODE_REPORT_TO_PUBLICATION_SUCCESS = 51;
     public static final int ACTION_CODE_REPORT_TO_PUBLICATION_FAIL = 52;
+    public static final int ACTION_CODE_NOTIFICATION_RECEIVED_NEW_PUBLICATION = 61;
+    public static final int ACTION_CODE_NOTIFICATION_RECEIVED_PUBLICATION_DELETED = 62;
+    public static final int ACTION_CODE_NOTIFICATION_RECEIVED_PUBLICATION_EDITED = 63;
+    public static final int ACTION_CODE_NOTIFICATION_RECEIVED_NEW_REGISTERED_USER = 64;
+    public static final int ACTION_CODE_NOTIFICATION_RECEIVED_NEW_REPORT = 65;
+    public static final int ACTION_CODE_NOTIFICATION_RECEIVED_ADDED_TO_GROUP = 66;
+    public static final int ACTION_CODE_NOTIFICATION_RECEIVED_REMOVED_FROM_GROUP = 67;
 
 
     public ServicesBroadcastReceiver(IBroadcastReceiverCallback callback){

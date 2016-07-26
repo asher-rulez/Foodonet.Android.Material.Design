@@ -8,13 +8,14 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 
 /**
  * Created by Asher on 22-Jul-16.
  */
-public class FNotification {
+public class FNotification implements Serializable {
     private static final String MY_TAG = "food_fnotification";
 
     public static final String FNOTIFICATION_KEY_ID = "_id";
@@ -139,7 +140,7 @@ public class FNotification {
 
     public ContentValues GetContentValuesRow() {
         ContentValues cv = new ContentValues();
-        cv.put(FNOTIFICATION_KEY_ID, "NULL");
+        //cv.put(FNOTIFICATION_KEY_ID, "NULL");
         cv.put(FNOTIFICATION_KEY_TYPE, get_type());
         cv.put(FNOTIFICATION_KEY_DATE_ARRIVED, getDateArrivedUnixTime());
         cv.put(FNOTIFICATION_KEY_PUBLICATION_OR_GROUP_ID, get_publication_or_group_id());
@@ -174,18 +175,20 @@ public class FNotification {
         FNotification notification = new FNotification();
         try {
             notification.set_date_arrived(new Date());
+            if(jo.isNull(FNOTIFICATION_KEY_TYPE))
+                return null;
 
             String type_got_from_json = jo.getString(FNOTIFICATION_KEY_TYPE);
-            org.json.JSONObject innerJson = jo.getJSONObject(FNOTIFICATION_KEY_DATA);
-            notification.set_publication_or_group_id(innerJson.getInt(FNOTIFICATION_KEY_PUBLICATION_OR_GROUP_ID));
-            notification.set_publication_or_group_title(innerJson.getString(FNOTIFICATION_KEY_PUBLICATION_OR_GROUP_TITLE));
+            //org.json.JSONObject innerJson = jo.getJSONObject(FNOTIFICATION_KEY_DATA);
+            notification.set_publication_or_group_id(jo.getInt(FNOTIFICATION_KEY_PUBLICATION_OR_GROUP_ID));
+            notification.set_publication_or_group_title(jo.getString(FNOTIFICATION_KEY_PUBLICATION_OR_GROUP_TITLE));
 
             if (type_got_from_json.compareTo(FNOTIFICATION_TYPE_KEY_GROUP_MEMBERS) == 0) {
                 notification.set_type(FNOTIFICATION_TYPE_GROUP_MEMBER_ADD);
             } else {
-                notification.set_publication_version(innerJson.getInt(FNOTIFICATION_KEY_PUBLICATION_VERSION));
-                notification.set_latitude(innerJson.getDouble(FNOTIFICATION_KEY_LATITUDE));
-                notification.set_longitude(innerJson.getDouble(FNOTIFICATION_KEY_LONGITUDE));
+                notification.set_publication_version(jo.getInt(FNOTIFICATION_KEY_PUBLICATION_VERSION));
+                notification.set_latitude(jo.getDouble(FNOTIFICATION_KEY_LATITUDE));
+                notification.set_longitude(jo.getDouble(FNOTIFICATION_KEY_LONGITUDE));
                 switch (type_got_from_json) {
                     case FNOTIFICATION_TYPE_KEY_NEW_PUBLICATION:
                         notification.set_type((notification.get_publication_version() == 1)

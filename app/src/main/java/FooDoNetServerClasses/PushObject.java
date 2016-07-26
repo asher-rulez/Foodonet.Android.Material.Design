@@ -1,3 +1,4 @@
+/*
 package FooDoNetServerClasses;
 
 
@@ -8,9 +9,11 @@ import org.json.JSONObject;
 
 import java.util.Date;
 
+*/
 /**
  * Created by Asher on 28.10.2015.
- */
+ *//*
+
 public class PushObject {
 
     public static final String PUSH_OBJECT_MSG = "message";
@@ -69,3 +72,4 @@ public class PushObject {
 //        return null;
     }
 }
+*/

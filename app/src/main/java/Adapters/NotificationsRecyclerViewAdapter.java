@@ -95,7 +95,7 @@ public class NotificationsRecyclerViewAdapter extends RecyclerView.Adapter<Notif
             switch (notification.get_type()){
                 case FNotification.FNOTIFICATION_TYPE_NEW_PUBLICATION:
                     tv_title.setText(context.getString(R.string.notification_title_new_event_near_you));
-                    tv_title.setText(context.getString(R.string.notification_title_event_changed));
+                    tv_title.setText(context.getString(R.string.notification_title_new_event_near_you));
                     break;
                 case FNotification.FNOTIFICATION_TYPE_EDITED_PUBLICATION:
                     iv_icon.setImageDrawable(context.getResources().getDrawable(R.drawable.notification_icon_new_event));

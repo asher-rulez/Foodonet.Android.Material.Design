@@ -76,7 +76,6 @@
                 <!-- action android:name="com.google.android.c2dm.intent.REGISTRATION" / -->
             </intent-filter>
         </receiver>
-        <!--
         <service
             android:name=".FooDoNetGcmListenerService"
             android:exported="false">
@@ -91,7 +90,6 @@
                 <action android:name="com.google.android.gms.iid.InstanceID" />
             </intent-filter>
         </service>
-        -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
@@ -99,9 +97,6 @@
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
 
-        <service
-            android:name=".FooDoNetInstanceIDListenerService"
-            android:exported="false" />
         <service
             android:name=".FooDoNetService"
             android:enabled="true"
@@ -188,7 +183,8 @@
 
         <activity
             android:name=".NotificationsActivity"
-            android:screenOrientation="portrait"></activity>
+            android:screenOrientation="portrait" />
+
     </application>
 
 </manifest>

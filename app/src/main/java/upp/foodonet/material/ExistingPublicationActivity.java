@@ -1,5 +1,6 @@
 package upp.foodonet.material;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
@@ -47,6 +48,7 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -59,6 +61,7 @@ import CommonUtilPackage.IAmazonFinishedCallback;
 import CommonUtilPackage.IPleaseRegisterDialogCallback;
 import CommonUtilPackage.InternalRequest;
 import DataModel.FCPublication;
+import DataModel.FNotification;
 import DataModel.PublicationReport;
 import DataModel.RegisteredUserForPublication;
 import FooDoNetSQLClasses.FooDoNetSQLExecuterAsync;
@@ -153,6 +156,8 @@ public class ExistingPublicationActivity
 
     boolean ifChangesMade;
 
+    public Activity getActivity() { return ExistingPublicationActivity.this; }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -246,14 +251,24 @@ public class ExistingPublicationActivity
         isGoogleServiceAvailable = CheckPlayServices();
         if (!isGoogleServiceAvailable)
             OnGooglePlayServicesCheckError();
-        if (progressDialog != null && progressDialog.isShowing()) {
-            SharedPreferences sp = getSharedPreferences(getString(R.string.shared_preferences_pending_broadcast), MODE_PRIVATE);
-            if (!sp.contains(getString(R.string.shared_preferences_pending_broadcast_value)))
+        Cursor cursor = getContentResolver()
+                .query(Uri.parse(FooDoNetSQLProvider.CONTENT_URI + "/" + currentPublication.getUniqueId()),
+                        FCPublication.GetColumnNamesArray(), null, null, null);
+        ArrayList<FCPublication> publications = FCPublication.GetArrayListOfPublicationsFromCursor(cursor, false);
+        if(publications.size() == 0)
+            ShowAlertPublicationDeletedAndCloseScreen();
+        else if (progressDialog != null && progressDialog.isShowing()) {
+            int pendingBroadcastTypeID = CommonUtil.GetPendingBroadcastTypeFromSharedPreferences(this);
+            if (pendingBroadcastTypeID == -1) {
                 Log.e(MY_TAG, "progress bar showing, but no pending broadcast");
+                progressDialog.dismiss();
+            }
+            else {
             Intent intent = new Intent();
             intent.putExtra(ServicesBroadcastReceiver.BROADCAST_REC_EXTRA_ACTION_KEY,
-                    sp.getInt(getString(R.string.shared_preferences_pending_broadcast_value), -1));
-            onBroadcastReceived(intent);
+                    pendingBroadcastTypeID);
+                onBroadcastReceived(intent);
+            }
         }
     }
 
@@ -1000,11 +1015,36 @@ public class ExistingPublicationActivity
                                 : R.string.succeeded_to_save_edited_publication),
                         Toast.LENGTH_SHORT).show();
                 break;
+            case ServicesBroadcastReceiver.ACTION_CODE_NOTIFICATION_RECEIVED_PUBLICATION_DELETED:
+                if(progressDialog != null)
+                    progressDialog.dismiss();
+                Serializable sObj = intent.getSerializableExtra(ServicesBroadcastReceiver.BROADCAST_REC_EXTRA_NOTIFICATION_KEY);
+                if(sObj != null){
+                    FNotification notification = (FNotification)sObj;
+                    if(notification.get_publication_or_group_id() == currentPublication.getUniqueId()){
+                        ShowAlertPublicationDeletedAndCloseScreen();
+                    }
+                }
+                break;
         }
-        SharedPreferences sp = getSharedPreferences(getString(R.string.shared_preferences_pending_broadcast), MODE_PRIVATE);
-        SharedPreferences.Editor editor = sp.edit();
-        editor.remove(getString(R.string.shared_preferences_pending_broadcast_value));
-        editor.commit();
+        CommonUtil.ClearPendingBroadcastFromSharedPreferences(this);
+    }
+
+    private void ShowAlertPublicationDeletedAndCloseScreen(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.notification_this_publication_has_been_removed_by_owner);
+        builder.setPositiveButton(R.string.address_dialog_btn_ok, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+            }
+        }).show().setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialogInterface) {
+                getActivity().setResult(RESULT_OK);
+                getActivity().finish();
+            }
+        });
     }
 
     private void SetPublicationPropertiesToControls(){

@@ -35,4 +35,9 @@
     <string name="notif_settings_radius_key">notif_radius</string>
     <string name="notif_settings_is_on_key">notif_is_on</string>
 
+    <!-- Is application running in foreground -->
+
+    <string name="is_app_running_in_foreground_token">is_running_token</string>
+    <string name="is_app_running_in_foreground_key">is_running_key</string>
+
 </resources>

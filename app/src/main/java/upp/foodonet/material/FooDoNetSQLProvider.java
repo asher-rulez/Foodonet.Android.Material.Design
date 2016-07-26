@@ -524,6 +524,11 @@ public class FooDoNetSQLProvider extends ContentProvider {
                 rowsDeleted = 0;
                 rowsDeleted += db.delete(GroupMemberTable.GROUP_MEMBER_TABLE_NAME, null, null);
                 return rowsDeleted;
+            case NOTIFICATIONS:
+                rowsDeleted = 0;
+                rowsDeleted += db.delete(FNotificationsTable.FNOTIFICATIONSS_TABLE_NAME,
+                        selection, selectionArgs);
+                return rowsDeleted;
             case NOTIFICATION_BY_ID:
                 rowsDeleted = 0;
                 rowsDeleted += db.delete(FNotificationsTable.FNOTIFICATIONSS_TABLE_NAME,

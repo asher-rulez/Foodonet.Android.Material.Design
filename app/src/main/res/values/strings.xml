@@ -521,6 +521,8 @@
     <string name="notification_title_new_report_for_event">New report for event:</string>
     <string name="notification_title_you_were_removed_from_group">You was removed from group:</string>
     <string name="notification_title_someone_registered_for_your_pub">Someone registered for your publication:</string>
+    <string name="notification_this_publication_has_been_removed_by_owner">This publication has been removed by user!</string>
+    <string name="notification_publication_has_been_removed_by_owner">Publication has been removed by user:</string>
 
 
 </resources>

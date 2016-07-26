@@ -623,7 +623,7 @@ public class CommonUtil {
                 Log.i(MY_TAG, "succeeded load and image " + photo.getPath());
             }
 */
-                Bitmap bitmap = decodeScaledBitmapFromSdCard(photo.getAbsolutePath(), 1000, 1000);
+                Bitmap bitmap = decodeScaledBitmapFromSdCard(photo.getAbsolutePath(), 90, 90);
                 bitmap = PreRotateBitmapFromFile(bitmap, photo);
                 return bitmap;
             } else {
@@ -649,6 +649,8 @@ public class CommonUtil {
     }
 
     private static Bitmap PreRotateBitmapFromFile(Bitmap bitmap, File photoFile){
+        if(bitmap == null)
+            return null;
         Bitmap result = null;
         try {
             ExifInterface ei = new ExifInterface(photoFile.getAbsolutePath());
@@ -916,4 +918,43 @@ public class CommonUtil {
                 ServicesBroadcastReceiver.ACTION_CODE_RELOAD_DATA_SUCCESS);
         context.sendBroadcast(intent);
     }
+
+    public static void SetIsApplicationRunningInForeground(Context ctx, boolean isRunning){
+        SharedPreferences sp = ctx.getSharedPreferences(ctx.getString(R.string.is_app_running_in_foreground_token), Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sp.edit();
+        editor.putBoolean(ctx.getString(R.string.is_app_running_in_foreground_key), isRunning);
+        editor.commit();
+    }
+
+    public static boolean GetIsApplicationRunningInForeground(Context ctx){
+        SharedPreferences sp = ctx.getSharedPreferences(ctx.getString(R.string.is_app_running_in_foreground_token), Context.MODE_PRIVATE);
+        return sp.getBoolean(ctx.getString(R.string.is_app_running_in_foreground_key), false);
+    }
+
+    public static void SavePendingBroadcastToSharedPreferences(Context context, Intent intent){
+        SharedPreferences sp = context.getSharedPreferences(
+                context.getString(R.string.shared_preferences_pending_broadcast), context.MODE_PRIVATE);
+        SharedPreferences.Editor editor;
+        editor = sp.edit();
+        if(sp.contains(context.getString(R.string.shared_preferences_pending_broadcast_value)))
+            editor.remove(context.getString(R.string.shared_preferences_pending_broadcast_value));
+        editor.putInt(context.getString(R.string.shared_preferences_pending_broadcast_value),
+                intent.getIntExtra(ServicesBroadcastReceiver.BROADCAST_REC_EXTRA_ACTION_KEY, -1));
+        editor.commit();
+    }
+
+    public static void ClearPendingBroadcastFromSharedPreferences(Context context){
+        SharedPreferences sp = context.getSharedPreferences(context.getString(R.string.shared_preferences_pending_broadcast), context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sp.edit();
+        editor.remove(context.getString(R.string.shared_preferences_pending_broadcast_value));
+        editor.commit();
+    }
+
+    public static int GetPendingBroadcastTypeFromSharedPreferences(Context context){
+        SharedPreferences sp = context.getSharedPreferences(
+                context.getString(R.string.shared_preferences_pending_broadcast), context.MODE_PRIVATE);
+        return sp.getInt(context.getString(R.string.shared_preferences_pending_broadcast_value), -1);
+    }
+
+
 }

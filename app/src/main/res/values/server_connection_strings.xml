@@ -8,7 +8,8 @@
     <!--<string name="amazon_sub_path_publication_images">foodcollector</string>-->
     <!--<string name="amazon_sub_path_user_images">foodonerusers</string>-->
     <!-- <string name="server_base_url">https://fd-server.herokuapp.com</string> -->
-    <!-- ========================== -->
+    <!-- ========================
+    == -->
 
     <!-- Connection strings - DEV -->
     <string name="amazon_base_url_for_images">https://s3.amazonaws.com/foodcollectordev</string>
@@ -35,4 +36,5 @@
     <string name="server_get_groups_by_user">/users/{0}/groups</string>
     <string name="server_post_add_members_to_group">/group_members</string>
     <string name="register_new_device">/active_devices.json</string>
+
 </resources>

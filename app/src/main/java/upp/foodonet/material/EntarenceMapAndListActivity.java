@@ -304,6 +304,16 @@ public class EntarenceMapAndListActivity
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        Intent intent = getIntent();
+        int publicationIdFromBroadcast = intent.getIntExtra(FooDoNetGcmListenerService.PUBLICATION_NUMBER, -1);
+        intent.removeExtra(FooDoNetGcmListenerService.PUBLICATION_NUMBER);
+        if(publicationIdFromBroadcast != -1)
+            OnPublicationFromListClicked(publicationIdFromBroadcast);
+    }
+
+    @Override
     public void onBackPressed() {
         if (isSideMenuOpened) {
             drawerLayout.closeDrawers();
@@ -644,26 +654,11 @@ public class EntarenceMapAndListActivity
                 lastLocationUpdateDate = new Date();
             }
         }
-/*
-        if(myLocation == null) {
-            BitmapDescriptor icon = BitmapDescriptorFactory.fromResource(R.drawable.blue_dot_circle);
-            myLocation = AddMarker(((float)location.getLatitude()), (float)location.getLongitude(), getString(R.string.my_location), icon);
-        }
-*/
         if (myLocation != null && myLocation.latitude == location.getLatitude() && myLocation.longitude == location.getLongitude())
             return;
         myLocation = new LatLng(location.getLatitude(), location.getLongitude());
-/*
-        if (mainPagerAdapter != null){
-            mainPagerAdapter.NotifyListOnLocationChange(location);
-        }
-*/
         SetCamera();
-/*
-        if (GetDistance(myLocation, new LatLng(location.getLatitude(), location.getLongitude())) <= maxDistance)
-            return;
-*/
-        //UpdateMyLocationPreferences(new LatLng(location.getLatitude(), location.getLongitude()));
+        UpdateMyLocationPreferences(new LatLng(location.getLatitude(), location.getLongitude()));
     }
 
     @Override
@@ -1205,6 +1200,8 @@ public class EntarenceMapAndListActivity
                     progressDialog.dismiss();
                     progressDialog = null;
                 }
+            case ServicesBroadcastReceiver.ACTION_CODE_NOTIFICATION_RECEIVED_PUBLICATION_DELETED:
+            case ServicesBroadcastReceiver.ACTION_CODE_NOTIFICATION_RECEIVED_NEW_PUBLICATION:
             default:
                 if (adapter != null) {
                     RestartLoadingForPublicationsList();

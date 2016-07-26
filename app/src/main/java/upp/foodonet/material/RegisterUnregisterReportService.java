@@ -245,14 +245,7 @@ public class RegisterUnregisterReportService
     }
 
     private void SendBroadcastAndSavePending(Intent intent){
-        SharedPreferences sp = getSharedPreferences(getString(R.string.shared_preferences_pending_broadcast), MODE_PRIVATE);
-        SharedPreferences.Editor editor;
-        editor = sp.edit();
-        if(sp.contains(getString(R.string.shared_preferences_pending_broadcast_value)))
-            editor.remove(getString(R.string.shared_preferences_pending_broadcast_value));
-        editor.putInt(getString(R.string.shared_preferences_pending_broadcast_value),
-                intent.getIntExtra(ServicesBroadcastReceiver.BROADCAST_REC_EXTRA_ACTION_KEY, -1));
-        editor.commit();
+        CommonUtil.SavePendingBroadcastToSharedPreferences(this, intent);
         sendBroadcast(intent);
     }
 }

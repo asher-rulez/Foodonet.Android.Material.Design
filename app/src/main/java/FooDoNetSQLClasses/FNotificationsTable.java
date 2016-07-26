@@ -16,7 +16,7 @@ public class FNotificationsTable {
         sb.append(FNOTIFICATIONSS_TABLE_NAME);
         sb.append("(");
         sb.append(FNotification.FNOTIFICATION_KEY_ID);
-        sb.append(" integer primary key, ");
+        sb.append(" integer primary key AUTOINCREMENT not null, ");
         sb.append(FNotification.FNOTIFICATION_KEY_DATE_ARRIVED);
         sb.append(" long not null, ");
         sb.append(FNotification.FNOTIFICATION_KEY_TYPE);

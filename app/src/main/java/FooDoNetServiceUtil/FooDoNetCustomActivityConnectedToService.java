@@ -1,5 +1,6 @@
 package FooDoNetServiceUtil;
 
+import android.app.NotificationManager;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -19,6 +20,7 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.model.LatLng;
 
+import CommonUtilPackage.CommonUtil;
 import CommonUtilPackage.GetMyLocationAsync;
 import FooDoNetServerClasses.ConnectionDetector;
 //import com.nikoxes.foodonetwmd.FooDoNetService;
@@ -92,6 +94,7 @@ public abstract class FooDoNetCustomActivityConnectedToService
             unregisterReceiver(servicesBroadcastReceiver);
             servicesBroadcastReceiver = null;
         }
+        CommonUtil.SetIsApplicationRunningInForeground(this, false);
 //        if(progressDialog != null)
 //            progressDialog.dismiss();
         super.onPause();
@@ -105,6 +108,9 @@ public abstract class FooDoNetCustomActivityConnectedToService
         isGoogleServiceAvailable = CheckPlayServices();
         if (!isGoogleServiceAvailable)
             OnGooglePlayServicesCheckError();
+        CommonUtil.SetIsApplicationRunningInForeground(this, true);
+        NotificationManager notificationManager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.cancelAll();
         super.onResume();
     }
 
@@ -237,6 +243,9 @@ public abstract class FooDoNetCustomActivityConnectedToService
         }
         SharedPreferences sp = getSharedPreferences(getString(R.string.shared_preferences_my_location_key), MODE_PRIVATE);
         SharedPreferences.Editor editor = sp.edit();
+        editor.clear();
+        editor.commit();
+/*
         if(sp.contains(getString(R.string.shared_preferences_my_latitude_key))){
             editor.remove(getString(R.string.shared_preferences_my_latitude_key));
             editor.commit();
@@ -245,6 +254,7 @@ public abstract class FooDoNetCustomActivityConnectedToService
             editor.remove(getString(R.string.shared_preferences_my_longitude_key));
             editor.commit();
         }
+*/
         editor.putFloat(getString(R.string.shared_preferences_my_latitude_key), ((float) myLocation.latitude));
         editor.putFloat(getString(R.string.shared_preferences_my_longitude_key), ((float) myLocation.longitude));
         editor.commit();
