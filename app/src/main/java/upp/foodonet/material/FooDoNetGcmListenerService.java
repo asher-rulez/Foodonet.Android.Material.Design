@@ -5,6 +5,7 @@ import android.app.PendingIntent;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -32,6 +33,7 @@ import FooDoNetServerClasses.IDownloadImageCallBack;
 import FooDoNetServerClasses.IFooDoNetServerCallback;
 import FooDoNetServiceUtil.ServicesBroadcastReceiver;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -105,7 +107,17 @@ public class FooDoNetGcmListenerService extends GcmListenerService implements IF
                 SendNotification(deletedPublication, InternalRequest.ACTION_PUSH_PUB_DELETED);
                 break;
             case FNotification.FNOTIFICATION_TYPE_EDITED_PUBLICATION:
+                // no such notification for now
                 getContentResolver().insert(FooDoNetSQLProvider.URI_NOTIFICATIONS, notification.GetContentValuesRow());
+                break;
+            case FNotification.FNOTIFICATION_TYPE_NEW_REGISTRATION:
+                getContentResolver().insert(FooDoNetSQLProvider.URI_NOTIFICATIONS, notification.GetContentValuesRow());
+                HttpServerConnectorAsync connector = new HttpServerConnectorAsync(getString(R.string.server_base_url), (IFooDoNetServerCallback) this);
+                InternalRequest registeredRequest = new InternalRequest(InternalRequest.ACTION_GET_ALL_REGISTERED_FOR_PUBLICATION,
+                        getResources().getString(R.string.server_get_registered_for_publications)
+                                .replace("{0}", String.valueOf(notification.get_publication_or_group_id())));
+                registeredRequest.PublicationID = notification.get_publication_or_group_id();
+                connector.execute(registeredRequest);
                 break;
 
         }
@@ -173,6 +185,24 @@ public class FooDoNetGcmListenerService extends GcmListenerService implements IF
                     sqlExecuterAsync.execute(response);
                 }
                 break;
+            case InternalRequest.ACTION_GET_ALL_REGISTERED_FOR_PUBLICATION:
+                if(response.Status == InternalRequest.STATUS_OK){
+                    ContentResolver resolver = getContentResolver();
+                    resolver.delete(Uri.parse(FooDoNetSQLProvider.URI_DELETE_REGISTERED_USER_BY_PUBLICATION_ID + "/" + response.PublicationID), null, null);
+                    if(response.registeredUsers != null && response.registeredUsers.size() != 0){
+                        for(RegisteredUserForPublication reg : response.registeredUsers)
+                            resolver.insert(FooDoNetSQLProvider.URI_INSERT_REGISTERED_FOR_PUBLICATION, reg.GetContentValuesRow());
+                    }
+                    Cursor cursor = resolver.query(Uri.parse(FooDoNetSQLProvider.CONTENT_URI + "/" + response.PublicationID),
+                            FCPublication.GetColumnNamesArray(), null, null, null);
+                    FCPublication publication = FCPublication.GetArrayListOfPublicationsFromCursor(cursor, false).get(0);
+                    Intent intent = new Intent(ServicesBroadcastReceiver.BROADCAST_REC_INTENT_FILTER);
+                    intent.putExtra(ServicesBroadcastReceiver.BROADCAST_REC_EXTRA_ACTION_KEY,
+                            ServicesBroadcastReceiver.ACTION_CODE_NOTIFICATION_RECEIVED_NEW_REGISTERED_USER);
+                    sendBroadcast(intent);
+                    SendNotification(publication, InternalRequest.ACTION_GET_ALL_REGISTERED_FOR_PUBLICATION);
+                }
+                break;
         }
     }
 
@@ -231,6 +261,7 @@ public class FooDoNetGcmListenerService extends GcmListenerService implements IF
         switch (action){
             case InternalRequest.ACTION_PUSH_NEW_PUB:
             case InternalRequest.ACTION_PUSH_PUB_DELETED:
+            case InternalRequest.ACTION_GET_ALL_REGISTERED_FOR_PUBLICATION:
                 Intent intent = new Intent();
                 String title = publication.getTitle();
                 String message = "";
@@ -244,6 +275,12 @@ public class FooDoNetGcmListenerService extends GcmListenerService implements IF
                         intent = new Intent(this, EntarenceMapAndListActivity.class);
                         message = getString(R.string.notification_publication_has_been_removed_by_owner) + " " + publication.getTitle();
                         break;
+                    case InternalRequest.ACTION_GET_ALL_REGISTERED_FOR_PUBLICATION:
+                        intent = new Intent(this, EntarenceMapAndListActivity.class);
+                        intent.putExtra(PUBLICATION_NUMBER, publication.getUniqueId());
+                        message = getString(R.string.notification_text_new_registration).replace("{0}", publication.getTitle());
+                        break;
+
                 }
                 intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                 PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,

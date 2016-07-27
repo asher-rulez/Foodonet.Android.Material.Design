@@ -181,22 +181,25 @@ public class FNotification implements Serializable {
             String type_got_from_json = jo.getString(FNOTIFICATION_KEY_TYPE);
             //org.json.JSONObject innerJson = jo.getJSONObject(FNOTIFICATION_KEY_DATA);
             notification.set_publication_or_group_id(jo.getInt(FNOTIFICATION_KEY_PUBLICATION_OR_GROUP_ID));
-            notification.set_publication_or_group_title(jo.getString(FNOTIFICATION_KEY_PUBLICATION_OR_GROUP_TITLE));
 
             if (type_got_from_json.compareTo(FNOTIFICATION_TYPE_KEY_GROUP_MEMBERS) == 0) {
                 notification.set_type(FNOTIFICATION_TYPE_GROUP_MEMBER_ADD);
             } else {
                 notification.set_publication_version(jo.getInt(FNOTIFICATION_KEY_PUBLICATION_VERSION));
-                notification.set_latitude(jo.getDouble(FNOTIFICATION_KEY_LATITUDE));
-                notification.set_longitude(jo.getDouble(FNOTIFICATION_KEY_LONGITUDE));
                 switch (type_got_from_json) {
                     case FNOTIFICATION_TYPE_KEY_NEW_PUBLICATION:
                         notification.set_type((notification.get_publication_version() == 1)
                                 ? FNOTIFICATION_TYPE_NEW_PUBLICATION
                                 : FNOTIFICATION_TYPE_EDITED_PUBLICATION);
+                        notification.set_publication_or_group_title(jo.getString(FNOTIFICATION_KEY_PUBLICATION_OR_GROUP_TITLE));
+                        notification.set_latitude(jo.getDouble(FNOTIFICATION_KEY_LATITUDE));
+                        notification.set_longitude(jo.getDouble(FNOTIFICATION_KEY_LONGITUDE));
                         break;
                     case FNOTIFICATION_TYPE_KEY_DELETED_PUBLICATION:
                         notification.set_type(FNOTIFICATION_TYPE_DELETED_PUBLICATION);
+                        notification.set_publication_or_group_title(jo.getString(FNOTIFICATION_KEY_PUBLICATION_OR_GROUP_TITLE));
+                        notification.set_latitude(jo.getDouble(FNOTIFICATION_KEY_LATITUDE));
+                        notification.set_longitude(jo.getDouble(FNOTIFICATION_KEY_LONGITUDE));
                         break;
                     case FNOTIFICATION_TYPE_KEY_PUBLICATION_REPORT:
                         notification.set_type(FNOTIFICATION_TYPE_NEW_REPORT);

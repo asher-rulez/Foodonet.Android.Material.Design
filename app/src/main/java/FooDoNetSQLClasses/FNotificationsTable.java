@@ -24,7 +24,7 @@ public class FNotificationsTable {
         sb.append(FNotification.FNOTIFICATION_KEY_PUBLICATION_OR_GROUP_ID);
         sb.append(" integer not null, ");
         sb.append(FNotification.FNOTIFICATION_KEY_PUBLICATION_OR_GROUP_TITLE);
-        sb.append(" text not null, ");
+        sb.append(" text null, ");
         sb.append(FNotification.FNOTIFICATION_KEY_PUBLICATION_VERSION);
         sb.append(" integer null, ");
         sb.append(FNotification.FNOTIFICATION_KEY_LATITUDE);

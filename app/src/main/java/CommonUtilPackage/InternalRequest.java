@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import DataModel.FCPublication;
+import DataModel.FNotification;
 import DataModel.Group;
 import DataModel.GroupMember;
 import DataModel.ICanWriteSelfToJSONWriter;

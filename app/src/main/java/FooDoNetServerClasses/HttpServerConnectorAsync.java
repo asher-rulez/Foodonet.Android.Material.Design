@@ -88,6 +88,8 @@ public class HttpServerConnectorAsync extends AsyncTask<InternalRequest, Void, S
 
     private int doAfterRegistrationActionID;
 
+    ArrayList<RegisteredUserForPublication> regedUpdateByPush;
+
     public HttpServerConnectorAsync(String baseUrl, IFooDoNetServerCallback callbackListener) {
         this.baseUrl = baseUrl;
         this.callbackListener = callbackListener;
@@ -555,6 +557,23 @@ public class HttpServerConnectorAsync extends AsyncTask<InternalRequest, Void, S
                 MakeServerRequest(REQUEST_METHOD_DELETE, server_sub_path  + "/" + String.valueOf(params[0].GroupMemberToDeleteID), null, false);
                 return "";
             //endregion
+            //region reload registered for publication
+            case InternalRequest.ACTION_GET_ALL_REGISTERED_FOR_PUBLICATION:
+                publicationID = params[0].PublicationID;
+                MakeServerRequest(REQUEST_METHOD_GET, server_sub_path, null, true);
+                if(!isSuccess || TextUtils.isEmpty(responseString))
+                    Log.e(MY_TAG, "failed to get registered");
+                else {
+                    try {
+                        regedUpdateByPush = RegisteredUserForPublication.
+                                GetArrayListOfRegisteredForPublicationsFromJSON(
+                                        new JSONArray(responseString));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+                return "";
+            //endregion
             default:
                 return "";
         }
@@ -761,6 +780,13 @@ public class HttpServerConnectorAsync extends AsyncTask<InternalRequest, Void, S
                 InternalRequest irDeleteMember = new InternalRequest(Action_Command_ID, isSuccess);
                 irDeleteMember.GroupMemberToDeleteID = groupMemberToDeleteID;
                 callbackListener.OnServerRespondedCallback(irDeleteMember);
+                break;
+            case InternalRequest.ACTION_GET_ALL_REGISTERED_FOR_PUBLICATION:
+                Log.i(MY_TAG, "getting updated reged users after push: " + (isSuccess ? "ok" : "fail"));
+                InternalRequest irRegedByPush = new InternalRequest(Action_Command_ID, isSuccess);
+                irRegedByPush.registeredUsers = regedUpdateByPush;
+                irRegedByPush.PublicationID = publicationID;
+                callbackListener.OnServerRespondedCallback(irRegedByPush);
                 break;
         }
     }

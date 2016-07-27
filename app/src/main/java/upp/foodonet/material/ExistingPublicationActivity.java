@@ -1026,6 +1026,9 @@ public class ExistingPublicationActivity
                     }
                 }
                 break;
+            case ServicesBroadcastReceiver.ACTION_CODE_NOTIFICATION_RECEIVED_NEW_REGISTERED_USER:
+                RefreshNumberOfJoinedUsers();
+                break;
         }
         CommonUtil.ClearPendingBroadcastFromSharedPreferences(this);
     }

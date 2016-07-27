@@ -523,6 +523,6 @@
     <string name="notification_title_someone_registered_for_your_pub">Someone registered for your publication:</string>
     <string name="notification_this_publication_has_been_removed_by_owner">This publication has been removed by user!</string>
     <string name="notification_publication_has_been_removed_by_owner">Publication has been removed by user:</string>
-
+    <string name="notification_text_new_registration">New registration for publication: {0}</string>
 
 </resources>
