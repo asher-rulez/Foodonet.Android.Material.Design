@@ -418,6 +418,7 @@
     <string name="loading_groups">Loading groups</string>
     <string name="title_activity_settings_select">SettingsSelectActivity</string>
     <string name="share_with_format">Share with: {0}</string>
+    <string name="hint_price">Price:</string>
 
     <!-- Settings -->
 

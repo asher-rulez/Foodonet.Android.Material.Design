@@ -143,10 +143,29 @@
             -->
 
             <android.support.design.widget.TextInputLayout
-                android:id="@+id/text_input_layout"
+                android:id="@+id/til_price"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:layout_below="@+id/til_share_with"
+                app:errorEnabled="true">
+                <EditText
+                    android:id="@+id/et_price"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="@dimen/edit_text_side_margin_add_edit_pub"
+                    android:layout_marginRight="@dimen/edit_text_side_margin_add_edit_pub"
+                    android:ems="10"
+                    android:hint="@string/hint_price"
+                    android:maxLines="1"
+                    android:textColorHighlight="@color/basic_blue"
+                    android:textSize="@dimen/add_pub_et_date_text_size"/>
+            </android.support.design.widget.TextInputLayout>
+
+            <android.support.design.widget.TextInputLayout
+                android:id="@+id/text_input_layout"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:layout_below="@+id/til_price"
                 app:errorEnabled="true">
 
                 <EditText
@@ -159,7 +178,8 @@
                     android:hint="@string/publication_details_title"
                     android:lines="3"
                     android:textColorHighlight="@color/basic_blue"
-                    android:textSize="@dimen/add_pub_et_date_text_size" />
+                    android:textSize="@dimen/add_pub_et_date_text_size"
+                    android:inputType="numberDecimal"/>
 
             </android.support.design.widget.TextInputLayout>
 
