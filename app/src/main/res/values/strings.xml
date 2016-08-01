@@ -377,6 +377,7 @@
     <string name="hello_world">Hello world!</string>
     <string name="user_avatar_file_name">avatar.jpeg</string>
     <string name="publication_picture_file_name_format">{0}.{1}.jpg</string>
+    <string name="new_israeli_shekel_sign">₪</string>
 
     <string name="title_activity_select_group_for_publication">aaa</string>
 
@@ -418,6 +419,7 @@
     <string name="loading_groups">Loading groups</string>
     <string name="title_activity_settings_select">SettingsSelectActivity</string>
     <string name="share_with_format">Share with: {0}</string>
+    <string name="hint_price_free">Price: Free</string>
     <string name="hint_price">Price:</string>
 
     <!-- Settings -->

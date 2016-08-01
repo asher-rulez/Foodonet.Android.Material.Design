@@ -583,6 +583,8 @@ public class FCPublication implements Serializable, ICanWriteSelfToJSONWriter {
                     publication.setIsOnAir(cursor.getInt(cursor.getColumnIndex(PUBLICATION_IS_ON_AIR_KEY)) == 1);
                     publication.setPublisherID(cursor.getInt(cursor.getColumnIndex(PUBLICATION_PUBLISHER_ID_KEY)));
                     publication.setPublisherUserName(cursor.getString(cursor.getColumnIndex(PUBLICATION_PUBLISHER_USER_NAME_KEY)));
+                    publication.setPrice(cursor.getDouble(cursor.getColumnIndex(PUBLICATION_PRICE_KEY)));
+                    publication.setPriceDescription(cursor.getString(cursor.getColumnIndex(PUBLICATION_PRICE_DESCRIPTION_KEY)));
                     //publication.setIfTriedToGetPictureBefore(cursor.getInt(cursor.getColumnIndex(PUBLICATION_TRIED_TO_LOAD_IMAGE)));
                 }
                 result.add(publication);

@@ -20,6 +20,7 @@ import android.os.AsyncTask;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -105,6 +106,9 @@ public class AddEditPublicationActivity extends FragmentActivity
     private EditText et_address;
     private EditText et_share_with;
     private EditText et_more_details;
+    private EditText et_price;
+    TextInputLayout til_price;
+    TextWatcher tWatcherPrice;
 
     //address picker
     private AutoCompleteTextView atv_address;
@@ -172,6 +176,49 @@ public class AddEditPublicationActivity extends FragmentActivity
         et_address = (EditText) findViewById(R.id.et_address_edit_add_pub);
         et_address.setOnClickListener(this);
         et_address.setOnTouchListener(this);
+        et_price = (EditText) findViewById(R.id.et_price_add_edit_pub);
+        til_price = (TextInputLayout) findViewById(R.id.til_price);
+        tWatcherPrice = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                String newPriceString = et_price.getText().toString();
+                if (TextUtils.isEmpty(newPriceString))
+                    OnPriceChanged(0);
+                else {
+                    double newPrice = Double.parseDouble(newPriceString);
+                    OnPriceChanged(newPrice);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) { }
+        };
+        et_price.addTextChangedListener(tWatcherPrice);
+        et_price.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean b) {
+                String priceString = et_price.getText().toString();
+                if (!TextUtils.isEmpty(priceString)){
+                    et_price.removeTextChangedListener(tWatcherPrice);
+                    if (b)
+                        et_price.setText(priceString.replace(" " + getString(R.string.new_israeli_shekel_sign), ""));
+                    else
+                        et_price.setText(et_price.getText().toString() + " " + getString(R.string.new_israeli_shekel_sign));
+                    et_price.addTextChangedListener(tWatcherPrice);
+                }
+            }
+        });
+        et_price.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View view, int keyCode, KeyEvent keyEvent) {
+                if(keyCode == 66)
+                    onTouch(et_share_with, null);
+                return false;
+            }
+        });
 
         et_more_details = (EditText) findViewById(R.id.et_subtitle_add_edit_pub);
         if (!isNew) {
@@ -222,6 +269,13 @@ public class AddEditPublicationActivity extends FragmentActivity
                     .build();
     }
 
+    private void OnPriceChanged(double price) {
+        til_price.setHint(price > 0
+                ? getString(R.string.hint_price)
+                : getString(R.string.hint_price_free));
+        publication.setPrice(price);
+    }
+
     private void initToolBar() {
         toolbar = (Toolbar) findViewById(R.id.toolBar);
         if (toolbar != null)
@@ -232,8 +286,8 @@ public class AddEditPublicationActivity extends FragmentActivity
         toolbar.inflateMenu(R.menu.menu_add_edit_publication);
     }
 
-    private void SetShareWithRow(){
-        if(publication.getAudience() == 0){
+    private void SetShareWithRow() {
+        if (publication.getAudience() == 0) {
             et_share_with.setText(getString(R.string.public_share_group_name));
             et_share_with.setCompoundDrawablesWithIntrinsicBounds(null, null, getResources().getDrawable(R.drawable.public_group_pub_det_icon), null);
         } else {
@@ -355,7 +409,7 @@ public class AddEditPublicationActivity extends FragmentActivity
         publication.setIsOnAir(true);
         publication.setPublisherUserName(CommonUtil.GetMyUserNameFromPreferences(this));
         publication.setPublisherID(CommonUtil.GetMyUserID(this));
-        publication.setPrice(0d);
+        //publication.setPrice(0d);
         publication.setPriceDescription("");
         publication.setContactInfo(CommonUtil.GetMyPhoneNumberFromPreferences(this));
         publication.setPriceDescription("");
@@ -567,6 +621,7 @@ public class AddEditPublicationActivity extends FragmentActivity
                 }
                 break;
             case ACTIVITY_FOR_RESULT_REQUEST_CODE_SELECT_GROUP:
+                startedSelectGroup = false;
                 if (resultCode < 0) return;
                 publication.setAudience(resultCode);
 /*
@@ -580,7 +635,6 @@ public class AddEditPublicationActivity extends FragmentActivity
                 et_share_with.setCompoundDrawablePadding(10);
 */
                 SetShareWithRow();
-                startedSelectGroup = false;
                 break;
         }
     }
