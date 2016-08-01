@@ -1,7 +1,9 @@
 package upp.foodonet.material;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.support.v7.app.ActionBarActivity;
@@ -21,6 +23,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import CommonUtilPackage.CommonUtil;
+import CommonUtilPackage.GetMyLocationAsync;
 import CommonUtilPackage.InternalRequest;
 import DataModel.FCPublication;
 import FooDoNetServerClasses.DownloadImageTask;
@@ -60,6 +63,15 @@ public class SplashScreenActivity
         flagWaitTaskFinished = true;
 
         CheckIfPhoneRegisteredOnFoodonet();
+
+        GetLocationFirstTime();
+    }
+
+    private void GetLocationFirstTime(){
+        GetMyLocationAsync locationTask
+                = new GetMyLocationAsync((LocationManager) this.getSystemService(Context.LOCATION_SERVICE), this);
+        locationTask.switchToReportLocationMode(false);
+        locationTask.execute();
     }
 
     private void CheckIfPhoneRegisteredOnFoodonet() {

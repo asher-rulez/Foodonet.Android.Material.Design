@@ -95,7 +95,7 @@ public class AboutUsActivity extends AppCompatActivity implements View.OnClickLi
     }
 
     private File GetLogoAsTmpFile(){
-        Bitmap bm = BitmapFactory.decodeResource(getResources(), R.drawable.foodonet_logo_200_200);
+        Bitmap bm = BitmapFactory.decodeResource(getResources(), R.drawable.app_logo_for_icon);
         File imageFile
                 = new File(Environment.getExternalStorageDirectory()
                     + getString(R.string.image_folder_path), "tmp.jpg");

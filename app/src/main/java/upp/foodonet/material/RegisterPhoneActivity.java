@@ -64,7 +64,7 @@ public class RegisterPhoneActivity extends Activity implements View.OnClickListe
             ImageView userProfileImage = (ImageView) findViewById(R.id.iv_user_profile_img);
             String networkUrl = CommonUtil.GetNetworkUrl(baseUrl, photoURL);
             DownloadImageTask imageTask = new DownloadImageTask(networkUrl,
-                    1024, getString(R.string.image_folder_path), userProfileImage, getString(R.string.user_avatar_file_name));
+                    150, getString(R.string.image_folder_path), userProfileImage, getString(R.string.user_avatar_file_name));
             imageTask.execute();
         }
 

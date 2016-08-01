@@ -508,6 +508,7 @@ public class ExistingPublicationActivity
                 fab_call_owner = (FloatingActionButton) findViewById(R.id.fab_pub_det_call);
                 fab_call_owner.setOnClickListener(this);
                 fab_navigate = (FloatingActionButton) findViewById(R.id.fab_pub_det_navigate);
+                fab_navigate.setOnClickListener(this);
                 if (!amIRegisteredToThisPublication) {
                     fab_reg_unreg.setImageDrawable(getResources().getDrawable(R.drawable.fab_register));
                     fab_sms_owner.setVisibility(View.GONE);

@@ -5,12 +5,13 @@
     android:layout_height="match_parent"
     >
 
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <UIUtil.RoundedImageView
+        android:id="@+id/riv_sign_in_logo"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:src="@drawable/sign_in_activity_logo"
+        android:src="@drawable/app_logo_for_icon"
         android:layout_marginTop="52dp" />
 
     <TextView
@@ -20,7 +21,7 @@
         android:textColor="@color/basic_blue"
         android:id="@+id/textView2"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="170dp" />
+        android:layout_below="@+id/riv_sign_in_logo"/>
 
     <TextView
         android:layout_width="wrap_content"

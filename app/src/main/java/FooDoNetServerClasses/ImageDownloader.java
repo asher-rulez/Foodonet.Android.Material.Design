@@ -31,7 +31,7 @@ public class ImageDownloader {
 
     public ImageDownloader(Context context, ImageDictionarySyncronized imageDictionary) {
         this.context = context;
-        defaultBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.foodonet_logo_200_200);
+        defaultBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.app_logo_for_icon);
         imageFolderPath = context.getString(R.string.image_folder_path);
         imageRepositoryBaseUrl = context.getString(R.string.amazon_base_url_for_images);
         this.imageDictionary = imageDictionary;

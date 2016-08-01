@@ -1,12 +1,17 @@
 package CommonUtilPackage;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Messenger;
+import android.support.v4.app.ActivityCompat;
 import android.util.Log;
+
+import com.google.android.gms.maps.model.LatLng;
 
 import FooDoNetServerClasses.HttpServerConnectorAsync;
 import FooDoNetServiceUtil.ServicesBroadcastReceiver;
@@ -29,26 +34,37 @@ public class GetMyLocationAsync extends AsyncTask<Void, Void, Void> {
 
     private static final String MY_TAG = "food_myLocationAsync";
 
-    public GetMyLocationAsync(LocationManager lManager, Context context){
+    public GetMyLocationAsync(LocationManager lManager, Context context) {
         locationManager = lManager;
         this.context = context;
     }
 
-    public void setGotLocationCallback(IGotMyLocationCallback gotLocationCallback){
+    public void setGotLocationCallback(IGotMyLocationCallback gotLocationCallback) {
         callback = gotLocationCallback;
     }
 
-    public void switchToReportLocationMode(boolean flag){
+    public void switchToReportLocationMode(boolean flag) {
         isReportLocationMode = flag;
     }
 
-    public void setIMEI(String imei){
+    public void setIMEI(String imei) {
         this.imei = imei;
     }
 
     @Override
     protected Void doInBackground(Void... params) {
-        location = locationManager.getLastKnownLocation( LocationManager.NETWORK_PROVIDER);
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+            && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return null;
+        }
+        location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
         if (location == null)
         {
             location = locationManager.getLastKnownLocation( LocationManager.GPS_PROVIDER);
@@ -65,6 +81,8 @@ public class GetMyLocationAsync extends AsyncTask<Void, Void, Void> {
 
     @Override
     protected void onPostExecute(Void aVoid) {
+        CommonUtil.UpdateFilterMyLocationPreferences(
+                context, new LatLng(this.location.getLatitude(), this.location.getLongitude()));
         if(isReportLocationMode){
             HttpServerConnectorAsync serverAsync
                     = new HttpServerConnectorAsync(context.getString(R.string.server_base_url), context);

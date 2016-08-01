@@ -105,7 +105,7 @@ public class AllPublicationsListRecyclerViewAdapter extends RecyclerView.Adapter
 
         public void SetupPublicationDetails(FCPublication publication, boolean isMine) {
             publicationID = publication.getUniqueId();
-            publicationImage.setImageDrawable(context.getResources().getDrawable(R.drawable.foodonet_logo_200_200));
+            publicationImage.setImageDrawable(context.getResources().getDrawable(R.drawable.app_logo_for_icon));
 
             tv_title_all.setText(publication.getTitle());
             tv_title_all.setVisibility(isMine?View.GONE:View.VISIBLE);

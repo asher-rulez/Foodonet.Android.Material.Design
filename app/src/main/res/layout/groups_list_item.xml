@@ -8,7 +8,7 @@
         android:id="@+id/iv_group_list_item_icon"
         android:layout_width="25dp"
         android:layout_height="25dp"
-        android:src="@drawable/group_list_item_icon"
+        android:src="@drawable/group_icon_list"
         android:scaleType="fitCenter"
         android:layout_centerVertical="true"
         android:layout_alignParentLeft="true"
