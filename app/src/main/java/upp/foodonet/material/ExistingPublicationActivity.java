@@ -1123,6 +1123,13 @@ public class ExistingPublicationActivity
             }
         });
         final Button btn_rating_dialog_yes = (Button)reportDialog.findViewById(R.id.btn_report_result_yes);
+        btn_rating_dialog_yes.setEnabled(false);
+        rg_report.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup radioGroup, int i) {
+                btn_rating_dialog_yes.setEnabled(true);
+            }
+        });
         btn_rating_dialog_yes.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
