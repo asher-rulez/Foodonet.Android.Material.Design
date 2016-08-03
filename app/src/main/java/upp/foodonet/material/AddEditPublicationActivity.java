@@ -1,5 +1,6 @@
 package upp.foodonet.material;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
@@ -447,7 +448,13 @@ public class AddEditPublicationActivity extends FragmentActivity
         dataPublicationIntent.putExtra(DETAILS_ACTIVITY_RESULT_KEY, InternalRequest.ACTION_POST_NEW_PUBLICATION);
         dataPublicationIntent.putExtra(PUBLICATION_KEY, publication);
         // return data Intent and finish
-        setResult(RESULT_OK, dataPublicationIntent);
+        //setResult(RESULT_OK, dataPublicationIntent);
+        if (getParent() == null) {
+            setResult(Activity.RESULT_OK, dataPublicationIntent);
+        }
+        else {
+            getParent().setResult(Activity.RESULT_OK, dataPublicationIntent);
+        }
         finish();
     }
 

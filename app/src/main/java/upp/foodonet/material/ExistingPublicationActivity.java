@@ -261,7 +261,7 @@ public class ExistingPublicationActivity
             int pendingBroadcastTypeID = CommonUtil.GetPendingBroadcastTypeFromSharedPreferences(this);
             if (pendingBroadcastTypeID == -1) {
                 Log.e(MY_TAG, "progress bar showing, but no pending broadcast");
-                progressDialog.dismiss();
+                //progressDialog.dismiss();
             }
             else {
             Intent intent = new Intent();
@@ -278,7 +278,7 @@ public class ExistingPublicationActivity
         toolbar.setTitle(null);
         if (toolbar != null)
             toolbar.setOnMenuItemClickListener(this);
-
+        toolbar.getMenu().clear();
         switch (existing_publication_mode) {
             case MODE_MY_PUBLICATION:
                 toolbar.inflateMenu(currentPublication.IsActivePublication()
@@ -990,9 +990,6 @@ public class ExistingPublicationActivity
                 Log.i(MY_TAG, "successfully left report for publication!");
                 amIRegisteredToThisPublication = false;
                 CollapseButtonsAfterUnregister();
-                if (progressDialog != null)
-                    progressDialog.dismiss();
-                progressDialog = null;
                 RefreshNumberOfJoinedUsers();
                 ResetReports();
                 if(progressDialog != null)
@@ -1005,6 +1002,8 @@ public class ExistingPublicationActivity
                     editedPublication.setVersion(editedPublication.getVersion() + 1);
                     currentPublication = editedPublication;
                     SetPublicationPropertiesToControls();
+                    if(progressDialog != null)
+                        progressDialog.dismiss();
                     ifChangesMade = true;
                 }
             case ServicesBroadcastReceiver.ACTION_CODE_SAVE_EDITED_PUB_FAIL:

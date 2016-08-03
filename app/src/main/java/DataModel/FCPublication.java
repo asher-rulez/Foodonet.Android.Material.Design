@@ -136,6 +136,7 @@ public class FCPublication implements Serializable, ICanWriteSelfToJSONWriter {
             return false;
         if (!TextUtils.isEmpty(otherPublication.getPhotoUrl())) return false;
         if (getAudience() != otherPublication.getAudience()) return false;
+        if (getPrice() != otherPublication.getPrice()) return false;
         return true;
     }
 

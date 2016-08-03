@@ -9,8 +9,8 @@ android {
         applicationId "upp.foodonet.material"
         minSdkVersion 16
         targetSdkVersion 23
-        versionCode 4
-        versionName "1.0903"
+        versionCode 5
+        versionName "1.0905"
     }
     buildTypes {
         release {

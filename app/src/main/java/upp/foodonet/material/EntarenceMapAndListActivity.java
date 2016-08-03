@@ -466,6 +466,9 @@ public class EntarenceMapAndListActivity
                     adapter.UpdatePublicationsList(new ArrayList<FCPublication>(), currentListMode == LIST_MODE_MY);
                 SetTabsVisibility(currentListMode);
                 RestartLoadingForPublicationsList();
+                if(progressDialog != null)
+                    progressDialog.dismiss();
+                progressDialog = CommonUtil.ShowProgressDialog(this, getString(R.string.progress_load));
 //                Intent intent = new Intent(getApplicationContext(), MyPublicationsActivity.class);
 //                startActivity(intent);
                 break;
@@ -868,6 +871,8 @@ public class EntarenceMapAndListActivity
                     break;
             }
         }
+        if(progressDialog != null)
+            progressDialog.dismiss();
     }
 
     //endregion
@@ -1259,6 +1264,7 @@ public class EntarenceMapAndListActivity
 //    }
 
     public void SetTabsVisibility(int listMode) {
+        tl_list_filter_buttons.setOnTabSelectedListener(null);
         while (tl_list_filter_buttons.getTabCount() > 0) {
             tl_list_filter_buttons.removeTabAt(0);
         }
@@ -1289,7 +1295,7 @@ public class EntarenceMapAndListActivity
                         .setTag(FooDoNetSQLHelper.FILTER_ID_LIST_MY_BY_ENDING_SOON));
                 break;
         }
-
+        tl_list_filter_buttons.setOnTabSelectedListener(this);
 
 //        tab_all_all.getCustomView().setVisibility(mode == LIST_MODE_ALL? View.VISIBLE: View.GONE);
 //        tab_all_new.getCustomView().setVisibility(mode == LIST_MODE_ALL? View.VISIBLE: View.GONE);
@@ -1332,10 +1338,15 @@ public class EntarenceMapAndListActivity
             CommonUtil.HideSoftKeyboard(this);
         }
 
+
         if (tab.getTag() == null || !(tab.getTag() instanceof Integer))
+                //|| currentFilterID == (int)tab.getTag())
             return;
 
         currentFilterID = (int) tab.getTag();
+        if(progressDialog != null)
+            progressDialog.dismiss();
+        progressDialog = CommonUtil.ShowProgressDialog(this, getString(R.string.progress_load));
         RestartLoadingForPublicationsList();
     }
 

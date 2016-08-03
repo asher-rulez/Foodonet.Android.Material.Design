@@ -258,7 +258,7 @@ tools:context="com.example.asher.mapappexample.MapsActivity"-->
                     android:layout_centerVertical="true"
                     android:layout_alignParentLeft="true"
                     android:layout_marginLeft="72dp"
-                    android:text="@string/ttl_item_your_sh_menu"/>
+                    android:text="@string/my_shares_toolbar_title"/>
 
             </RelativeLayout>
 
