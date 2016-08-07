@@ -3,14 +3,14 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 23
-    buildToolsVersion "23.0.3"//3
+    buildToolsVersion "24.0.1"//3
 
     defaultConfig {
         applicationId "upp.foodonet.material"
         minSdkVersion 16
         targetSdkVersion 23
-        versionCode 5
-        versionName "1.0905"
+        versionCode 6
+        versionName "1.0906"
     }
     buildTypes {
         release {

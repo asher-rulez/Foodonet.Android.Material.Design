@@ -16,7 +16,7 @@
             android:id="@+id/tb_select_contacts_for_group"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
+            android:background="@color/colorPrimary"
             app:popupTheme="@style/AppDefault.PopupOverlay">
             <RelativeLayout
                 android:layout_width="match_parent"

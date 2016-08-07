@@ -134,7 +134,7 @@ tools:context="com.example.asher.mapappexample.MapsActivity"-->
                 android:id="@+id/tb_map_and_list"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                android:background="?attr/colorPrimary" >
+                android:background="@color/colorPrimary" >
                 <TextView
                     android:id="@+id/tv_main_activity_title"
                     android:layout_width="wrap_content"
@@ -150,6 +150,7 @@ tools:context="com.example.asher.mapappexample.MapsActivity"-->
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom"
                 app:tabIndicatorColor="@android:color/white"
+                android:background="@color/colorPrimary"
                 app:tabMode="fixed" />
 
             <!--

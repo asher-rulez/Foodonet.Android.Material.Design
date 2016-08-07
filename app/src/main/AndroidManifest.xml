@@ -54,7 +54,8 @@
         </activity>
         <activity
             android:name=".EntarenceMapAndListActivity"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait"
+            android:theme="@style/AppDefault" >
 
             <!--
                         <intent-filter>
@@ -66,14 +67,12 @@
 
         <receiver
             android:name="com.google.android.gms.gcm.GcmReceiver"
+            android:exported="true"
             android:permission="com.google.android.c2dm.permission.SEND">
             <intent-filter>
-
-                <!-- android:exported="true" -->
-                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
-
+                <action android:name="com.google.android.c2dm.intent.RECEIVE"/>
+                <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
                 <category android:name="upp.foodonet.material" />
-                <!-- action android:name="com.google.android.c2dm.intent.REGISTRATION" / -->
             </intent-filter>
         </receiver>
         <service

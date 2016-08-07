@@ -687,7 +687,7 @@ public class HttpServerConnectorAsync extends AsyncTask<InternalRequest, Void, S
                 intent.putExtra(ServicesBroadcastReceiver.BROADCAST_REC_EXTRA_ACTION_KEY,
                         isSuccess ? ServicesBroadcastReceiver.ACTION_CODE_REGISTRATION_SUCCESS
                                 : ServicesBroadcastReceiver.ACTION_CODE_REGISTRATION_FAIL);
-                context.sendBroadcast(intent);
+                context.getApplicationContext().sendBroadcast(intent);
                 break;
             case InternalRequest.ACTION_POST_NEW_PUBLICATION:
                 Log.i(MY_TAG, "post new publication to server: " + (isSuccess ? "ok" : "fail"));

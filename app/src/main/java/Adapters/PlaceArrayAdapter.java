@@ -1,6 +1,7 @@
 package Adapters;
 
 import android.content.Context;
+import android.text.style.CharacterStyle;
 import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.Filter;
@@ -92,7 +93,7 @@ public class PlaceArrayAdapter
             while (iterator.hasNext()) {
                 AutocompletePrediction prediction = iterator.next();
                 resultList.add(new PlaceAutocomplete(prediction.getPlaceId(),
-                        prediction.getDescription()));
+                        prediction.getPrimaryText(null)));// getDescription()));
             }
             // Buffer release
             autocompletePredictions.release();

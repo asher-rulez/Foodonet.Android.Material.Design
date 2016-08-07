@@ -1,11 +1,17 @@
 package upp.foodonet.material;
 
+import android.*;
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Environment;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -41,6 +47,8 @@ public class SplashScreenActivity
 
     private final String MY_TAG = "food_splashscreen";
 
+    private static final int REQUEST_CODE_ASK_PERMISSION = 10;
+
 //    private boolean isGoogleFacebookChecked;
 //    private boolean isLoadDataServiceStarted = false;
 
@@ -59,12 +67,26 @@ public class SplashScreenActivity
 
         tv_load_status = (TextView) findViewById(R.id.tv_progress_text_splash_screen);
         tv_load_status.setText(R.string.progress_load);
-
         flagWaitTaskFinished = true;
 
-        CheckIfPhoneRegisteredOnFoodonet();
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                || ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                || ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{
+                            android.Manifest.permission.ACCESS_FINE_LOCATION,
+                            android.Manifest.permission.ACCESS_COARSE_LOCATION,
+                            android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+                    },
+                    REQUEST_CODE_ASK_PERMISSION);
+        }
+        else ContinueAfterGettingPermissions();
+    }
 
-        GetLocationFirstTime();
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        ContinueAfterGettingPermissions();
     }
 
     private void GetLocationFirstTime(){
@@ -84,6 +106,11 @@ public class SplashScreenActivity
                 directory.mkdirs();
             FooDoNetInstanceIDListenerService.StartRegisterToGCM(this);
         }
+    }
+
+    private void ContinueAfterGettingPermissions(){
+        CheckIfPhoneRegisteredOnFoodonet();
+        GetLocationFirstTime();
     }
 
     private void RegisterToGoogleFacebookIfNeeded() {
@@ -115,23 +142,24 @@ public class SplashScreenActivity
         super.onActivityResult(requestCode, resultCode, data);
         //isGoogleFacebookChecked = true;
         switch (resultCode) {
-            case 1:
-                InternalRequest ir = (InternalRequest) data.getSerializableExtra(InternalRequest.INTERNAL_REQUEST_EXTRA_KEY);
-                if (ir != null) {
-//                    if(ir.PhotoURL != null){
-//                        DownloadImageTask imageTask = new DownloadImageTask(ir.PhotoURL, 100, getString(R.string.image_folder_path));
-//                        imageTask.execute();
-//                    }
-                    HttpServerConnectorAsync connectorAsync
-                            = new HttpServerConnectorAsync(getString(R.string.server_base_url), (IFooDoNetServerCallback) this);
-                    connectorAsync.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, ir);
-                    return;
-                }
-                Log.e(MY_TAG, "InternalRequest extra null");
-                break;
+//            case 1:
+//                InternalRequest ir = (InternalRequest) data.getSerializableExtra(InternalRequest.INTERNAL_REQUEST_EXTRA_KEY);
+//                if (ir != null) {
+////                    if(ir.PhotoURL != null){
+////                        DownloadImageTask imageTask = new DownloadImageTask(ir.PhotoURL, 100, getString(R.string.image_folder_path));
+////                        imageTask.execute();
+////                    }
+//                    HttpServerConnectorAsync connectorAsync
+//                            = new HttpServerConnectorAsync(getString(R.string.server_base_url), (IFooDoNetServerCallback) this);
+//                    connectorAsync.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, ir);
+//                    return;
+//                }
+//                Log.e(MY_TAG, "InternalRequest extra null");
+//                break;
+//            case REQUEST_CODE_ASK_PERMISSION:
+//                ContinueAfterGettingPermissions();
+//                break;
             default:
-                Log.i(MY_TAG, "User decided not to login with google/facebook");
-                OnServerRespondedCallback(null);
                 break;
         }
     }

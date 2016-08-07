@@ -94,7 +94,6 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
 
         faceLogIn = (ImageButton) findViewById(R.id.sing_in_btn_facebook);
         faceLogIn.setOnClickListener(this);
-        //faceLogIn.registerCallback(callbackManager, facebookCallback);
 
         signInGoogle = (ImageButton) findViewById(R.id.sing_in_btn_google);
         signInGoogle.setOnClickListener(this);
@@ -219,28 +218,6 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
     private FacebookCallback<LoginResult> InitFacebookCallback() {
         FacebookSdk.sdkInitialize(getApplicationContext());
         LoginManager.getInstance().registerCallback(callbackManager, this);
-//                new FacebookCallback<LoginResult>() {
-//
-//                    @Override
-//                    public void onSuccess(LoginResult loginResult) {
-//                        profile = Profile.getCurrentProfile();
-//
-//                        Toast.makeText(getApplicationContext(), profile.getFirstName() + " is logged to Facebook", Toast.LENGTH_SHORT).show();
-//
-//                        Intent regPhoneIntent = new Intent(getApplicationContext(), RegisterPhoneActivity.class);
-//                        startActivityForResult(regPhoneIntent, RC_REG_PHONE_NUM);
-//                    }
-//
-//                    @Override
-//                    public void onCancel() {
-//                        Toast.makeText(getApplicationContext(), "Cancelled", Toast.LENGTH_SHORT).show();
-//                    }
-//
-//                    @Override
-//                    public void onError(FacebookException exception) {
-//                        Toast.makeText(getApplicationContext(), "LogIn error", Toast.LENGTH_SHORT).show();
-//                    }
-//                });
 
         accessTokenTracker = new AccessTokenTracker() {
             @Override
@@ -287,7 +264,17 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
                 request.setParameters(parameters);
                 request.executeAsync();
 
-                profile = Profile.getCurrentProfile();
+                if(Profile.getCurrentProfile() == null){
+                    profileTracker = new ProfileTracker() {
+                        @Override
+                        protected void onCurrentProfileChanged(Profile oldProfile, Profile currentProfile) {
+                            profileTracker.stopTracking();
+                        }
+                    };
+                }
+                else {
+                    profile = Profile.getCurrentProfile();
+                }
 
                 Toast.makeText(getApplicationContext(), profile.getFirstName() + " is logged to Facebook", Toast.LENGTH_SHORT).show();
             }

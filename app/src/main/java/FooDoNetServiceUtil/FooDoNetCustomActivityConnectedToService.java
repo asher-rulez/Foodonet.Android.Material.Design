@@ -58,11 +58,6 @@ public abstract class FooDoNetCustomActivityConnectedToService
 
     @Override
     protected void onStart() {
-        if (servicesBroadcastReceiver == null) {
-            servicesBroadcastReceiver = new ServicesBroadcastReceiver(this);
-            IntentFilter filter = new IntentFilter(ServicesBroadcastReceiver.BROADCAST_REC_INTENT_FILTER);
-            registerReceiver(servicesBroadcastReceiver, filter);
-        }
 /*
         if(!isServiceRunning){
             serviceIntent = new Intent(this, FooDoNetService.class);
@@ -111,6 +106,11 @@ public abstract class FooDoNetCustomActivityConnectedToService
         CommonUtil.SetIsApplicationRunningInForeground(this, true);
         NotificationManager notificationManager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.cancelAll();
+        if (servicesBroadcastReceiver == null) {
+            servicesBroadcastReceiver = new ServicesBroadcastReceiver(this);
+            IntentFilter filter = new IntentFilter(ServicesBroadcastReceiver.BROADCAST_REC_INTENT_FILTER);
+            registerReceiver(servicesBroadcastReceiver, filter);
+        }
         super.onResume();
     }
 

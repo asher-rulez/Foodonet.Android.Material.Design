@@ -30,7 +30,7 @@
             android:id="@+id/tb_groups_list"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
+            android:background="@color/colorPrimary"
             app:theme="@style/ThemeOverlay.AppCompat.Dark" >
             <TextView
                 android:layout_width="wrap_content"
