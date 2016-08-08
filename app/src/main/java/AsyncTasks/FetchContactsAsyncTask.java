@@ -7,7 +7,9 @@ import android.os.AsyncTask;
 import android.provider.ContactsContract;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 
 import CommonUtilPackage.ContactItem;
 
@@ -69,6 +71,7 @@ public class FetchContactsAsyncTask extends AsyncTask<ArrayList<ContactItem>, Vo
         Cursor cursor = contentResolver.query(CONTENT_URI, null, null, null, null);
         // Loop for every contact in the phone
         if (cursor.getCount() > 0) {
+            List<ContactItem> tmpList = new ArrayList<ContactItem>();
             int counter = result.size();
             while (cursor.moveToNext()) {
                 String contact_id = cursor.getString(cursor.getColumnIndex(_ID));
@@ -94,9 +97,12 @@ public class FetchContactsAsyncTask extends AsyncTask<ArrayList<ContactItem>, Vo
                     }
                     emailCursor.close();
 */
-                    result.put(counter++, new ContactItem(name, phoneNumber));
+                    tmpList.add(new ContactItem(name, phoneNumber));
                 }
             }
+            Collections.sort(tmpList);
+            for(ContactItem ci : tmpList)
+                result.put(counter++, ci);
         }
     }
 

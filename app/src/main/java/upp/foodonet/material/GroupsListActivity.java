@@ -1,15 +1,21 @@
 package upp.foodonet.material;
 
+import android.*;
+import android.Manifest;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -89,9 +95,21 @@ public class GroupsListActivity
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.fab_groups:
-                ShowDialogEnterNewGroupName(this, this);
+                if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED)
+                    ActivityCompat.requestPermissions(this,
+                            new String[]{
+                                    Manifest.permission.READ_CONTACTS
+                            },
+                            SplashScreenActivity.REQUEST_CODE_ASK_PERMISSION);
+                else ShowDialogEnterNewGroupName(this, this);
                 break;
         }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        ShowDialogEnterNewGroupName(this, this);
     }
 
     @Override

@@ -11,6 +11,7 @@ import android.media.Image;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
@@ -55,7 +56,7 @@ import java.util.Arrays;
 import CommonUtilPackage.CommonUtil;
 import CommonUtilPackage.InternalRequest;
 
-public class SignInActivity extends AppCompatActivity implements View.OnClickListener, GoogleApiClient.OnConnectionFailedListener, FacebookCallback<LoginResult> {
+public class SignInActivity extends AppCompatActivity implements View.OnClickListener, GoogleApiClient.OnConnectionFailedListener {
 
     private static final String MY_TAG = "food_SignIn";
 
@@ -185,7 +186,9 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
             case R.id.sing_in_btn_facebook:
                 //Toast.makeText(this,"face",Toast.LENGTH_LONG).show();
                 facebookCallback = InitFacebookCallback();
-                LoginManager.getInstance().logInWithReadPermissions(this, Arrays.asList("public_profile", "user_friends", "email"));
+                LoginManager manager = LoginManager.getInstance();
+                manager.registerCallback(callbackManager, facebookCallback);
+                manager.logInWithReadPermissions(this, Arrays.asList("public_profile", "user_friends", "email"));
 
                 break;
             case R.id.sing_in_btn_google:
@@ -217,7 +220,6 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
 
     private FacebookCallback<LoginResult> InitFacebookCallback() {
         FacebookSdk.sdkInitialize(getApplicationContext());
-        LoginManager.getInstance().registerCallback(callbackManager, this);
 
         accessTokenTracker = new AccessTokenTracker() {
             @Override
@@ -251,9 +253,12 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
                                     GraphResponse response) {
                                 // Application code
                                 try {
-                                    String s = object.getString("locale");
                                     facebookEmail = object.getString("email");
                                     Log.i(MY_TAG, "facebook email: " + facebookEmail);
+                                    profile = Profile.getCurrentProfile();
+                                    //CommonUtil.PutCommonPreferencesIsRegisteredGoogleFacebook(this, profile);
+                                    CreateFacebookInternalRequest();
+                                    ContinueAfterFacebookLogin();
                                 } catch (JSONException e) {
                                     e.printStackTrace();
                                 }
@@ -273,10 +278,9 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
                     };
                 }
                 else {
-                    profile = Profile.getCurrentProfile();
                 }
 
-                Toast.makeText(getApplicationContext(), profile.getFirstName() + " is logged to Facebook", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getApplicationContext(), profile.getFirstName() + " is logged to Facebook", Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -331,11 +335,11 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
     }
 
 
-    @Override
-    public void onSuccess(LoginResult loginResult) {
-        profile = Profile.getCurrentProfile();
-        //CommonUtil.PutCommonPreferencesIsRegisteredGoogleFacebook(this, profile);
-        CreateFacebookInternalRequest();
+//    @Override
+//    public void onSuccess(LoginResult loginResult) {
+//    }
+
+    public void ContinueAfterFacebookLogin(){
         Intent regPhoneIntent = new Intent(getApplicationContext(), RegisterPhoneActivity.class);
         regPhoneIntent.putExtra(NETWORKTYPE_KEY, ir.SocialNetworkType);
         regPhoneIntent.putExtra(USER_NAME, ir.UserName);
@@ -350,7 +354,7 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
         ir.SocialNetworkID = profile.getId();
         ir.SocialNetworkToken = "token1";
         ir.PhoneNumber = "";
-        ir.Email = "noEmail";
+        ir.Email = TextUtils.isEmpty(facebookEmail) ? "" : facebookEmail;
         ir.UserName = profile.getName();
         ir.IsLoggedIn = true;
         ir.DeviceUUID = CommonUtil.GetIMEI(this);
@@ -358,15 +362,15 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
         ir.ServerSubPath = getString(R.string.server_post_register_user);
     }
 
-    @Override
-    public void onCancel() {
-
-    }
-
-    @Override
-    public void onError(FacebookException error) {
-
-    }
+//    @Override
+//    public void onCancel() {
+//
+//    }
+//
+//    @Override
+//    public void onError(FacebookException error) {
+//
+//    }
 
     private void printKeyHash() {
         // Add code to print out the key hash

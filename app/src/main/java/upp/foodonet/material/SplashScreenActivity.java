@@ -47,7 +47,7 @@ public class SplashScreenActivity
 
     private final String MY_TAG = "food_splashscreen";
 
-    private static final int REQUEST_CODE_ASK_PERMISSION = 10;
+    public static final int REQUEST_CODE_ASK_PERMISSION = 10;
 
 //    private boolean isGoogleFacebookChecked;
 //    private boolean isLoadDataServiceStarted = false;
@@ -102,8 +102,15 @@ public class SplashScreenActivity
         } else {
             File directory = new File(Environment.getExternalStorageDirectory()
                     + getResources().getString(R.string.image_folder_path));
-            if (!directory.exists())
+            if(directory.exists() && !CommonUtil.GetFromPreferencesIsRegisteredToGoogleFacebook(this))
+                if(directory.isDirectory()){
+                    String[] children = directory.list();
+                    for(int i = 0; i < children.length; i++)
+                        new File(directory, children[i]).delete();
+                }
+            if (!directory.exists()) {
                 directory.mkdirs();
+            }
             FooDoNetInstanceIDListenerService.StartRegisterToGCM(this);
         }
     }
@@ -187,15 +194,22 @@ public class SplashScreenActivity
 
     private void RepairPushNotifications() {
         SharedPreferences sp = getSharedPreferences(getString(R.string.shared_preferences_token), MODE_PRIVATE);
-        String token = sp.getString(getString(R.string.shared_preferences_token_key), "");
+        final String token = sp.getString(getString(R.string.shared_preferences_token_key), "");
         if (!TextUtils.isEmpty(token)) {
-            GcmPubSub pubSub = GcmPubSub.getInstance(this);
-            try {
-                pubSub.unsubscribe(token, "/topics/global");
-                pubSub.subscribe(token, getString(R.string.push_notification_prefix), null);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            final Context ctx = this;
+            new AsyncTask<Void,Void,Void>(){
+                @Override
+                protected Void doInBackground(Void... voids) {
+                    GcmPubSub pubSub = GcmPubSub.getInstance(ctx);
+                    try {
+                        pubSub.unsubscribe(token, "/topics/global");
+                        pubSub.subscribe(token, getString(R.string.push_notification_prefix), null);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    return null;
+                }
+            }.execute();
         }
     }
 

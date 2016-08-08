@@ -7,7 +7,7 @@ import DataModel.GroupMember;
 /**
  * Created by Asher on 26.05.2016.
  */
-public class ContactItem implements Serializable{
+public class ContactItem implements Serializable, Comparable<ContactItem>{
     private String name;
     private String phoneNumber;
     private boolean isSelected;
@@ -49,5 +49,10 @@ public class ContactItem implements Serializable{
 
     public void setGroupMember(GroupMember groupMember) {
         this.groupMember = groupMember;
+    }
+
+    @Override
+    public int compareTo(ContactItem contactItem) {
+        return getName().compareToIgnoreCase(contactItem.getName());
     }
 }

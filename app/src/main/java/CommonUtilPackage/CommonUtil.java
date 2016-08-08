@@ -589,7 +589,7 @@ public class CommonUtil {
             URL urlurl = new URL(url);
             connection = (HttpURLConnection) urlurl.openConnection();
             connection.setRequestMethod("GET");
-            connection.setReadTimeout(5000);
+            connection.setReadTimeout(10000);
             connection.setConnectTimeout(1000);
             connection.setUseCaches(false);
             input = new BufferedInputStream(connection.getInputStream());
@@ -603,12 +603,18 @@ public class CommonUtil {
                 OutputStream output = new FileOutputStream(photo.getAbsolutePath());
                 byte data[] = new byte[1024];
                 int count;
-                while ((count = input.read(data)) != -1) {
-                    output.write(data, 0, count);
+                try {
+                    while ((count = input.read(data)) != -1) {
+                        output.write(data, 0, count);
+                    }
+                    output.flush();
+                    output.close();
+                    input.close();
                 }
-                output.flush();
-                output.close();
-                input.close();
+                catch (Exception e){
+                    photo.delete();
+                    throw e;
+                }
 
 
 /*
