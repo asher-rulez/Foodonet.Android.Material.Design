@@ -149,6 +149,11 @@ public class AddEditPublicationActivity extends FragmentActivity
 
     Context context = this;
 
+    private final String SAVE_STATE_KEY_PUBLICATION = "key_publication";
+    private final String SAVE_STATE_KEY_TITLE = "key_title";
+    private final String SAVE_STATE_KEY_SUBTITLE = "key_subtitle";
+    private final String SAVE_STATE_KEY_ISNEW = "key_isnew";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(R.style.AppDefault);
@@ -157,19 +162,31 @@ public class AddEditPublicationActivity extends FragmentActivity
 
         initToolBar();
 
-        Bundle extras = getIntent().getExtras();
-        if (extras == null) {
-            publication = new FCPublication();
-            publication.setLatitude(latitude);
-            publication.setLongitude(longitude);
-            publication.setAddress(address);
-            publication.setAudience(0);
-            isNew = true;
+        boolean isStateRestore = false;
+        String titleStateRestore = "";
+        String subtitleStateRestore = "";
+        if (savedInstanceState != null) {
+            publication = (FCPublication) savedInstanceState.getSerializable(SAVE_STATE_KEY_PUBLICATION);
+            titleStateRestore = savedInstanceState.getString(SAVE_STATE_KEY_TITLE);
+            subtitleStateRestore = savedInstanceState.getString(SAVE_STATE_KEY_SUBTITLE);
+            isNew = savedInstanceState.getBoolean(SAVE_STATE_KEY_ISNEW);
+            isStateRestore = true;
         } else {
-            publication = (FCPublication) extras.get(PUBLICATION_KEY);
-            isNew = false;
+            Bundle extras = getIntent().getExtras();
+            if (extras == null) {
+                publication = new FCPublication();
+                publication.setLatitude(latitude);
+                publication.setLongitude(longitude);
+                publication.setAddress(address);
+                publication.setAudience(0);
+                isNew = true;
+            } else {
+                publication = (FCPublication) extras.get(PUBLICATION_KEY);
+                isNew = false;
+            }
         }
         publicationOldVersion = new FCPublication(publication);
+
 
         et_publication_title = (EditText) findViewById(R.id.et_title_new_publication);
         et_publication_title.setOnClickListener(this);
@@ -181,7 +198,8 @@ public class AddEditPublicationActivity extends FragmentActivity
         til_price = (TextInputLayout) findViewById(R.id.til_price);
         tWatcherPrice = new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -195,14 +213,15 @@ public class AddEditPublicationActivity extends FragmentActivity
             }
 
             @Override
-            public void afterTextChanged(Editable editable) { }
+            public void afterTextChanged(Editable editable) {
+            }
         };
         et_price.addTextChangedListener(tWatcherPrice);
         et_price.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View view, boolean b) {
                 String priceString = et_price.getText().toString();
-                if (!TextUtils.isEmpty(priceString)){
+                if (!TextUtils.isEmpty(priceString)) {
                     et_price.removeTextChangedListener(tWatcherPrice);
                     if (b)
                         et_price.setText(priceString.replace(" " + getString(R.string.new_israeli_shekel_sign), ""));
@@ -215,7 +234,7 @@ public class AddEditPublicationActivity extends FragmentActivity
         et_price.setOnKeyListener(new View.OnKeyListener() {
             @Override
             public boolean onKey(View view, int keyCode, KeyEvent keyEvent) {
-                if(keyCode == 66)
+                if (keyCode == 66)
                     onTouch(et_share_with, null);
                 return false;
             }
@@ -227,13 +246,16 @@ public class AddEditPublicationActivity extends FragmentActivity
             et_more_details.setText(publication.getSubtitle());
             et_address.setText(publication.getAddress());
         }
+        if(isStateRestore){
+            et_publication_title.setText(titleStateRestore);
+            et_more_details.setText(subtitleStateRestore);
+        }
 
         mAddPicImageView = (ImageView) findViewById(R.id.imgAddPicture);
         mAddPicImageView.setOnClickListener(this);
 
-
         if (!isNew) {
-            TryLoadExistingImage();
+            TryLoadExistingImage(isStateRestore);
         }
 
         fab_add_photo = (FloatingActionButton) findViewById(R.id.fab_add_photo);
@@ -268,6 +290,17 @@ public class AddEditPublicationActivity extends FragmentActivity
                     .enableAutoManage(AddEditPublicationActivity.this, GOOGLE_API_CLIENT_ID, AddEditPublicationActivity.this)
                     .addConnectionCallbacks(this)
                     .build();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putSerializable(SAVE_STATE_KEY_PUBLICATION, publication);
+        if (et_publication_title.getText().toString().length() > 0)
+            outState.putString(SAVE_STATE_KEY_TITLE, et_publication_title.getText().toString());
+        if (et_more_details.getText().toString().length() > 0)
+            outState.putString(SAVE_STATE_KEY_SUBTITLE, et_more_details.toString().toString());
+
+        super.onSaveInstanceState(outState);
     }
 
     private void OnPriceChanged(double price) {
@@ -411,7 +444,7 @@ public class AddEditPublicationActivity extends FragmentActivity
         publication.setPublisherUserName(CommonUtil.GetMyUserNameFromPreferences(this));
         publication.setPublisherID(CommonUtil.GetMyUserID(this));
         //publication.setPrice(0d);
-        publication.setPriceDescription("");
+        //publication.setPriceDescription("");
         publication.setContactInfo(CommonUtil.GetMyPhoneNumberFromPreferences(this));
         publication.setPriceDescription("");
         publication.setPublisherID(CommonUtil.GetMyUserID(this));
@@ -451,8 +484,7 @@ public class AddEditPublicationActivity extends FragmentActivity
         //setResult(RESULT_OK, dataPublicationIntent);
         if (getParent() == null) {
             setResult(Activity.RESULT_OK, dataPublicationIntent);
-        }
-        else {
+        } else {
             getParent().setResult(Activity.RESULT_OK, dataPublicationIntent);
         }
         finish();
@@ -540,10 +572,11 @@ public class AddEditPublicationActivity extends FragmentActivity
 
     //region image
 
-    private void TryLoadExistingImage() {
+    private void TryLoadExistingImage(boolean isSavedStateRestore) {
         int imageSize = mAddPicImageView.getLayoutParams().height;
-        Drawable imageDrawable = CommonUtil.GetBitmapDrawableFromFile(
-                CommonUtil.GetFileNameByPublication(publication),
+        String filename = (isSavedStateRestore && publication.getPhotoUrl().length() > 0)?
+                publication.getPhotoUrl() : CommonUtil.GetFileNameByPublication(publication);
+        Drawable imageDrawable = CommonUtil.GetBitmapDrawableFromFile(filename,
                 getString(R.string.image_folder_path), imageSize, imageSize);
         if (imageDrawable != null)
             mAddPicImageView.setImageDrawable(imageDrawable);
